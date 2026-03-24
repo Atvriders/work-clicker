@@ -97,45 +97,41 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
 
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
-    position: 'fixed',
-    bottom: 16,
-    left: 16,
-    zIndex: 1000,
-    width: 340,
-    maxWidth: '40vw',
+    width: '100%',
+    flexShrink: 0,
   },
   banner: {
-    padding: 12,
-    borderRadius: 10,
+    padding: '6px 10px',
+    borderRadius: 8,
     borderLeft: '3px solid #34a853',
   },
   header: {
     display: 'flex',
     alignItems: 'center',
-    gap: 8,
-    marginBottom: 6,
+    gap: 6,
+    marginBottom: 2,
   },
   icon: {
-    fontSize: 20,
+    fontSize: 16,
   },
   name: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: 700,
     flex: 1,
   },
   timer: {
-    fontSize: 12,
+    fontSize: 11,
     color: COLORS.amber,
     fontWeight: 700,
   },
   description: {
-    fontSize: 11,
+    fontSize: 10,
     color: COLORS.muted,
-    marginBottom: 8,
-    lineHeight: 1.4,
+    marginBottom: 4,
+    lineHeight: 1.3,
   },
   progressTrack: {
-    height: 3,
+    height: 2,
     background: 'rgba(255, 255, 255, 0.08)',
     borderRadius: 2,
     overflow: 'hidden',

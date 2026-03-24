@@ -236,6 +236,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
           )}
           {activeTab === 'log' && (
             <section style={styles.mobileSection}>
+              <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
               <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
             </section>
           )}
@@ -254,8 +255,6 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
             </button>
           ))}
         </nav>
-
-        <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
         {showLeaderboard && (
           <Leaderboard currentUsername={username} onClose={() => setShowLeaderboard(false)} />
         )}
@@ -313,6 +312,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
             <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
             <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
           </div>
+          <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
           <div style={styles.logArea}>
             <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
           </div>
@@ -337,9 +337,6 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
           </div>
         </aside>
       </main>
-
-      {/* Event Popup Overlay */}
-      <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
 
       {/* Leaderboard Modal */}
       {showLeaderboard && (
