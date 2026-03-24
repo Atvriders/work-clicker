@@ -1,8 +1,8 @@
 node_modules/
 dist/
 data/*.db
-data/*.db-shm
 data/*.db-wal
+data/*.db-shm
 *.log
+.env
 .DS_Store
-tsconfig.tsbuildinfo

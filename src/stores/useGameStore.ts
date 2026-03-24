@@ -70,6 +70,7 @@ interface GameActions {
   setEvent: (event: RandomEvent) => void;
   clearEvent: () => void;
   addLogEntry: (message: string, type: EventLogType) => void;
+  clearEventLog: () => void;
   recalcWps: () => void;
   save: () => void;
   load: () => void;
@@ -420,6 +421,11 @@ export const useGameStore = create<GameStore>((set, get) => ({
     set((s) => ({
       eventLog: [makeLogEntry(message, type), ...s.eventLog].slice(0, 200),
     }));
+  },
+
+  // --- Clear Event Log ---
+  clearEventLog: () => {
+    set({ eventLog: [] });
   },
 
   // --- Recalc WPS ---

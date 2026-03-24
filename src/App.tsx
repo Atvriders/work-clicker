@@ -114,6 +114,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
   const storeStartShift = useGameStore((s) => s.startShift);
   const storeSetClockOutTime = useGameStore((s) => s.setClockOutTime);
   const storeAddLogEntry = useGameStore((s) => s.addLogEntry);
+  const storeClearEventLog = useGameStore((s) => s.clearEventLog);
 
   // Start the game loop (handles ticks, events, achievements, auto-save)
   useGameLoop();
@@ -243,7 +244,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
           )}
           {activeTab === 'log' && (
             <section style={styles.mobileSection}>
-              <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} />
+              <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
             </section>
           )}
         </div>
@@ -329,7 +330,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
             <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
           </div>
           <div style={styles.centerLogArea}>
-            <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} />
+            <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
           </div>
         </section>
 

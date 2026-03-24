@@ -3,30 +3,7 @@
 // ============================================================
 
 import React, { useState } from 'react';
-
-// Hard-coded achievement definitions for display
-const ACHIEVEMENT_DEFS = [
-  { id: 'first_click', name: 'First Day', description: 'Complete your first click', icon: '\uD83D\uDCBC', hidden: false },
-  { id: 'wp_100', name: 'Getting Started', description: 'Earn 100 WP', icon: '\u2B50', hidden: false },
-  { id: 'wp_1000', name: 'Employee of the Hour', description: 'Earn 1,000 WP', icon: '\uD83C\uDF1F', hidden: false },
-  { id: 'wp_10000', name: 'Promotion Material', description: 'Earn 10,000 WP', icon: '\uD83C\uDFC6', hidden: false },
-  { id: 'wp_100000', name: 'Corner Office', description: 'Earn 100,000 WP', icon: '\uD83C\uDFE2', hidden: false },
-  { id: 'wp_1000000', name: 'Corporate Legend', description: 'Earn 1,000,000 WP', icon: '\uD83D\uDC51', hidden: false },
-  { id: 'clicks_100', name: 'Busy Bee', description: 'Click 100 times', icon: '\uD83D\uDC1D', hidden: false },
-  { id: 'clicks_1000', name: 'Carpal Tunnel', description: 'Click 1,000 times', icon: '\u2328\uFE0F', hidden: false },
-  { id: 'wps_10', name: 'Multitasker', description: 'Reach 10 WP/s', icon: '\u26A1', hidden: false },
-  { id: 'wps_100', name: 'Automation Expert', description: 'Reach 100 WP/s', icon: '\u2699\uFE0F', hidden: false },
-  { id: 'wps_1000', name: 'Workaholic', description: 'Reach 1,000 WP/s', icon: '\uD83D\uDD25', hidden: false },
-  { id: 'shift_1', name: 'Clock Puncher', description: 'Complete 1 shift', icon: '\u23F0', hidden: false },
-  { id: 'shift_5', name: 'Five Day Week', description: 'Complete 5 shifts', icon: '\uD83D\uDCC5', hidden: false },
-  { id: 'shift_10', name: 'Veteran', description: 'Complete 10 shifts', icon: '\uD83C\uDF96\uFE0F', hidden: false },
-  { id: 'overtime_30', name: 'Overtime Warrior', description: 'Work 30 minutes overtime', icon: '\uD83D\uDCAA', hidden: false },
-  { id: 'overtime_60', name: 'No Life', description: 'Work 60 minutes overtime', icon: '\uD83D\uDC80', hidden: true },
-  { id: 'first_station', name: 'Delegator', description: 'Buy your first station', icon: '\uD83D\uDCCC', hidden: false },
-  { id: 'all_stations', name: 'Empire Builder', description: 'Own every type of station', icon: '\uD83C\uDF0D', hidden: true },
-  { id: 'speed_demon', name: 'Speed Demon', description: 'Reach 10,000 WP/s', icon: '\uD83D\uDE80', hidden: true },
-  { id: 'million_clicks', name: 'RSI Achieved', description: 'Click 10,000 times', icon: '\uD83E\uDE7C', hidden: true },
-];
+import { ACHIEVEMENTS } from '../data/achievements';
 
 const COLORS = {
   blue: '#1a73e8',
@@ -45,7 +22,7 @@ const Achievements: React.FC<AchievementsProps> = ({ unlockedIds }) => {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   const unlockedCount = unlockedIds.length;
-  const totalCount = ACHIEVEMENT_DEFS.length;
+  const totalCount = ACHIEVEMENTS.length;
 
   return (
     <div style={styles.container}>
@@ -57,7 +34,7 @@ const Achievements: React.FC<AchievementsProps> = ({ unlockedIds }) => {
       </div>
 
       <div style={styles.grid}>
-        {ACHIEVEMENT_DEFS.map((ach) => {
+        {ACHIEVEMENTS.map((ach) => {
           const isUnlocked = unlockedIds.includes(ach.id);
           const isHovered = hoveredId === ach.id;
           const showInfo = isUnlocked || !ach.hidden;

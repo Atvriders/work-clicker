@@ -60,6 +60,7 @@ const WORK_FLAVOR = [
 interface EventLogProps {
   eventLog: EventLogEntry[];
   onAddLogEntry: (message: string, type: EventLogEntry['type']) => void;
+  onClearLog?: () => void;
 }
 
 function formatTimestamp(ts: number): string {
@@ -70,8 +71,10 @@ function formatTimestamp(ts: number): string {
   return `${h}:${m}:${s}`;
 }
 
-const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry }) => {
+const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const addLogRef = useRef(onAddLogEntry);
+  addLogRef.current = onAddLogEntry;
 
   // Auto-scroll to bottom
   useEffect(() => {
@@ -84,10 +87,10 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry }) => {
   useEffect(() => {
     const interval = setInterval(() => {
       const msg = WORK_FLAVOR[Math.floor(Math.random() * WORK_FLAVOR.length)];
-      onAddLogEntry(msg, 'event');
+      addLogRef.current(msg, 'event');
     }, 5000 + Math.random() * 5000);
     return () => clearInterval(interval);
-  }, [onAddLogEntry]);
+  }, []); // empty deps — runs once
 
   const visible = eventLog.slice(-30);
 
@@ -95,7 +98,14 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry }) => {
     <div style={styles.container}>
       <div style={styles.titleRow}>
         <span style={styles.title}>WORK LOG</span>
-        <span style={styles.entryCount}>{eventLog.length} entries</span>
+        <span style={styles.headerRight}>
+          <span style={styles.entryCount}>{eventLog.length} entries</span>
+          {onClearLog && (
+            <button style={styles.clrButton} onClick={onClearLog}>
+              CLR
+            </button>
+          )}
+        </span>
       </div>
       <div style={styles.logArea} ref={scrollRef}>
         {visible.map((entry: EventLogEntry, i: number) => {
@@ -146,11 +156,27 @@ const styles: Record<string, React.CSSProperties> = {
     textTransform: 'uppercase',
     color: COLORS.blue,
   },
+  headerRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+  },
   entryCount: {
     fontSize: 9,
     color: COLORS.muted,
     letterSpacing: 1,
     opacity: 0.5,
+  },
+  clrButton: {
+    fontSize: 9,
+    padding: '1px 5px',
+    background: 'transparent',
+    border: `1px solid ${COLORS.border}`,
+    borderRadius: 3,
+    color: COLORS.muted,
+    cursor: 'pointer',
+    letterSpacing: 1,
+    lineHeight: 1.4,
   },
   logArea: {
     flex: 1,

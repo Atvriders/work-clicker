@@ -1,0 +1,11 @@
+services:
+  workclicker:
+    image: ghcr.io/atvriders/work-clicker:latest
+    ports:
+      - "3014:3014"
+    volumes:
+      - ./data:/app/data
+    environment:
+      - NODE_ENV=production
+      - PORT=3014
+    restart: unless-stopped

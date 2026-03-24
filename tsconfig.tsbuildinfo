@@ -1,0 +1,1 @@
+{"root":["./src/main.tsx","./src/vite-env.d.ts","./src/data/achievements.ts","./src/data/events.ts","./src/data/stations.ts","./src/data/upgrades.ts","./src/stores/useGameStore.ts","./src/types/index.ts","./src/utils/format.ts"],"errors":true,"version":"5.9.3"}
