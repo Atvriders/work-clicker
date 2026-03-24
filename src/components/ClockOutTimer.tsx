@@ -2,7 +2,7 @@
 // Work Clicker — Clock-Out Countdown Timer (THE MAIN FEATURE)
 // ============================================================
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 
 interface ClockOutTimerProps {
   shiftStart: number;
@@ -32,12 +32,10 @@ function formatCountdown(ms: number): string {
   return `${h}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
 }
 
-function formatTime(date: Date): string {
-  const h = date.getHours();
+function formatTimeValue(date: Date): string {
+  const h = String(date.getHours()).padStart(2, '0');
   const m = String(date.getMinutes()).padStart(2, '0');
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  const h12 = h === 0 ? 12 : h > 12 ? h - 12 : h;
-  return `${h12}:${m} ${ampm}`;
+  return `${h}:${m}`;
 }
 
 const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
@@ -47,10 +45,7 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   onClockOutTimeChange,
   onStartShift,
 }) => {
-  const [now, setNow] = useState(Date.now());
-  const [showSettings, setShowSettings] = useState(false);
-  const [settingHours, setSettingHours] = useState('17');
-  const [settingMinutes, setSettingMinutes] = useState('00');
+  const [now, setNow] = React.useState(Date.now());
   const animFrameRef = useRef<number>(0);
 
   // Tick every 100ms for smooth countdown
@@ -86,11 +81,11 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   const elapsed = now - shiftStart;
   const progress = shiftDuration > 0 ? Math.min(1, Math.max(0, elapsed / shiftDuration)) : 0;
 
-  const handleSaveSettings = () => {
-    const h = parseInt(settingHours) || 17;
-    const m = parseInt(settingMinutes) || 0;
+  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value; // "HH:MM"
+    if (!val) return;
+    const [h, m] = val.split(':').map(Number);
     onClockOutTimeChange(h, m);
-    setShowSettings(false);
   };
 
   // Not on shift
@@ -112,13 +107,6 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
         <span style={styles.statusLabel}>
           {isShiftComplete ? 'SHIFT COMPLETE!' : 'TIME UNTIL CLOCK-OUT'}
         </span>
-        <button
-          style={styles.gearButton}
-          onClick={() => setShowSettings(!showSettings)}
-          title="Change clock-out time"
-        >
-          &#9881;
-        </button>
       </div>
 
       {/* Huge countdown */}
@@ -126,7 +114,7 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
         style={{
           ...styles.countdown,
           color: timerColor,
-          textShadow: `0 0 20px ${timerColor}80`,
+          textShadow: `0 0 24px ${timerColor}99, 0 0 8px ${timerColor}60`,
           animation: isPulsing ? 'pulse-red 1s ease-in-out infinite' : 'none',
         }}
       >
@@ -152,39 +140,16 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
         />
       </div>
 
-      {/* Clock-out time label */}
-      <div style={styles.clockOutLabel}>
-        Clock-out: {formatTime(new Date(clockOutTime))}
+      {/* Clock-out time inline input */}
+      <div style={styles.clockOutRow}>
+        <span style={styles.clockOutLabel}>Clock-out:</span>
+        <input
+          type="time"
+          value={formatTimeValue(new Date(clockOutTime))}
+          onChange={handleTimeChange}
+          style={styles.timeInput}
+        />
       </div>
-
-      {/* Settings popup */}
-      {showSettings && (
-        <div style={styles.settingsPanel}>
-          <div style={styles.settingsTitle}>Set Clock-Out Time</div>
-          <div style={styles.settingsRow}>
-            <input
-              type="number"
-              min={0}
-              max={23}
-              value={settingHours}
-              onChange={(e) => setSettingHours(e.target.value)}
-              style={styles.timeInput}
-            />
-            <span style={styles.timeSep}>:</span>
-            <input
-              type="number"
-              min={0}
-              max={59}
-              value={settingMinutes}
-              onChange={(e) => setSettingMinutes(e.target.value)}
-              style={styles.timeInput}
-            />
-            <button style={styles.saveButton} onClick={handleSaveSettings}>
-              SET
-            </button>
-          </div>
-        </div>
-      )}
 
       <style>{`
         @keyframes pulse-red {
@@ -216,17 +181,8 @@ const styles: Record<string, React.CSSProperties> = {
   statusLabel: {
     fontSize: 11,
     letterSpacing: 3,
-    color: COLORS.muted,
+    color: '#c5cad1',
     textTransform: 'uppercase',
-  },
-  gearButton: {
-    background: 'none',
-    border: 'none',
-    color: COLORS.muted,
-    fontSize: 16,
-    cursor: 'pointer',
-    padding: '0 4px',
-    opacity: 0.6,
   },
   countdown: {
     fontSize: 48,
@@ -242,11 +198,12 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: 18,
     letterSpacing: 6,
     fontWeight: 700,
+    color: '#ff4444',
     animation: 'flash-overtime 1s ease-in-out infinite',
   },
   progressTrack: {
     height: 4,
-    background: 'rgba(255,255,255,0.08)',
+    background: 'rgba(255,255,255,0.12)',
     borderRadius: 2,
     overflow: 'hidden',
     marginTop: 10,
@@ -257,15 +214,21 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 2,
     transition: 'width 0.5s linear',
   },
+  clockOutRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
   clockOutLabel: {
     fontSize: 11,
-    color: COLORS.muted,
+    color: '#c5cad1',
     letterSpacing: 1,
   },
   offShiftLabel: {
     fontSize: 14,
     letterSpacing: 4,
-    color: COLORS.muted,
+    color: '#c5cad1',
     marginBottom: 12,
   },
   startButton: {
@@ -279,57 +242,15 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: 3,
     cursor: 'pointer',
   },
-  settingsPanel: {
-    position: 'absolute',
-    top: '100%',
-    left: '50%',
-    transform: 'translateX(-50%)',
-    background: '#1a2332',
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 6,
-    padding: '12px 16px',
-    marginTop: 4,
-    zIndex: 100,
-    boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
-  },
-  settingsTitle: {
-    fontSize: 11,
-    color: COLORS.muted,
-    letterSpacing: 2,
-    marginBottom: 8,
-  },
-  settingsRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-  },
   timeInput: {
-    width: 50,
-    padding: '6px 8px',
+    padding: '3px 6px',
     background: '#0f1923',
-    border: `1px solid ${COLORS.border}`,
+    border: `1px solid ${COLORS.blue}`,
     borderRadius: 4,
-    color: COLORS.text,
-    fontSize: 16,
+    color: '#e8eaed',
+    fontSize: 13,
     fontFamily: 'system-ui, -apple-system, sans-serif',
-    textAlign: 'center',
     outline: 'none',
-  },
-  timeSep: {
-    color: COLORS.muted,
-    fontSize: 20,
-    fontWeight: 700,
-  },
-  saveButton: {
-    padding: '6px 16px',
-    background: COLORS.blue,
-    border: 'none',
-    borderRadius: 4,
-    color: '#ffffff',
-    fontSize: 12,
-    fontWeight: 600,
-    letterSpacing: 1,
-    cursor: 'pointer',
   },
 };
 

@@ -152,9 +152,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   titleLabel: {
     fontSize: 9,
-    color: COLORS.muted,
+    color: '#b0b5bc',
     letterSpacing: 1,
-    opacity: 0.5,
+    opacity: 0.7,
   },
   statBlock: {
     textAlign: 'center',
@@ -169,7 +169,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   statLabel: {
     fontSize: 10,
-    color: COLORS.muted,
+    color: '#b0b5bc',
     letterSpacing: 1,
     textTransform: 'uppercase',
   },
@@ -190,7 +190,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   progressTrack: {
     height: 4,
-    background: 'rgba(255,255,255,0.08)',
+    background: 'rgba(255,255,255,0.12)',
     borderRadius: 2,
     overflow: 'hidden',
   },

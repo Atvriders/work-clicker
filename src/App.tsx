@@ -410,7 +410,7 @@ const styles: Record<string, React.CSSProperties> = {
     textShadow: '0 0 8px rgba(26,115,232,0.6)',
   },
   statsBlock: { display: 'flex', gap: '24px', alignItems: 'center' },
-  statItem: { fontSize: '12px', color: '#9aa0a6', letterSpacing: '1px' },
+  statItem: { fontSize: '12px', color: '#c5cad1', letterSpacing: '1px' },
   statValue: { color: '#e8eaed', fontSize: '14px', textShadow: '0 0 6px rgba(26,115,232,0.4)' },
   actionBlock: { display: 'flex', gap: '6px', alignItems: 'center' },
   headerBtn: {

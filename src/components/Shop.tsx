@@ -203,7 +203,7 @@ const Shop: React.FC<ShopProps> = ({
                   <span style={styles.cardName}>{up.name}</span>
                 </div>
                 <div style={styles.cardFlavor}>{up.flavor}</div>
-                <div style={{ fontSize: 10, color: COLORS.blue, marginBottom: 3 }}>
+                <div style={{ fontSize: 10, color: '#5e9cf5', marginBottom: 3 }}>
                   {up.description}
                 </div>
                 <div style={styles.cardFooter}>
@@ -269,9 +269,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   titleLabel: {
     fontSize: 9,
-    color: COLORS.muted,
+    color: '#b0b5bc',
     letterSpacing: 1,
-    opacity: 0.5,
+    opacity: 0.7,
   },
   tabRow: {
     display: 'flex',
@@ -288,7 +288,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'pointer',
     border: `1px solid ${COLORS.border}`,
     background: 'transparent',
-    color: COLORS.muted,
+    color: '#b0b5bc',
     fontFamily: 'system-ui, -apple-system, sans-serif',
     fontWeight: 'bold',
     transition: 'all 0.15s',
@@ -346,8 +346,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   cardFlavor: {
     fontSize: 9,
-    color: COLORS.muted,
-    opacity: 0.6,
+    color: '#b0b5bc',
+    opacity: 0.8,
     lineHeight: 1.3,
     marginBottom: 3,
   },
@@ -368,8 +368,8 @@ const styles: Record<string, React.CSSProperties> = {
   },
   cardPct: {
     fontSize: 9,
-    color: COLORS.muted,
-    opacity: 0.5,
+    color: '#b0b5bc',
+    opacity: 0.7,
   },
   buyBtn: {
     background: 'rgba(26,115,232,0.1)',
@@ -390,7 +390,7 @@ const styles: Record<string, React.CSSProperties> = {
     cursor: 'not-allowed',
   },
   emptyMsg: {
-    color: COLORS.muted,
+    color: '#b0b5bc',
     fontSize: 11,
     fontStyle: 'italic',
     textAlign: 'center',

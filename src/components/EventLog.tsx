@@ -163,9 +163,9 @@ const styles: Record<string, React.CSSProperties> = {
   },
   entryCount: {
     fontSize: 9,
-    color: COLORS.muted,
+    color: '#b0b5bc',
     letterSpacing: 1,
-    opacity: 0.5,
+    opacity: 0.8,
   },
   clrButton: {
     fontSize: 9,
@@ -173,7 +173,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'transparent',
     border: `1px solid ${COLORS.border}`,
     borderRadius: 3,
-    color: COLORS.muted,
+    color: '#b0b5bc',
     cursor: 'pointer',
     letterSpacing: 1,
     lineHeight: 1.4,
@@ -192,10 +192,10 @@ const styles: Record<string, React.CSSProperties> = {
     whiteSpace: 'pre-wrap',
   },
   timestamp: {
-    color: COLORS.muted,
+    color: '#b0b5bc',
     marginRight: 4,
     fontSize: 10,
-    opacity: 0.5,
+    opacity: 0.8,
   },
 };
 
