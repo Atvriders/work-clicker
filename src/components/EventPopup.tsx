@@ -61,7 +61,7 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
     <div
       style={{
         ...styles.wrapper,
-        animation: visible ? 'slide-in-right 0.4s ease-out' : 'slide-out-right 0.3s ease-in',
+        animation: visible ? 'slide-down 0.4s ease-out' : 'none',
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? 'auto' : 'none',
       }}
@@ -99,9 +99,10 @@ const styles: Record<string, React.CSSProperties> = {
   wrapper: {
     position: 'fixed',
     top: 56,
-    right: 16,
+    left: '50%',
+    transform: 'translateX(-50%)',
     zIndex: 1000,
-    width: 340,
+    width: 400,
     maxWidth: '90vw',
   },
   banner: {
