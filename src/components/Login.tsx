@@ -22,15 +22,15 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ callsign: name }),
+        body: JSON.stringify({ username: name }),
       });
       if (!res.ok) {
         const data = await res.json();
         throw new Error(data.error || 'Login failed');
       }
       const data = await res.json();
-      localStorage.setItem(USERNAME_KEY, data.callsign);
-      onLogin(data.callsign, data.isNew);
+      localStorage.setItem(USERNAME_KEY, data.username);
+      onLogin(data.username, data.isNew);
     } catch (err: any) {
       setError(err.message || 'Connection failed');
       setLoading(false);

@@ -5,13 +5,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 
 interface LeaderboardEntry {
-  callsign: string;
-  total_qsos: number;
-  qso_per_second: number;
-  stations_owned: number;
-  achievements_count: number;
+  username: string;
+  best_shift_wp: number;
+  total_shifts: number;
+  total_wp: number;
+  wps: number;
   is_online: number;
-  shifts_completed?: number;
 }
 
 interface LeaderboardProps {
@@ -94,11 +93,11 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
               </thead>
               <tbody>
                 {entries.map((entry, i) => {
-                  const isMe = entry.callsign === currentUsername;
+                  const isMe = entry.username === currentUsername;
                   const rowStyle = isMe ? styles.rowHighlight : styles.row;
                   const online = entry.is_online === 1;
                   return (
-                    <tr key={entry.callsign} style={rowStyle}>
+                    <tr key={entry.username} style={rowStyle}>
                       <td style={styles.td}>{i + 1}</td>
                       <td style={{ ...styles.td, textAlign: 'left', fontWeight: isMe ? 700 : 400 }}>
                         <span style={styles.callsignCell}>
@@ -106,12 +105,12 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
                             style={online ? styles.onlineDot : styles.offlineDot}
                             title={online ? 'Online' : 'Offline'}
                           />
-                          {entry.callsign}
+                          {entry.username}
                         </span>
                       </td>
-                      <td style={styles.td}>{formatNum(entry.total_qsos)}</td>
-                      <td style={styles.td}>{entry.shifts_completed ?? entry.stations_owned}</td>
-                      <td style={styles.td}>{entry.qso_per_second.toFixed(1)}</td>
+                      <td style={styles.td}>{formatNum(entry.best_shift_wp)}</td>
+                      <td style={styles.td}>{entry.total_shifts}</td>
+                      <td style={styles.td}>{entry.wps.toFixed(1)}</td>
                     </tr>
                   );
                 })}

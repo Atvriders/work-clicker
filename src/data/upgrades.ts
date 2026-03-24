@@ -21,6 +21,7 @@ export const UPGRADES: Upgrade[] = [
     type: 'click_multiplier',
     value: 2,
     icon: '\u26A1',
+    requires: 'coffee',
     tier: 1,
   },
   {
@@ -76,6 +77,7 @@ export const UPGRADES: Upgrade[] = [
     type: 'wps_multiplier',
     value: 2,
     icon: '\uD83D\uDD10',
+    requires: 'slack_busy',
     tier: 3,
   },
   {
@@ -125,10 +127,10 @@ export const UPGRADES: Upgrade[] = [
   {
     id: 'corner_office',
     name: 'Corner Office',
-    description: 'Click multiplier x5',
+    description: 'WPS multiplier x5',
     flavor: "View of the parking garage. You watch your coworkers leave at 5 PM while you're still clicking.",
     cost: 500_000,
-    type: 'click_multiplier',
+    type: 'wps_multiplier',
     value: 5,
     icon: '\uD83C\uDFE2',
     tier: 4,
@@ -147,10 +149,10 @@ export const UPGRADES: Upgrade[] = [
   {
     id: 'company_card',
     name: 'Company Card',
-    description: 'Click multiplier x8',
+    description: 'WPS multiplier x8',
     flavor: "Expense everything. Lunch, dinner, that 'team building' go-kart trip. It's all business.",
     cost: 5_000_000,
-    type: 'click_multiplier',
+    type: 'wps_multiplier',
     value: 8,
     icon: '\uD83D\uDCB3',
     tier: 5,

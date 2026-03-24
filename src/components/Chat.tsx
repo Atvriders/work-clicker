@@ -6,7 +6,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 interface ChatMessage {
   id: number;
-  callsign: string;
+  username: string;
   message: string;
   timestamp: string;
 }
@@ -83,7 +83,7 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
 
     ws.onopen = () => {
       setConnected(true);
-      ws.send(JSON.stringify({ type: 'join', callsign: username }));
+      ws.send(JSON.stringify({ type: 'join', username }));
     };
 
     ws.onmessage = (event) => {
@@ -93,7 +93,7 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
         if (data.type === 'chat') {
           const msg: ChatMessage = {
             id: ++msgIdCounter,
-            callsign: data.callsign,
+            username: data.username,
             message: data.message,
             timestamp: data.timestamp,
           };
@@ -149,7 +149,7 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
 
     wsRef.current.send(JSON.stringify({
       type: 'chat',
-      callsign: username,
+      username,
       message: trimmed,
     }));
     setInput('');
@@ -208,12 +208,12 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
           <div style={styles.emptyChat}>No messages yet</div>
         ) : (
           messages.map((msg) => {
-            const isOwn = msg.callsign === username;
+            const isOwn = msg.username === username;
             return (
               <div key={msg.id} style={styles.messageRow}>
                 <span style={styles.timestamp}>[{formatTime(msg.timestamp)}]</span>{' '}
                 <span style={isOwn ? styles.ownCallsign : styles.otherCallsign}>
-                  {msg.callsign}:
+                  {msg.username}:
                 </span>{' '}
                 <span style={isOwn ? styles.ownMessage : styles.otherMessage}>
                   {msg.message}
