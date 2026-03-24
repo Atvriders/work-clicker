@@ -63,9 +63,9 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
   const dynamicStyles: Record<string, React.CSSProperties> = {
     wrapper: {
       position: 'fixed',
-      top: 0,
+      top: 48,
       left: '50%',
-      transform: `translateX(-50%) translateY(${visible ? '0' : '-100%'})`,
+      transform: `translateX(-50%) translateY(${visible ? '0' : '-150%'})`,
       transition: 'transform 0.4s ease-in-out',
       zIndex: 1000,
       width: '90%',
