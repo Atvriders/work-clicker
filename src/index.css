@@ -1,0 +1,194 @@
+/* ============================================================
+   Work Clicker — Global Styles
+   Corporate blue/gray dark theme
+   ============================================================ */
+
+/* --- Reset --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+/* --- Body --- */
+body {
+  margin: 0;
+  padding: 0;
+  background: #0f1923;
+  color: #e8eaed;
+  font-family: system-ui, -apple-system, sans-serif;
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* --- Scrollbar --- */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f1923;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #2a3a4a;
+  border-radius: 4px;
+  border: 1px solid #0f1923;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #1a73e8;
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2a3a4a #0f1923;
+}
+
+/* --- Selection --- */
+::selection {
+  background: #1a73e8;
+  color: #ffffff;
+}
+
+/* --- Base resets --- */
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+/* ============================================================
+   Keyframe Animations
+   ============================================================ */
+
+/* Blue glow pulse — used on work button click */
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 4px rgba(26, 115, 232, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(26, 115, 232, 0.6), 0 0 24px rgba(26, 115, 232, 0.2);
+  }
+}
+
+/* Rise and fade — click feedback text */
+@keyframes float-up {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  60% {
+    opacity: 0.7;
+    transform: translateY(-40px) scale(1.1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-80px) scale(0.8);
+  }
+}
+
+/* Pulsing red for overtime / low time */
+@keyframes pulse-red {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+/* Flash red for overtime text */
+@keyframes flash-overtime {
+  0%, 100% {
+    color: #ea4335;
+    text-shadow: 0 0 10px rgba(234, 67, 53, 0.8);
+  }
+  50% {
+    color: #ff6b5e;
+    text-shadow: 0 0 20px rgba(234, 67, 53, 1), 0 0 40px rgba(234, 67, 53, 0.5);
+  }
+}
+
+/* Event popup slide in from top */
+@keyframes slide-down {
+  0% {
+    opacity: 0;
+    transform: translateY(-30px) translateX(-50%);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) translateX(-50%);
+  }
+}
+
+/* ============================================================
+   Mobile Responsive — 768px and below
+   ============================================================ */
+@media (max-width: 768px) {
+  body {
+    font-size: 13px;
+  }
+
+  /* --- Bottom tab bar --- */
+  .mobile-tab-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    background: #0f1923;
+    border-top: 1px solid rgba(26, 115, 232, 0.2);
+    z-index: 1000;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  .mobile-tab {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    flex: 1;
+    height: 100%;
+    background: none;
+    border: none;
+    color: #9aa0a6;
+    font-family: system-ui, -apple-system, sans-serif;
+    font-size: 10px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    padding: 4px 0;
+    transition: color 0.15s;
+  }
+
+  .mobile-tab.active {
+    color: #1a73e8;
+    text-shadow: 0 0 6px rgba(26, 115, 232, 0.5);
+  }
+
+  .mobile-tab-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .mobile-tab-label {
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  /* --- Mobile content area needs bottom padding for tab bar --- */
+  .mobile-content {
+    flex: 1;
+    overflow-y: auto;
+    padding-bottom: 56px;
+  }
+}
