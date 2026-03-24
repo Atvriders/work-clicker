@@ -61,7 +61,7 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
     <div
       style={{
         ...styles.wrapper,
-        animation: visible ? 'slide-down 0.4s ease-out' : 'none',
+        animation: visible ? 'slide-up 0.4s ease-out' : 'none',
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? 'auto' : 'none',
       }}
@@ -98,15 +98,14 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
 const styles: Record<string, React.CSSProperties> = {
   wrapper: {
     position: 'fixed',
-    top: 56,
-    left: '50%',
-    transform: 'translateX(-50%)',
+    bottom: 16,
+    left: 16,
     zIndex: 1000,
-    width: 400,
-    maxWidth: '90vw',
+    width: 340,
+    maxWidth: '40vw',
   },
   banner: {
-    padding: 14,
+    padding: 12,
     borderRadius: 10,
     borderLeft: '3px solid #34a853',
   },
