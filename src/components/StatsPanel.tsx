@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Stats Panel (Left Sidebar)
+// Work Clicker — Stats Panel (Glassmorphism Card)
 // ============================================================
 
 import React from 'react';
@@ -21,8 +21,6 @@ const COLORS = {
   green: '#34a853',
   amber: '#fbbc04',
   red: '#ea4335',
-  card: '#1a2332',
-  border: 'rgba(26,115,232,0.2)',
   text: '#e8eaed',
   muted: '#9aa0a6',
 };
@@ -52,77 +50,88 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
   const progressPct = (progress * 100).toFixed(1);
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="glass-card">
       <div style={styles.title}>
-        STATS
-        <span style={styles.titleLabel}>// PERFORMANCE</span>
+        {'\uD83D\uDCCA'} Stats
       </div>
 
-      {/* Total WP */}
-      <div style={styles.statBlock}>
-        <div style={styles.statLabel}>TOTAL WP</div>
-        <div style={styles.statBig}>{formatNumber(wp)}</div>
-      </div>
+      {/* Stats grid */}
+      <div style={styles.grid}>
+        <div style={styles.statCell}>
+          <span style={styles.statIcon}>{'\uD83D\uDCB0'}</span>
+          <div style={styles.statInfo}>
+            <span style={styles.statLabel}>Total WP</span>
+            <span style={styles.statBig}>{formatNumber(wp)}</span>
+          </div>
+        </div>
 
-      {/* WP/sec */}
-      <div style={styles.row}>
-        <span style={styles.statLabel}>WP/sec</span>
-        <span style={styles.statValue}>{wps.toFixed(1)}</span>
-      </div>
+        <div style={styles.statCell}>
+          <span style={styles.statIcon}>{'\u26A1'}</span>
+          <div style={styles.statInfo}>
+            <span style={styles.statLabel}>WP/sec</span>
+            <span style={styles.statValue}>{wps.toFixed(1)}</span>
+          </div>
+        </div>
 
-      {/* WP/click */}
-      <div style={styles.row}>
-        <span style={styles.statLabel}>WP/click</span>
-        <span style={styles.statValue}>{wpPerClick.toFixed(1)}</span>
+        <div style={styles.statCell}>
+          <span style={styles.statIcon}>{'\uD83D\uDDB1\uFE0F'}</span>
+          <div style={styles.statInfo}>
+            <span style={styles.statLabel}>WP/click</span>
+            <span style={styles.statValue}>{wpPerClick.toFixed(1)}</span>
+          </div>
+        </div>
+
+        <div style={styles.statCell}>
+          <span style={styles.statIcon}>{'\u2705'}</span>
+          <div style={styles.statInfo}>
+            <span style={styles.statLabel}>Shifts Done</span>
+            <span style={styles.statValue}>{shiftsCompleted}</span>
+          </div>
+        </div>
+
+        <div style={styles.statCell}>
+          <span style={styles.statIcon}>{'\u23F0'}</span>
+          <div style={styles.statInfo}>
+            <span style={styles.statLabel}>Overtime</span>
+            <span style={{
+              ...styles.statValue,
+              color: overtimeMinutes > 0 ? COLORS.red : COLORS.muted,
+            }}>
+              {overtimeMinutes.toFixed(0)}m
+            </span>
+          </div>
+        </div>
+
+        {isOnShift && (
+          <div style={styles.statCell}>
+            <span style={styles.statIcon}>{'\uD83D\uDCC8'}</span>
+            <div style={styles.statInfo}>
+              <span style={styles.statLabel}>Shift Progress</span>
+              <span style={styles.statValue}>{progressPct}%</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Shift progress bar */}
       {isOnShift && (
-        <div style={styles.progressSection}>
-          <div style={styles.row}>
-            <span style={styles.statLabel}>Shift Progress</span>
-            <span style={styles.statValue}>{progressPct}%</span>
-          </div>
-          <div style={styles.progressTrack}>
-            <div
-              style={{
-                ...styles.progressBar,
-                width: `${progress * 100}%`,
-                background: progress > 0.9 ? COLORS.green : progress > 0.7 ? COLORS.amber : COLORS.blue,
-              }}
-            />
-          </div>
+        <div style={styles.progressTrack}>
+          <div
+            style={{
+              ...styles.progressBar,
+              width: `${progress * 100}%`,
+              background: progress > 0.9 ? COLORS.green : progress > 0.7 ? COLORS.amber : COLORS.blue,
+            }}
+          />
         </div>
       )}
 
-      <div style={styles.divider} />
-
-      {/* Shifts completed */}
-      <div style={styles.row}>
-        <span style={styles.statLabel}>Shifts Completed</span>
-        <span style={styles.statValue}>{shiftsCompleted}</span>
-      </div>
-
-      {/* Overtime */}
-      <div style={styles.row}>
-        <span style={styles.statLabel}>Overtime (min)</span>
-        <span style={{
-          ...styles.statValue,
-          color: overtimeMinutes > 0 ? COLORS.red : COLORS.muted,
-        }}>
-          {overtimeMinutes.toFixed(0)}
-        </span>
-      </div>
-
       {/* Active event */}
       {activeEventName && (
-        <>
-          <div style={styles.divider} />
-          <div style={styles.eventBlock}>
-            <div style={styles.eventLabel}>ACTIVE EVENT</div>
-            <div style={styles.eventName}>{activeEventName}</div>
-          </div>
-        </>
+        <div style={styles.eventBlock}>
+          <span style={styles.eventIcon}>{'\uD83C\uDF1F'}</span>
+          <span style={styles.eventName}>{activeEventName}</span>
+        </div>
       )}
     </div>
   );
@@ -130,67 +139,68 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    background: COLORS.card,
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 6,
-    padding: '8px 10px',
-    color: COLORS.text,
+    padding: '12px 14px',
+    color: '#e8eaed',
     display: 'flex',
     flexDirection: 'column',
-    gap: 6,
+    gap: 10,
   },
   title: {
-    fontSize: 10,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
+    fontSize: 13,
+    fontWeight: 700,
     color: COLORS.blue,
-    paddingBottom: 4,
-    borderBottom: `1px solid ${COLORS.border}`,
     display: 'flex',
     alignItems: 'center',
     gap: 6,
+    paddingBottom: 6,
+    borderBottom: '1px solid rgba(26, 115, 232, 0.12)',
   },
-  titleLabel: {
-    fontSize: 9,
-    color: '#b0b5bc',
-    letterSpacing: 1,
-    opacity: 0.7,
+  grid: {
+    display: 'grid',
+    gridTemplateColumns: '1fr 1fr',
+    gap: 8,
   },
-  statBlock: {
-    textAlign: 'center',
-    padding: '8px 0',
-  },
-  statBig: {
-    fontSize: 32,
-    fontWeight: 700,
-    color: COLORS.text,
-    textShadow: '0 0 10px rgba(26,115,232,0.3)',
-    lineHeight: 1,
-  },
-  statLabel: {
-    fontSize: 10,
-    color: '#b0b5bc',
-    letterSpacing: 1,
-    textTransform: 'uppercase',
-  },
-  row: {
+  statCell: {
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 8,
+    padding: '6px 8px',
+    borderRadius: 8,
+    background: 'rgba(255, 255, 255, 0.03)',
   },
-  statValue: {
-    fontSize: 13,
-    fontWeight: 600,
-    color: COLORS.text,
+  statIcon: {
+    fontSize: 16,
+    lineHeight: 1,
+    flexShrink: 0,
   },
-  progressSection: {
+  statInfo: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
+    gap: 1,
+    minWidth: 0,
+  },
+  statLabel: {
+    fontSize: 9,
+    color: '#9aa0a6',
+    letterSpacing: 0.5,
+    textTransform: 'uppercase',
+    fontWeight: 600,
+  },
+  statBig: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: '#e8eaed',
+    lineHeight: 1,
+  },
+  statValue: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#e8eaed',
+    lineHeight: 1.2,
   },
   progressTrack: {
     height: 4,
-    background: 'rgba(255,255,255,0.12)',
+    background: 'rgba(255, 255, 255, 0.08)',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -199,25 +209,22 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: 2,
     transition: 'width 1s linear',
   },
-  divider: {
-    height: 1,
-    background: COLORS.border,
-    margin: '2px 0',
-  },
   eventBlock: {
-    textAlign: 'center',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    padding: '6px 8px',
+    borderRadius: 8,
+    background: 'rgba(251, 188, 4, 0.08)',
+    border: '1px solid rgba(251, 188, 4, 0.15)',
   },
-  eventLabel: {
-    fontSize: 9,
-    color: COLORS.amber,
-    letterSpacing: 2,
-    marginBottom: 2,
+  eventIcon: {
+    fontSize: 14,
   },
   eventName: {
     fontSize: 12,
     fontWeight: 600,
     color: COLORS.amber,
-    textShadow: '0 0 6px rgba(251,188,4,0.4)',
   },
 };
 

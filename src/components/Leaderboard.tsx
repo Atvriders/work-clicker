@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Global Leaderboard
+// Work Clicker — Global Leaderboard (Glassmorphism)
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -29,8 +29,6 @@ const COLORS = {
   blue: '#1a73e8',
   green: '#34a853',
   amber: '#fbbc04',
-  card: '#1a2332',
-  border: 'rgba(26,115,232,0.2)',
   text: '#e8eaed',
   muted: '#9aa0a6',
 };
@@ -47,7 +45,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
         setEntries(data);
       }
     } catch {
-      // Network error -- keep existing data
+      // Keep existing data
     }
     setLoading(false);
   }, []);
@@ -62,9 +60,9 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
 
   return (
     <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
+      <div style={styles.panel} className="glass-card" onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
-          <h2 style={styles.title}>LEADERBOARD</h2>
+          <h2 style={styles.title}>{'\uD83C\uDFC6'} LEADERBOARD</h2>
           <button style={styles.closeBtn} onClick={onClose}>X</button>
         </div>
         <div style={styles.subtitleRow}>
@@ -136,23 +134,20 @@ const styles: Record<string, React.CSSProperties> = {
   overlay: {
     position: 'fixed',
     top: 0, left: 0, width: '100%', height: '100%',
-    background: 'rgba(0, 0, 0, 0.8)',
+    background: 'rgba(0, 0, 0, 0.7)',
+    backdropFilter: 'blur(4px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 5000,
   },
   panel: {
-    background: '#0f1923',
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: '8px',
     padding: '24px',
     maxWidth: '700px',
     width: '95%',
     maxHeight: '80vh',
     display: 'flex',
     flexDirection: 'column',
-    boxShadow: '0 0 30px rgba(26,115,232,0.1)',
   },
   header: {
     display: 'flex',
@@ -163,40 +158,41 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
     fontSize: '18px',
     fontWeight: 700,
-    letterSpacing: '3px',
+    letterSpacing: 2,
     color: COLORS.blue,
-    textShadow: '0 0 8px rgba(26,115,232,0.6)',
   },
   closeBtn: {
-    background: 'none',
-    border: `1px solid ${COLORS.blue}`,
+    background: 'rgba(26, 115, 232, 0.08)',
+    border: '1px solid rgba(26, 115, 232, 0.2)',
     color: COLORS.blue,
-    fontSize: '14px',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
+    fontSize: '13px',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
     cursor: 'pointer',
-    padding: '4px 10px',
-    borderRadius: 4,
-    letterSpacing: '2px',
+    padding: '4px 12px',
+    borderRadius: 8,
+    fontWeight: 600,
   },
   subtitleRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '16px',
-    marginTop: '4px',
+    marginTop: '6px',
   },
   subtitle: {
     fontSize: '10px',
-    letterSpacing: '3px',
+    letterSpacing: 2,
     color: COLORS.muted,
+    fontWeight: 600,
   },
   onlineCount: {
     fontSize: '10px',
-    letterSpacing: '1px',
+    letterSpacing: 0.5,
     color: COLORS.green,
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
+    fontWeight: 600,
   },
   onlineDotSmall: {
     display: 'inline-block',
@@ -211,14 +207,14 @@ const styles: Record<string, React.CSSProperties> = {
     color: COLORS.blue,
     textAlign: 'center',
     padding: '32px',
-    letterSpacing: '3px',
+    letterSpacing: 2,
+    fontWeight: 600,
   },
   empty: {
     color: COLORS.muted,
     textAlign: 'center',
     padding: '32px',
     fontSize: '12px',
-    letterSpacing: '1px',
   },
   tableWrap: {
     overflowY: 'auto',
@@ -230,28 +226,28 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '12px',
   },
   th: {
-    padding: '6px 8px',
+    padding: '8px',
     textAlign: 'right',
     color: COLORS.muted,
-    borderBottom: `1px solid ${COLORS.border}`,
+    borderBottom: '1px solid rgba(26, 115, 232, 0.12)',
     fontSize: '10px',
-    letterSpacing: '1px',
-    fontWeight: 600,
+    letterSpacing: 0.5,
+    fontWeight: 700,
     whiteSpace: 'nowrap',
   },
   td: {
-    padding: '5px 8px',
+    padding: '6px 8px',
     textAlign: 'right',
     color: COLORS.text,
-    borderBottom: '1px solid rgba(26,115,232,0.06)',
+    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
     whiteSpace: 'nowrap',
   },
   row: {
     background: 'transparent',
   },
   rowHighlight: {
-    background: 'rgba(26, 115, 232, 0.08)',
-    boxShadow: 'inset 0 0 10px rgba(26,115,232,0.05)',
+    background: 'rgba(26, 115, 232, 0.06)',
+    borderRadius: 6,
   },
   callsignCell: {
     display: 'inline-flex',
@@ -278,11 +274,11 @@ const styles: Record<string, React.CSSProperties> = {
   },
   footer: {
     marginTop: '12px',
-    fontSize: '9px',
+    fontSize: '10px',
     color: COLORS.muted,
-    letterSpacing: '2px',
+    letterSpacing: 1,
     textAlign: 'center',
-    opacity: 0.5,
+    opacity: 0.4,
   },
 };
 

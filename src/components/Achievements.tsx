@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Achievements Grid (Trophy display)
+// Work Clicker — Achievements Grid (Glassmorphism Trophy Display)
 // ============================================================
 
 import React, { useState } from 'react';
@@ -8,8 +8,6 @@ import { ACHIEVEMENTS } from '../data/achievements';
 const COLORS = {
   blue: '#1a73e8',
   amber: '#fbbc04',
-  card: '#1a2332',
-  border: 'rgba(26,115,232,0.2)',
   text: '#e8eaed',
   muted: '#9aa0a6',
 };
@@ -27,7 +25,7 @@ const Achievements: React.FC<AchievementsProps> = ({ unlockedIds }) => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <div style={styles.title}>TROPHIES</div>
+        <div style={styles.title}>{'\uD83C\uDFC6'} TROPHIES</div>
         <div style={styles.count}>
           {unlockedCount} / {totalCount}
         </div>
@@ -65,7 +63,7 @@ const Achievements: React.FC<AchievementsProps> = ({ unlockedIds }) => {
               </span>
 
               {isHovered && (
-                <div style={styles.tooltip}>
+                <div style={styles.tooltip} className="glass-card">
                   <div style={styles.tooltipName}>
                     {showInfo ? ach.name : '???'}
                   </div>
@@ -90,19 +88,19 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottom: `1px solid ${COLORS.border}`,
+    borderBottom: '1px solid rgba(26, 115, 232, 0.1)',
     paddingBottom: 8,
     marginBottom: 12,
   },
   title: {
     fontSize: 12,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
+    fontWeight: 700,
     color: COLORS.blue,
   },
   count: {
     fontSize: 11,
     color: COLORS.amber,
+    fontWeight: 700,
   },
   grid: {
     display: 'grid',
@@ -116,20 +114,21 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: 8,
-    borderRadius: 6,
-    border: `1px solid ${COLORS.border}`,
+    borderRadius: 10,
+    border: '1px solid rgba(26, 115, 232, 0.12)',
     cursor: 'pointer',
-    transition: 'all 0.15s',
+    transition: 'all 0.2s ease',
     minHeight: 70,
     textAlign: 'center',
+    background: 'rgba(255, 255, 255, 0.02)',
   },
   badgeUnlocked: {
-    background: 'rgba(26,115,232,0.05)',
-    borderColor: 'rgba(26,115,232,0.3)',
+    background: 'rgba(26, 115, 232, 0.06)',
+    borderColor: 'rgba(26, 115, 232, 0.25)',
   },
   badgeLocked: {
-    background: 'rgba(128,128,128,0.05)',
-    borderColor: 'rgba(128,128,128,0.2)',
+    background: 'rgba(128, 128, 128, 0.04)',
+    borderColor: 'rgba(128, 128, 128, 0.15)',
   },
   badgeIcon: {
     fontSize: 24,
@@ -147,32 +146,29 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: '100%',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    fontWeight: 500,
   },
   badgeNameLocked: {
     fontSize: 9,
     lineHeight: 1.2,
-    color: 'rgba(128,128,128,0.5)',
+    color: 'rgba(128, 128, 128, 0.5)',
   },
   tooltip: {
     position: 'absolute',
     bottom: '100%',
     left: '50%',
     transform: 'translateX(-50%)',
-    background: '#0f1923',
-    border: `1px solid ${COLORS.blue}`,
-    borderRadius: 4,
-    padding: '8px 10px',
+    padding: '8px 12px',
     fontSize: 11,
     color: COLORS.text,
     zIndex: 100,
     pointerEvents: 'none',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.6)',
     marginBottom: 6,
     maxWidth: 220,
     whiteSpace: 'normal',
   },
   tooltipName: {
-    fontWeight: 'bold',
+    fontWeight: 700,
     marginBottom: 3,
     color: COLORS.blue,
   },

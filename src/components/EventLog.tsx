@@ -1,28 +1,9 @@
 // ============================================================
-// Work Clicker — Event Log (Work log with flavor messages)
+// Work Clicker — Event Log (Clean Modern Log)
 // ============================================================
 
 import React, { useEffect, useRef } from 'react';
 import { EventLogEntry } from '../types';
-
-const COLORS = {
-  blue: '#1a73e8',
-  amber: '#fbbc04',
-  green: '#34a853',
-  red: '#ea4335',
-  card: '#1a2332',
-  border: 'rgba(26,115,232,0.2)',
-  text: '#e8eaed',
-  muted: '#9aa0a6',
-};
-
-const TYPE_COLORS: Record<string, string> = {
-  milestone: '#fbbc04',
-  event: COLORS.amber,
-  achievement: '#fbbc04',
-  warning: COLORS.red,
-  shift: COLORS.green,
-};
 
 const WORK_FLAVOR = [
   'Replied to email chain',
@@ -90,35 +71,35 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
       addLogRef.current(msg, 'event');
     }, 5000 + Math.random() * 5000);
     return () => clearInterval(interval);
-  }, []); // empty deps — runs once
+  }, []);
 
   const visible = eventLog.slice(-30);
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="glass-card">
       <div style={styles.titleRow}>
-        <span style={styles.title}>WORK LOG</span>
+        <span style={styles.title}>{'\uD83D\uDCDD'} Work Log</span>
         <span style={styles.headerRight}>
           <span style={styles.entryCount}>{eventLog.length} entries</span>
           {onClearLog && (
             <button style={styles.clrButton} onClick={onClearLog}>
-              CLR
+              Clear
             </button>
           )}
         </span>
       </div>
       <div style={styles.logArea} ref={scrollRef}>
         {visible.map((entry: EventLogEntry, i: number) => {
-          const typeColor = TYPE_COLORS[entry.type] ?? COLORS.text;
           const age = visible.length - 1 - i;
           const opacity = Math.max(0.4, 1 - age * 0.02);
 
           return (
             <div key={entry.id} style={{ ...styles.entry, opacity }}>
+              <span className={`log-dot ${entry.type}`} />
               <span style={styles.timestamp}>
-                [{formatTimestamp(entry.timestamp)}]
+                {formatTimestamp(entry.timestamp)}
               </span>
-              <span style={{ color: typeColor }}>{entry.message}</span>
+              <span style={styles.message}>{entry.message}</span>
             </div>
           );
         })}
@@ -129,11 +110,8 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    background: COLORS.card,
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 6,
-    padding: '6px 8px',
-    color: COLORS.text,
+    padding: '10px 12px',
+    color: '#e8eaed',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -145,57 +123,68 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottom: `1px solid ${COLORS.border}`,
-    paddingBottom: 4,
-    marginBottom: 4,
+    borderBottom: '1px solid rgba(26, 115, 232, 0.1)',
+    paddingBottom: 6,
+    marginBottom: 6,
     flexShrink: 0,
   },
   title: {
-    fontSize: 10,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
-    color: COLORS.blue,
+    fontSize: 13,
+    fontWeight: 700,
+    color: '#1a73e8',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
   },
   headerRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
+    gap: 8,
   },
   entryCount: {
-    fontSize: 9,
-    color: '#b0b5bc',
-    letterSpacing: 1,
-    opacity: 0.8,
+    fontSize: 10,
+    color: '#9aa0a6',
+    opacity: 0.6,
+    fontWeight: 500,
   },
   clrButton: {
-    fontSize: 9,
-    padding: '1px 5px',
-    background: 'transparent',
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 3,
-    color: '#b0b5bc',
+    fontSize: 10,
+    padding: '2px 8px',
+    background: 'rgba(255, 255, 255, 0.04)',
+    border: '1px solid rgba(26, 115, 232, 0.15)',
+    borderRadius: 6,
+    color: '#9aa0a6',
     cursor: 'pointer',
-    letterSpacing: 1,
-    lineHeight: 1.4,
+    fontWeight: 500,
   },
   logArea: {
     flex: 1,
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: 1,
+    gap: 2,
     minHeight: 0,
   },
   entry: {
+    display: 'flex',
+    alignItems: 'flex-start',
+    gap: 0,
     fontSize: 12,
     lineHeight: 1.5,
-    whiteSpace: 'pre-wrap',
+    padding: '1px 0',
   },
   timestamp: {
-    color: '#b0b5bc',
-    marginRight: 4,
+    color: '#9aa0a6',
     fontSize: 10,
-    opacity: 0.8,
+    opacity: 0.6,
+    marginRight: 6,
+    flexShrink: 0,
+    fontWeight: 500,
+    lineHeight: 1.8,
+  },
+  message: {
+    color: '#c5cad1',
+    lineHeight: 1.5,
   },
 };
 

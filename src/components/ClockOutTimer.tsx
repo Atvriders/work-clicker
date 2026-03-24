@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Clock-Out Countdown Timer (THE MAIN FEATURE)
+// Work Clicker — Clock-Out Countdown Timer (Compact Single Row)
 // ============================================================
 
 import React, { useEffect, useRef } from 'react';
@@ -17,9 +17,6 @@ const COLORS = {
   green: '#34a853',
   amber: '#fbbc04',
   red: '#ea4335',
-  card: '#1a2332',
-  bg: '#0f1923',
-  border: 'rgba(26,115,232,0.2)',
   text: '#e8eaed',
   muted: '#9aa0a6',
 };
@@ -48,7 +45,6 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   const [now, setNow] = React.useState(Date.now());
   const animFrameRef = useRef<number>(0);
 
-  // Tick every 100ms for smooth countdown
   useEffect(() => {
     const tick = () => {
       setNow(Date.now());
@@ -60,7 +56,6 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
 
   const remaining = clockOutTime - now;
   const isOvertime = remaining < 0;
-  const isShiftComplete = isOnShift && isOvertime;
   const absRemaining = Math.abs(remaining);
 
   // Color logic
@@ -76,13 +71,13 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
     timerColor = COLORS.amber;
   }
 
-  // Shift elapsed
+  // Shift progress
   const shiftDuration = clockOutTime - shiftStart;
   const elapsed = now - shiftStart;
   const progress = shiftDuration > 0 ? Math.min(1, Math.max(0, elapsed / shiftDuration)) : 0;
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value; // "HH:MM"
+    const val = e.target.value;
     if (!val) return;
     const [h, m] = val.split(':').map(Number);
     onClockOutTimeChange(h, m);
@@ -91,64 +86,59 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   // Not on shift
   if (!isOnShift) {
     return (
-      <div style={styles.container}>
-        <div style={styles.offShiftLabel}>NOT CLOCKED IN</div>
-        <button style={styles.startButton} onClick={onStartShift}>
-          START NEW SHIFT
-        </button>
+      <div style={styles.container} className="glass-card">
+        <div style={styles.offShiftRow}>
+          <span style={styles.offShiftLabel}>NOT CLOCKED IN</span>
+          <button style={styles.startButton} onClick={onStartShift}>
+            START NEW SHIFT
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.container}>
-      {/* Status label */}
-      <div style={styles.statusRow}>
+    <div style={styles.container} className="glass-card">
+      <div style={styles.mainRow}>
+        {/* Status label */}
         <span style={styles.statusLabel}>
-          {isShiftComplete ? 'SHIFT COMPLETE!' : 'TIME UNTIL CLOCK-OUT'}
+          {isOvertime ? 'OVERTIME' : 'CLOCK-OUT IN'}
         </span>
-      </div>
 
-      {/* Huge countdown */}
-      <div
-        style={{
-          ...styles.countdown,
-          color: timerColor,
-          textShadow: `0 0 24px ${timerColor}99, 0 0 8px ${timerColor}60`,
-          animation: isPulsing ? 'pulse-red 1s ease-in-out infinite' : 'none',
-        }}
-      >
-        {isOvertime ? (
-          <>
-            <span style={styles.overtimeLabel}>OVERTIME!</span>
-            <span>+{formatCountdown(absRemaining)}</span>
-          </>
-        ) : (
-          formatCountdown(remaining)
-        )}
-      </div>
-
-      {/* Progress bar */}
-      <div style={styles.progressTrack}>
-        <div
+        {/* Countdown */}
+        <span
           style={{
-            ...styles.progressBar,
-            width: `${progress * 100}%`,
-            background: timerColor,
-            boxShadow: `0 0 8px ${timerColor}80`,
+            ...styles.countdown,
+            color: timerColor,
+            textShadow: `0 0 12px ${timerColor}60`,
+            animation: isPulsing ? 'pulse-red 1s ease-in-out infinite' : 'none',
           }}
-        />
-      </div>
+        >
+          {isOvertime ? '+' : ''}{formatCountdown(absRemaining)}
+        </span>
 
-      {/* Clock-out time inline input */}
-      <div style={styles.clockOutRow}>
-        <span style={styles.clockOutLabel}>Clock-out:</span>
-        <input
-          type="time"
-          value={formatTimeValue(new Date(clockOutTime))}
-          onChange={handleTimeChange}
-          style={styles.timeInput}
-        />
+        {/* Progress bar */}
+        <div style={styles.progressTrack}>
+          <div
+            style={{
+              ...styles.progressBar,
+              width: `${progress * 100}%`,
+              background: `linear-gradient(90deg, ${COLORS.blue}, ${timerColor})`,
+              boxShadow: `0 0 6px ${timerColor}60`,
+            }}
+          />
+        </div>
+
+        {/* Clock-out time input */}
+        <div style={styles.clockOutGroup}>
+          <span style={styles.clockOutLabel}>Out:</span>
+          <input
+            type="time"
+            value={formatTimeValue(new Date(clockOutTime))}
+            onChange={handleTimeChange}
+            style={styles.timeInput}
+          />
+        </div>
       </div>
 
       <style>{`
@@ -163,94 +153,87 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    background: COLORS.card,
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 8,
-    padding: '12px 24px',
-    textAlign: 'center',
-    position: 'relative',
+    padding: '8px 16px',
     flexShrink: 0,
   },
-  statusRow: {
+  mainRow: {
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    marginBottom: 4,
+    gap: 16,
+    flexWrap: 'wrap',
   },
   statusLabel: {
-    fontSize: 11,
-    letterSpacing: 3,
-    color: '#c5cad1',
+    fontSize: 10,
+    letterSpacing: 2,
+    color: '#9aa0a6',
     textTransform: 'uppercase',
+    fontWeight: 600,
+    flexShrink: 0,
   },
   countdown: {
-    fontSize: 48,
+    fontSize: 22,
     fontWeight: 700,
-    letterSpacing: 2,
-    lineHeight: 1.2,
-    display: 'flex',
-    flexDirection: 'column',
-    alignItems: 'center',
-    gap: 0,
-  },
-  overtimeLabel: {
-    fontSize: 18,
-    letterSpacing: 6,
-    fontWeight: 700,
-    color: '#ff4444',
-    animation: 'flash-overtime 1s ease-in-out infinite',
+    letterSpacing: 1,
+    flexShrink: 0,
   },
   progressTrack: {
-    height: 4,
-    background: 'rgba(255,255,255,0.12)',
-    borderRadius: 2,
+    flex: 1,
+    height: 6,
+    background: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 3,
     overflow: 'hidden',
-    marginTop: 10,
-    marginBottom: 6,
+    minWidth: 80,
   },
   progressBar: {
     height: '100%',
-    borderRadius: 2,
+    borderRadius: 3,
     transition: 'width 0.5s linear',
   },
-  clockOutRow: {
+  clockOutGroup: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+    flexShrink: 0,
+  },
+  clockOutLabel: {
+    fontSize: 10,
+    color: '#9aa0a6',
+    letterSpacing: 0.5,
+    fontWeight: 600,
+  },
+  timeInput: {
+    padding: '4px 8px',
+    background: 'rgba(15, 25, 35, 0.6)',
+    border: '1px solid rgba(26, 115, 232, 0.25)',
+    borderRadius: 6,
+    color: '#e8eaed',
+    fontSize: 12,
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    outline: 'none',
+  },
+  offShiftRow: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 8,
-  },
-  clockOutLabel: {
-    fontSize: 11,
-    color: '#c5cad1',
-    letterSpacing: 1,
+    gap: 16,
   },
   offShiftLabel: {
-    fontSize: 14,
-    letterSpacing: 4,
-    color: '#c5cad1',
-    marginBottom: 12,
+    fontSize: 12,
+    letterSpacing: 2,
+    color: '#9aa0a6',
+    fontWeight: 600,
   },
   startButton: {
-    padding: '12px 32px',
-    background: COLORS.blue,
+    padding: '8px 24px',
+    background: 'linear-gradient(135deg, #1a73e8, #1557b0)',
     border: 'none',
-    borderRadius: 6,
+    borderRadius: 8,
     color: '#ffffff',
-    fontSize: 16,
-    fontWeight: 700,
-    letterSpacing: 3,
-    cursor: 'pointer',
-  },
-  timeInput: {
-    padding: '3px 6px',
-    background: '#0f1923',
-    border: `1px solid ${COLORS.blue}`,
-    borderRadius: 4,
-    color: '#e8eaed',
     fontSize: 13,
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    outline: 'none',
+    fontWeight: 700,
+    letterSpacing: 2,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
   },
 };
 

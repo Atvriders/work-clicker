@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Chat Box (WebSocket ephemeral chat)
+// Work Clicker — Chat Box (Glassmorphism WebSocket Chat)
 // ============================================================
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -19,8 +19,6 @@ interface ChatProps {
 const COLORS = {
   blue: '#1a73e8',
   amber: '#fbbc04',
-  card: '#1a2332',
-  border: 'rgba(26,115,232,0.2)',
   text: '#e8eaed',
   muted: '#9aa0a6',
 };
@@ -55,7 +53,6 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, []);
 
-  // Track open state in ref for WS callback access
   useEffect(() => {
     openRef.current = open;
     if (open) {
@@ -63,14 +60,12 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
     }
   }, [open]);
 
-  // Auto-scroll when new messages arrive while open
   useEffect(() => {
     if (open) {
       scrollToBottom();
     }
   }, [messages, open, scrollToBottom]);
 
-  // WebSocket connection
   const connectWs = useCallback(() => {
     if (wsRef.current && (wsRef.current.readyState === WebSocket.CONNECTING || wsRef.current.readyState === WebSocket.OPEN)) {
       return;
@@ -117,12 +112,9 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
       }, 3000);
     };
 
-    ws.onerror = () => {
-      // onclose will fire after onerror
-    };
+    ws.onerror = () => {};
   }, [username]);
 
-  // Connect on mount, cleanup on unmount
   useEffect(() => {
     connectWs();
 
@@ -172,7 +164,7 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
         }}
         onClick={() => setOpen(true)}
       >
-        CHAT
+        {'\uD83D\uDCAC'} CHAT
         {unread > 0 && (
           <span style={styles.badge}>{unread > 99 ? '99+' : unread}</span>
         )}
@@ -183,26 +175,24 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
   // Expanded chat window
   return (
     <div
+      className="glass-card"
       style={{
         ...styles.chatWindow,
         bottom: isMobile ? '64px' : '16px',
       }}
     >
-      {/* Header */}
       <div style={styles.chatHeader}>
-        <span style={styles.chatTitle}>OFFICE CHAT</span>
-        <span style={{ fontSize: 8, color: COLORS.muted, letterSpacing: 1, opacity: 0.5 }}>TEMP — LOST ON RELOAD</span>
+        <span style={styles.chatTitle}>{'\uD83D\uDCAC'} OFFICE CHAT</span>
+        <span style={{ fontSize: 8, color: COLORS.muted, opacity: 0.4, fontWeight: 500 }}>TEMP</span>
         <button style={styles.chatCloseBtn} onClick={() => setOpen(false)}>X</button>
       </div>
 
-      {/* Online users */}
       <div style={styles.onlineBar}>
         <span style={styles.onlineIndicator}>{connected ? '\u25CF' : '\u25CB'}</span>
         {' '}
         ONLINE: {onlineUsers.length > 0 ? onlineUsers.join(', ') : 'none'}
       </div>
 
-      {/* Messages */}
       <div style={styles.messageList}>
         {messages.length === 0 ? (
           <div style={styles.emptyChat}>No messages yet</div>
@@ -225,7 +215,6 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input */}
       <div style={styles.inputRow}>
         <input
           style={styles.chatInput}
@@ -252,25 +241,26 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
 };
 
 const styles: Record<string, React.CSSProperties> = {
-  // Collapsed chat button
   chatButton: {
     position: 'fixed',
     right: '16px',
     zIndex: 4000,
-    background: COLORS.card,
-    border: `1px solid ${COLORS.border}`,
+    background: 'rgba(26, 35, 50, 0.85)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(26, 115, 232, 0.2)',
     color: COLORS.blue,
-    fontFamily: 'system-ui, -apple-system, sans-serif',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
     fontSize: '11px',
     fontWeight: 700,
-    letterSpacing: '2px',
-    padding: '6px 16px',
+    letterSpacing: 1,
+    padding: '8px 18px',
     borderRadius: '12px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    boxShadow: '0 0 10px rgba(26,115,232,0.1)',
+    boxShadow: '0 4px 16px rgba(0, 0, 0, 0.2)',
+    transition: 'all 0.2s ease',
   },
   badge: {
     background: '#ea4335',
@@ -281,72 +271,65 @@ const styles: Record<string, React.CSSProperties> = {
     borderRadius: '8px',
     minWidth: '16px',
     textAlign: 'center',
-    letterSpacing: '0',
+    letterSpacing: 0,
   },
 
-  // Expanded chat window
   chatWindow: {
     position: 'fixed',
     right: '16px',
-    width: '300px',
+    width: '320px',
     height: '400px',
     zIndex: 4000,
-    background: COLORS.card,
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: '8px',
     display: 'flex',
     flexDirection: 'column',
-    boxShadow: '0 0 20px rgba(26,115,232,0.1)',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
   },
   chatHeader: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: '8px 10px',
-    borderBottom: `1px solid ${COLORS.border}`,
+    padding: '10px 12px',
+    borderBottom: '1px solid rgba(26, 115, 232, 0.1)',
     flexShrink: 0,
   },
   chatTitle: {
     color: COLORS.blue,
-    fontSize: '11px',
+    fontSize: '12px',
     fontWeight: 700,
-    letterSpacing: '2px',
-    textShadow: '0 0 6px rgba(26,115,232,0.4)',
+    letterSpacing: 1,
   },
   chatCloseBtn: {
-    background: 'none',
-    border: `1px solid ${COLORS.border}`,
+    background: 'rgba(26, 115, 232, 0.08)',
+    border: '1px solid rgba(26, 115, 232, 0.15)',
     color: COLORS.blue,
-    fontSize: '10px',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
+    fontSize: '11px',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
     cursor: 'pointer',
-    padding: '2px 6px',
-    borderRadius: 3,
-    letterSpacing: '1px',
+    padding: '2px 8px',
+    borderRadius: 6,
+    fontWeight: 600,
   },
 
-  // Online users bar
   onlineBar: {
-    padding: '4px 10px',
+    padding: '4px 12px',
     fontSize: '9px',
     color: '#34a853',
-    letterSpacing: '1px',
-    borderBottom: `1px solid rgba(26,115,232,0.1)`,
+    letterSpacing: 0.5,
+    borderBottom: '1px solid rgba(26, 115, 232, 0.06)',
     flexShrink: 0,
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    fontWeight: 600,
   },
   onlineIndicator: {
     fontSize: '8px',
   },
 
-  // Messages area
   messageList: {
     flex: 1,
     overflowY: 'auto',
-    padding: '8px 10px',
+    padding: '8px 12px',
     display: 'flex',
     flexDirection: 'column',
     gap: '3px',
@@ -356,18 +339,17 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: '11px',
     textAlign: 'center',
     marginTop: '40px',
-    letterSpacing: '1px',
-    opacity: 0.5,
+    opacity: 0.4,
   },
   messageRow: {
     fontSize: '11px',
-    lineHeight: '1.4',
+    lineHeight: '1.5',
     wordBreak: 'break-word',
   },
   timestamp: {
     color: COLORS.muted,
     fontSize: '10px',
-    opacity: 0.5,
+    opacity: 0.4,
   },
   ownCallsign: {
     color: COLORS.amber,
@@ -384,36 +366,36 @@ const styles: Record<string, React.CSSProperties> = {
     color: COLORS.text,
   },
 
-  // Input area
   inputRow: {
     display: 'flex',
-    gap: '4px',
-    padding: '8px 10px',
-    borderTop: `1px solid ${COLORS.border}`,
+    gap: '6px',
+    padding: '8px 12px',
+    borderTop: '1px solid rgba(26, 115, 232, 0.1)',
     flexShrink: 0,
   },
   chatInput: {
     flex: 1,
-    background: '#0f1923',
-    border: `1px solid ${COLORS.border}`,
+    background: 'rgba(15, 25, 35, 0.6)',
+    border: '1px solid rgba(26, 115, 232, 0.15)',
     color: COLORS.text,
-    fontFamily: 'system-ui, -apple-system, sans-serif',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
     fontSize: '11px',
-    padding: '6px 8px',
+    padding: '6px 10px',
     outline: 'none',
-    borderRadius: '4px',
+    borderRadius: '8px',
   },
   sendBtn: {
-    background: 'none',
-    border: `1px solid ${COLORS.border}`,
+    background: 'rgba(26, 115, 232, 0.1)',
+    border: '1px solid rgba(26, 115, 232, 0.2)',
     color: COLORS.blue,
-    fontFamily: 'system-ui, -apple-system, sans-serif',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
     fontSize: '10px',
     fontWeight: 700,
-    letterSpacing: '1px',
-    padding: '4px 10px',
+    letterSpacing: 0.5,
+    padding: '4px 12px',
     cursor: 'pointer',
-    borderRadius: '4px',
+    borderRadius: '8px',
+    transition: 'all 0.15s ease',
   },
 };
 

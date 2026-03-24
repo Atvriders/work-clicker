@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Shop (Right Sidebar - Compact)
+// Work Clicker — Shop (Modern Glassmorphism Cards)
 // ============================================================
 
 import React, { useState } from 'react';
@@ -34,8 +34,6 @@ const COLORS = {
   green: '#34a853',
   amber: '#fbbc04',
   red: '#ea4335',
-  card: '#1a2332',
-  border: 'rgba(26,115,232,0.2)',
   text: '#e8eaed',
   muted: '#9aa0a6',
 };
@@ -72,43 +70,27 @@ const Shop: React.FC<ShopProps> = ({
     .sort((a, b) => a.cost - b.cost);
 
   return (
-    <div style={styles.container}>
+    <div style={styles.container} className="glass-card">
       <div style={styles.title}>
-        SHOP
-        <span style={styles.titleLabel}>// OFFICE SUPPLY</span>
+        {'\uD83D\uDED2'} Shop
       </div>
 
       {/* Tab Toggle */}
       <div style={styles.tabRow}>
-        <button
-          style={{
-            ...styles.tab,
-            ...styles.tabLeft,
-            ...(tab === 'STATIONS' ? styles.tabActive : {}),
-          }}
-          onClick={() => setTab('STATIONS')}
-        >
-          STATIONS
-        </button>
-        <button
-          style={{
-            ...styles.tab,
-            ...(tab === 'UPGRADES' ? styles.tabActive : {}),
-          }}
-          onClick={() => setTab('UPGRADES')}
-        >
-          UPGRADES
-        </button>
-        <button
-          style={{
-            ...styles.tab,
-            ...styles.tabRight,
-            ...(tab === 'TROPHIES' ? styles.tabActive : {}),
-          }}
-          onClick={() => setTab('TROPHIES')}
-        >
-          TROPHIES
-        </button>
+        {(['STATIONS', 'UPGRADES', 'TROPHIES'] as ShopTab[]).map((t, i) => (
+          <button
+            key={t}
+            style={{
+              ...styles.tab,
+              ...(i === 0 ? styles.tabLeft : i === 2 ? styles.tabRight : {}),
+              ...(tab === t ? styles.tabActive : {}),
+            }}
+            onClick={() => setTab(t)}
+          >
+            {t === 'STATIONS' ? '\uD83C\uDFE2' : t === 'UPGRADES' ? '\u2B06\uFE0F' : '\uD83C\uDFC6'}{' '}
+            {t}
+          </button>
+        ))}
       </div>
 
       {/* List */}
@@ -123,19 +105,16 @@ const Shop: React.FC<ShopProps> = ({
               const owned = ownedStations[st.id] ?? 0;
               const cost = getStationCost(st, owned);
               const canAfford = wp >= cost;
-
-              // WPS percentage for owned stations
               const totalWps = owned > 0 ? +(st.baseWps * owned).toFixed(1) : 0;
               const pct = wpPerSecond > 0 && totalWps > 0 ? ((totalWps / wpPerSecond) * 100).toFixed(0) : null;
 
               return (
                 <div
                   key={st.id}
+                  className={`shop-item-card${canAfford ? '' : ' disabled'}`}
                   style={{
                     ...styles.card,
-                    ...(canAfford
-                      ? { borderColor: 'rgba(26,115,232,0.3)' }
-                      : styles.cardDisabled),
+                    ...(canAfford ? styles.cardAffordable : styles.cardDisabled),
                   }}
                   onClick={() => canAfford && onBuyStation(st.id)}
                 >
@@ -188,12 +167,13 @@ const Shop: React.FC<ShopProps> = ({
             return (
               <div
                 key={up.id}
+                className={`shop-item-card${canAfford ? '' : ' disabled'}`}
                 style={{
                   ...styles.card,
                   ...(!prereqMet
-                    ? { ...styles.cardDisabled, borderColor: 'rgba(234,67,53,0.2)' }
+                    ? { ...styles.cardDisabled, borderColor: 'rgba(234, 67, 53, 0.15)' }
                     : canAfford
-                      ? { borderColor: 'rgba(26,115,232,0.3)' }
+                      ? styles.cardAffordable
                       : styles.cardDisabled),
                 }}
                 onClick={() => canAfford && onBuyUpgrade(up.id)}
@@ -203,19 +183,13 @@ const Shop: React.FC<ShopProps> = ({
                   <span style={styles.cardName}>{up.name}</span>
                 </div>
                 <div style={styles.cardFlavor}>{up.flavor}</div>
-                <div style={{ fontSize: 10, color: '#5e9cf5', marginBottom: 3 }}>
-                  {up.description}
-                </div>
+                <div style={styles.cardDesc}>{up.description}</div>
                 <div style={styles.cardFooter}>
                   <span style={styles.cardCost}>
                     {formatNumber(up.cost)} WP
                   </span>
                   {!prereqMet ? (
-                    <span style={{
-                      fontSize: 9,
-                      color: COLORS.red,
-                      fontWeight: 'bold',
-                    }}>
+                    <span style={styles.reqLabel}>
                       Req: {requiresName}
                     </span>
                   ) : (
@@ -245,11 +219,8 @@ const Shop: React.FC<ShopProps> = ({
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    background: COLORS.card,
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 6,
-    padding: '8px 8px',
-    color: COLORS.text,
+    padding: '12px',
+    color: '#e8eaed',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -257,144 +228,149 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
   },
   title: {
-    fontSize: 10,
-    letterSpacing: 2,
-    textTransform: 'uppercase',
+    fontSize: 13,
+    fontWeight: 700,
     color: COLORS.blue,
-    paddingBottom: 4,
-    marginBottom: 4,
     display: 'flex',
     alignItems: 'center',
     gap: 6,
-  },
-  titleLabel: {
-    fontSize: 9,
-    color: '#b0b5bc',
-    letterSpacing: 1,
-    opacity: 0.7,
+    paddingBottom: 8,
   },
   tabRow: {
     display: 'flex',
     gap: 0,
-    marginBottom: 6,
+    marginBottom: 10,
     flexShrink: 0,
   },
   tab: {
     flex: 1,
-    padding: '5px 0',
+    padding: '7px 0',
     textAlign: 'center',
     fontSize: 10,
-    letterSpacing: 1,
+    letterSpacing: 0.5,
     cursor: 'pointer',
-    border: `1px solid ${COLORS.border}`,
-    background: 'transparent',
-    color: '#b0b5bc',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    fontWeight: 'bold',
-    transition: 'all 0.15s',
+    border: '1px solid rgba(26, 115, 232, 0.15)',
+    background: 'rgba(255, 255, 255, 0.03)',
+    color: '#9aa0a6',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    fontWeight: 600,
+    transition: 'all 0.2s ease',
   },
   tabActive: {
-    background: 'rgba(26,115,232,0.1)',
+    background: 'rgba(26, 115, 232, 0.12)',
     color: COLORS.blue,
-    borderColor: COLORS.blue,
-    boxShadow: '0 0 4px rgba(26,115,232,0.2)',
+    borderColor: 'rgba(26, 115, 232, 0.3)',
   },
   tabLeft: {
-    borderRadius: '3px 0 0 3px',
+    borderRadius: '8px 0 0 8px',
   },
   tabRight: {
-    borderRadius: '0 3px 3px 0',
+    borderRadius: '0 8px 8px 0',
   },
   list: {
     flex: 1,
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: 4,
+    gap: 6,
     minHeight: 0,
   },
   card: {
-    border: `1px solid ${COLORS.border}`,
-    borderRadius: 3,
-    padding: '6px 8px',
-    cursor: 'pointer',
-    transition: 'all 0.15s',
+    border: '1px solid rgba(26, 115, 232, 0.12)',
+    borderRadius: 10,
+    padding: '8px 10px',
+    background: 'rgba(255, 255, 255, 0.03)',
+  },
+  cardAffordable: {
+    borderColor: 'rgba(26, 115, 232, 0.25)',
+    background: 'rgba(26, 115, 232, 0.04)',
   },
   cardDisabled: {
     opacity: 0.4,
-    cursor: 'not-allowed',
   },
   cardHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: 5,
-    marginBottom: 2,
+    gap: 6,
+    marginBottom: 3,
   },
   cardIcon: {
-    fontSize: 14,
+    fontSize: 16,
   },
   cardName: {
     flex: 1,
-    fontSize: 11,
-    fontWeight: 'bold',
-    color: COLORS.text,
+    fontSize: 12,
+    fontWeight: 600,
+    color: '#e8eaed',
   },
   cardCount: {
-    fontSize: 10,
+    fontSize: 11,
     color: COLORS.amber,
-    fontWeight: 'bold',
+    fontWeight: 700,
   },
   cardFlavor: {
-    fontSize: 9,
-    color: '#b0b5bc',
+    fontSize: 10,
+    color: '#9aa0a6',
     opacity: 0.8,
     lineHeight: 1.3,
-    marginBottom: 3,
+    marginBottom: 4,
+  },
+  cardDesc: {
+    fontSize: 10,
+    color: 'rgba(26, 115, 232, 0.7)',
+    marginBottom: 4,
   },
   cardFooter: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 4,
+    gap: 6,
   },
   cardCost: {
-    fontSize: 10,
+    fontSize: 11,
     color: COLORS.amber,
-    fontWeight: 'bold',
+    fontWeight: 700,
   },
   cardEffect: {
     fontSize: 10,
     color: COLORS.blue,
+    fontWeight: 500,
   },
   cardPct: {
     fontSize: 9,
-    color: '#b0b5bc',
-    opacity: 0.7,
+    color: '#9aa0a6',
+    opacity: 0.6,
   },
   buyBtn: {
-    background: 'rgba(26,115,232,0.1)',
-    border: `1px solid ${COLORS.blue}`,
+    background: 'linear-gradient(135deg, rgba(26, 115, 232, 0.2), rgba(26, 115, 232, 0.1))',
+    border: '1px solid rgba(26, 115, 232, 0.35)',
     color: COLORS.blue,
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    fontSize: 9,
-    padding: '2px 8px',
-    borderRadius: 2,
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    fontSize: 10,
+    padding: '3px 12px',
+    borderRadius: 6,
     cursor: 'pointer',
-    fontWeight: 'bold',
-    letterSpacing: 1,
+    fontWeight: 700,
+    letterSpacing: 0.5,
+    transition: 'all 0.15s ease',
   },
   buyBtnDisabled: {
     background: 'transparent',
-    borderColor: 'rgba(26,115,232,0.2)',
-    color: 'rgba(26,115,232,0.3)',
+    borderColor: 'rgba(26, 115, 232, 0.1)',
+    color: 'rgba(26, 115, 232, 0.25)',
     cursor: 'not-allowed',
   },
+  reqLabel: {
+    fontSize: 9,
+    color: COLORS.red,
+    fontWeight: 600,
+  },
   emptyMsg: {
-    color: '#b0b5bc',
-    fontSize: 11,
-    fontStyle: 'italic',
+    color: '#9aa0a6',
+    fontSize: 12,
     textAlign: 'center',
-    padding: '16px 0',
+    padding: '24px 0',
+    opacity: 0.6,
   },
 };
 

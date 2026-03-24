@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Login Screen
+// Work Clicker — Login Screen (Modern Office)
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -37,7 +37,6 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     }
   }, [onLogin]);
 
-  // Auto-login if username exists in localStorage
   useEffect(() => {
     const saved = localStorage.getItem(USERNAME_KEY);
     if (saved) {
@@ -60,7 +59,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   if (loading) {
     return (
       <div style={styles.wrapper}>
-        <div style={styles.container}>
+        <div style={styles.container} className="glass-card">
           <div style={styles.loadingText}>CONNECTING...</div>
         </div>
       </div>
@@ -69,8 +68,8 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div style={styles.wrapper}>
-      <div style={styles.container}>
-        <div style={styles.logoIcon}>&#128188;</div>
+      <div style={styles.container} className="glass-card">
+        <div style={styles.logoIcon}>{'\uD83D\uDCBC'}</div>
         <h1 style={styles.title}>WORK CLICKER</h1>
         <div style={styles.subtitle}>EMPLOYEE LOGIN</div>
 
@@ -109,38 +108,34 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     height: '100vh',
     width: '100vw',
-    background: 'linear-gradient(180deg, #0a1219 0%, #0f1923 50%, #0a1219 100%)',
+    background: 'linear-gradient(135deg, #0f1923 0%, #141e2b 50%, #0f1923 100%)',
   },
   container: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     padding: '40px',
-    background: '#1a2332',
-    border: '1px solid rgba(26,115,232,0.3)',
-    borderRadius: '8px',
-    boxShadow: '0 0 30px rgba(26,115,232,0.1)',
-    maxWidth: '400px',
+    maxWidth: '420px',
     width: '90%',
   },
   logoIcon: {
-    fontSize: '48px',
+    fontSize: '52px',
     marginBottom: '8px',
   },
   title: {
     margin: '0 0 8px 0',
-    fontSize: '24px',
+    fontSize: '26px',
     fontWeight: 700,
-    letterSpacing: '3px',
+    letterSpacing: 2,
     color: '#1a73e8',
-    textShadow: '0 0 8px rgba(26,115,232,0.6)',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: '12px',
-    letterSpacing: '4px',
+    letterSpacing: 3,
     color: '#9aa0a6',
     marginBottom: '32px',
+    fontWeight: 600,
   },
   form: {
     display: 'flex',
@@ -151,56 +146,59 @@ const styles: Record<string, React.CSSProperties> = {
   },
   label: {
     fontSize: '11px',
-    letterSpacing: '2px',
+    letterSpacing: 1.5,
     color: '#9aa0a6',
+    fontWeight: 600,
   },
   input: {
     width: '100%',
     padding: '12px 16px',
-    background: '#0f1923',
-    border: '1px solid rgba(26,115,232,0.4)',
-    borderRadius: '4px',
+    background: 'rgba(15, 25, 35, 0.6)',
+    border: '1px solid rgba(26, 115, 232, 0.3)',
+    borderRadius: '8px',
     color: '#e8eaed',
     fontSize: '18px',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    letterSpacing: '2px',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    letterSpacing: 1,
     textAlign: 'center',
     outline: 'none',
     boxSizing: 'border-box',
+    transition: 'border-color 0.2s ease',
   },
   error: {
     color: '#ea4335',
     fontSize: '12px',
-    letterSpacing: '1px',
+    fontWeight: 500,
   },
   button: {
-    padding: '10px 32px',
-    background: '#1a73e8',
+    padding: '12px 36px',
+    background: 'linear-gradient(135deg, #1a73e8, #1557b0)',
     border: 'none',
-    borderRadius: '4px',
+    borderRadius: '8px',
     color: '#ffffff',
     fontSize: '14px',
-    fontFamily: 'system-ui, -apple-system, sans-serif',
-    fontWeight: 600,
-    letterSpacing: '3px',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    fontWeight: 700,
+    letterSpacing: 2,
     textTransform: 'uppercase',
     cursor: 'pointer',
     marginTop: '8px',
-    transition: 'background 0.2s',
+    transition: 'all 0.2s ease',
+    boxShadow: '0 4px 14px rgba(26, 115, 232, 0.3)',
   },
   hint: {
     marginTop: '24px',
-    fontSize: '10px',
+    fontSize: '11px',
     color: '#9aa0a6',
-    letterSpacing: '1px',
+    letterSpacing: 0.5,
     textAlign: 'center',
-    opacity: 0.6,
+    opacity: 0.5,
   },
   loadingText: {
     fontSize: '16px',
     color: '#1a73e8',
-    letterSpacing: '4px',
-    textShadow: '0 0 8px rgba(26,115,232,0.6)',
+    letterSpacing: 3,
+    fontWeight: 600,
   },
 };
 

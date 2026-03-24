@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Main "DO WORK" Click Button
+// Work Clicker — Main "DO WORK" Click Button (Modern Office)
 // ============================================================
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -16,41 +16,33 @@ interface WorkButtonProps {
   onWork: () => void;
 }
 
-const COLORS = {
-  blue: '#1a73e8',
-  card: '#1a2332',
-  border: 'rgba(26,115,232,0.2)',
-  text: '#e8eaed',
-  muted: '#9aa0a6',
-};
-
 let floatIdCounter = 0;
 
 const WorkButton: React.FC<WorkButtonProps> = ({ wpPerClick, onWork }) => {
   const [floaters, setFloaters] = useState<FloatingText[]>([]);
-  const [isGlowing, setIsGlowing] = useState(false);
+  const [isPressed, setIsPressed] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const glowTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pressTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((e?: React.MouseEvent) => {
     onWork();
 
     // Floating text
     const id = ++floatIdCounter;
-    const x = 40 + Math.random() * 20; // % from left
-    const y = 10 + Math.random() * 20;  // % from top
+    const x = 30 + Math.random() * 40;
+    const y = 5 + Math.random() * 20;
     setFloaters((prev) => [...prev.slice(-8), { id, value: `+${wpPerClick.toFixed(1)} WP`, x, y }]);
     setTimeout(() => {
       setFloaters((prev) => prev.filter((f) => f.id !== id));
     }, 1000);
 
-    // Glow
-    setIsGlowing(true);
-    if (glowTimerRef.current) clearTimeout(glowTimerRef.current);
-    glowTimerRef.current = setTimeout(() => setIsGlowing(false), 200);
+    // Press animation
+    setIsPressed(true);
+    if (pressTimerRef.current) clearTimeout(pressTimerRef.current);
+    pressTimerRef.current = setTimeout(() => setIsPressed(false), 150);
   }, [onWork, wpPerClick]);
 
-  // Spacebar trigger (skip if typing in an input)
+  // Spacebar trigger
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space' || e.key === ' ') {
@@ -70,14 +62,14 @@ const WorkButton: React.FC<WorkButtonProps> = ({ wpPerClick, onWork }) => {
         ref={buttonRef}
         style={{
           ...styles.button,
-          boxShadow: isGlowing
-            ? '0 0 20px rgba(26,115,232,0.6), 0 0 40px rgba(26,115,232,0.3), inset 0 1px 0 rgba(255,255,255,0.1)'
-            : '0 4px 12px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)',
-          borderColor: isGlowing ? '#4da3ff' : 'rgba(26,115,232,0.3)',
-          transform: isGlowing ? 'scale(0.97)' : 'scale(1)',
+          transform: isPressed ? 'scale(0.96)' : 'scale(1)',
+          boxShadow: isPressed
+            ? '0 2px 8px rgba(26, 115, 232, 0.4), 0 0 30px rgba(26, 115, 232, 0.2), inset 0 2px 4px rgba(0,0,0,0.2)'
+            : '0 4px 16px rgba(26, 115, 232, 0.3), 0 0 40px rgba(26, 115, 232, 0.1)',
         }}
         onClick={handleClick}
       >
+        <span style={styles.buttonIcon}>{'\uD83D\uDCBC'}</span>
         <span style={styles.buttonLabel}>DO WORK</span>
         <span style={styles.buttonSub}>+{wpPerClick.toFixed(1)} WP per click</span>
       </button>
@@ -97,14 +89,6 @@ const WorkButton: React.FC<WorkButtonProps> = ({ wpPerClick, onWork }) => {
       ))}
 
       <span style={styles.hint}>or press SPACEBAR</span>
-
-      <style>{`
-        @keyframes float-up {
-          0% { opacity: 1; transform: translateY(0) scale(1); }
-          60% { opacity: 0.7; transform: translateY(-40px) scale(1.1); }
-          100% { opacity: 0; transform: translateY(-80px) scale(0.8); }
-        }
-      `}</style>
     </div>
   );
 };
@@ -116,52 +100,58 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     alignItems: 'center',
     gap: 8,
-    padding: '16px 0',
+    padding: '8px 0',
   },
   button: {
-    width: 220,
-    height: 100,
-    background: 'linear-gradient(180deg, #243447 0%, #1a2332 100%)',
-    border: '2px solid rgba(26,115,232,0.3)',
+    width: 240,
+    height: 80,
+    background: 'linear-gradient(135deg, #1a73e8 0%, #1557b0 50%, #1a73e8 100%)',
+    border: 'none',
     borderRadius: 12,
-    color: COLORS.text,
+    color: '#ffffff',
     cursor: 'pointer',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
-    transition: 'all 0.1s ease',
+    gap: 2,
+    transition: 'all 0.15s ease',
     userSelect: 'none',
     position: 'relative',
+    overflow: 'hidden',
+  },
+  buttonIcon: {
+    fontSize: 18,
+    lineHeight: 1,
   },
   buttonLabel: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 800,
-    letterSpacing: 4,
-    color: '#e8eaed',
-    textShadow: '0 0 10px rgba(26,115,232,0.4)',
+    letterSpacing: 3,
+    color: '#ffffff',
   },
   buttonSub: {
-    fontSize: 11,
-    color: COLORS.muted,
-    letterSpacing: 1,
+    fontSize: 10,
+    color: 'rgba(255, 255, 255, 0.7)',
+    letterSpacing: 0.5,
+    fontWeight: 500,
   },
   floater: {
     position: 'absolute',
-    color: COLORS.blue,
+    color: '#1a73e8',
     fontSize: 18,
     fontWeight: 700,
     pointerEvents: 'none',
     animation: 'float-up 1s ease-out forwards',
-    textShadow: '0 0 8px rgba(26,115,232,0.6)',
+    textShadow: '0 0 12px rgba(26, 115, 232, 0.6)',
     zIndex: 10,
   },
   hint: {
     fontSize: 10,
-    color: COLORS.muted,
-    opacity: 0.5,
-    letterSpacing: 1,
+    color: '#9aa0a6',
+    opacity: 0.4,
+    letterSpacing: 0.5,
+    fontWeight: 500,
   },
 };
 

@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Main App Layout
+// Work Clicker — Main App Layout (Modern Office Dashboard)
 // ============================================================
 
 import React, { useCallback, useState, useEffect } from 'react';
@@ -9,6 +9,7 @@ import { UPGRADES } from './data/upgrades';
 import { EVENTS } from './data/events';
 import ClockOutTimer from './components/ClockOutTimer';
 import WorkButton from './components/WorkButton';
+import WorkerAvatar from './components/WorkerAvatar';
 import StatsPanel from './components/StatsPanel';
 import StationList from './components/StationList';
 import EventLog from './components/EventLog';
@@ -91,7 +92,6 @@ interface GameAppProps {
 }
 
 const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboard, setShowLeaderboard, onLogout }) => {
-  // ---- Wire everything to the Zustand store ----
   const wp = useGameStore((s) => s.wp);
   const totalWp = useGameStore((s) => s.totalWp);
   const stations = useGameStore((s) => s.stations);
@@ -116,15 +116,12 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
   const storeAddLogEntry = useGameStore((s) => s.addLogEntry);
   const storeClearEventLog = useGameStore((s) => s.clearEventLog);
 
-  // Start the game loop (handles ticks, events, achievements, auto-save)
   useGameLoop();
 
-  // Mobile
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<MobileTab>('work');
   const [showWelcome, setShowWelcome] = useState(!!loginMessage);
 
-  // Effective WP per click (including event modifiers for display)
   const effectiveWpPerClick = (() => {
     let eventClickMult = 1;
     if (activeEvent && activeEvent.endTime > Date.now()) {
@@ -135,7 +132,6 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     return wpPerClick * clickMultiplier * eventClickMult;
   })();
 
-  // Auto-dismiss welcome
   useEffect(() => {
     if (showWelcome) {
       const timer = setTimeout(() => setShowWelcome(false), 4000);
@@ -143,22 +139,18 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     }
   }, [showWelcome]);
 
-  // ---- Click handler ----
   const handleWork = useCallback(() => {
     storeClick();
   }, [storeClick]);
 
-  // ---- Buy station ----
   const handleBuyStation = useCallback((stationId: string) => {
     storeBuyStation(stationId);
   }, [storeBuyStation]);
 
-  // ---- Buy upgrade ----
   const handleBuyUpgrade = useCallback((upgradeId: string) => {
     storeBuyUpgrade(upgradeId);
   }, [storeBuyUpgrade]);
 
-  // ---- Clock-out time change ----
   const handleClockOutTimeChange = useCallback((hours: number, minutes: number) => {
     const d = new Date();
     d.setHours(hours, minutes, 0, 0);
@@ -168,7 +160,6 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     storeSetClockOutTime(d.getTime());
   }, [storeSetClockOutTime]);
 
-  // ---- Start shift ----
   const handleStartShift = useCallback(() => {
     const now = Date.now();
     const clockOut = now + 8 * 60 * 60 * 1000;
@@ -218,6 +209,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
         <div className="mobile-content" style={styles.mobileContent}>
           {activeTab === 'work' && (
             <section style={styles.mobileSection}>
+              <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
               <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
             </section>
           )}
@@ -272,30 +264,32 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     );
   }
 
-  // Desktop layout
+  // Desktop layout — 2-column
   return (
     <div style={styles.wrapper}>
       {showWelcome && loginMessage && (
         <div style={styles.welcomeBanner}>{loginMessage}</div>
       )}
 
-      {/* Top Bar */}
+      {/* Top Bar — Slim Header */}
       <header style={styles.topBar}>
         <div style={styles.titleBlock}>
-          <span style={{ fontSize: 20 }}>{'\uD83D\uDCBC'}</span>
+          <span style={{ fontSize: 18 }}>{'\uD83D\uDCBC'}</span>
           <h1 style={styles.title}>WORK CLICKER</h1>
         </div>
         <div style={styles.statsBlock}>
           <span style={styles.statItem}>
-            WP: <strong style={styles.statValue}>{formatNumber(wp)}</strong>
+            {'\uD83D\uDCB0'} WP: <strong style={styles.statValue}>{formatNumber(wp)}</strong>
           </span>
           <span style={styles.statItem}>
-            WP/s: <strong style={styles.statValue}>{wpPerSecond.toFixed(1)}</strong>
+            {'\u26A1'} WP/s: <strong style={styles.statValue}>{wpPerSecond.toFixed(1)}</strong>
           </span>
         </div>
         <div style={styles.actionBlock}>
-          <span style={styles.usernameLabel}>{username}</span>
-          <button style={styles.headerBtn} onClick={() => setShowLeaderboard(true)}>LEADERBOARD</button>
+          <span style={styles.usernameLabel}>{'\uD83D\uDC64'} {username}</span>
+          <button style={styles.headerBtn} onClick={() => setShowLeaderboard(true)}>
+            {'\uD83C\uDFC6'} LEADERBOARD
+          </button>
           <button style={{ ...styles.headerBtn, ...styles.logoutBtn }} onClick={onLogout}>LOG OUT</button>
         </div>
       </header>
@@ -311,10 +305,21 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
         />
       </div>
 
-      {/* Main Three-Column Layout */}
+      {/* Main Two-Column Layout */}
       <main style={styles.main}>
-        {/* Left Column */}
-        <aside style={styles.leftCol}>
+        {/* Left Column (60%) — Worker + Work Button + Event Log */}
+        <section style={styles.leftCol}>
+          <div style={styles.workerWorkArea}>
+            <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
+            <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
+          </div>
+          <div style={styles.logArea}>
+            <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
+          </div>
+        </section>
+
+        {/* Right Column (40%) — Stats + Shop */}
+        <aside style={styles.rightCol}>
           <StatsPanel
             wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
             shiftStart={shiftStart} clockOutTime={clockOutTime}
@@ -322,26 +327,14 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
             activeEventName={activeEventName} isOnShift={isOnShift}
           />
           <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
-        </aside>
-
-        {/* Center Column */}
-        <section style={styles.centerCol}>
-          <div style={styles.centerWorkArea}>
-            <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
+          <div style={styles.shopArea}>
+            <Shop
+              wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
+              ownedStations={stations} purchasedUpgrades={upgrades}
+              onBuyStation={handleBuyStation} onBuyUpgrade={handleBuyUpgrade}
+              upgrades={UPGRADES} achievements={achievements}
+            />
           </div>
-          <div style={styles.centerLogArea}>
-            <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
-          </div>
-        </section>
-
-        {/* Right Column */}
-        <aside style={styles.rightCol}>
-          <Shop
-            wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
-            ownedStations={stations} purchasedUpgrades={upgrades}
-            onBuyStation={handleBuyStation} onBuyUpgrade={handleBuyUpgrade}
-            upgrades={UPGRADES} achievements={achievements}
-          />
         </aside>
       </main>
 
@@ -367,100 +360,149 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100vh',
     width: '100vw',
     overflow: 'hidden',
-    background: '#0f1923',
+    background: 'linear-gradient(135deg, #0f1923 0%, #141e2b 50%, #0f1923 100%)',
   },
 
   // Welcome banner
   welcomeBanner: {
     position: 'fixed',
-    top: '60px',
+    top: '56px',
     left: '50%',
     transform: 'translateX(-50%)',
-    background: '#1a2332',
-    border: '1px solid #1a73e8',
+    background: 'rgba(26, 35, 50, 0.9)',
+    backdropFilter: 'blur(10px)',
+    border: '1px solid rgba(26, 115, 232, 0.3)',
     color: '#1a73e8',
-    padding: '10px 24px',
+    padding: '10px 28px',
     fontSize: '13px',
-    letterSpacing: '2px',
+    fontWeight: 600,
+    letterSpacing: 1,
     zIndex: 6000,
-    textShadow: '0 0 6px rgba(26,115,232,0.4)',
-    boxShadow: '0 0 20px rgba(26,115,232,0.15)',
+    boxShadow: '0 4px 20px rgba(26, 115, 232, 0.15)',
     whiteSpace: 'nowrap',
-    borderRadius: 6,
+    borderRadius: 10,
   },
 
   // Username display
   usernameLabel: {
     color: '#fbbc04',
     fontSize: '12px',
-    fontWeight: 700,
-    letterSpacing: '2px',
+    fontWeight: 600,
+    letterSpacing: 0.5,
   },
 
-  // Desktop top bar
+  // Desktop top bar (40px height)
   topBar: {
-    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-    padding: '6px 16px', background: '#1a2332',
-    borderBottom: '1px solid rgba(26,115,232,0.2)', zIndex: 10, flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: '0 16px',
+    height: 40,
+    background: 'rgba(26, 35, 50, 0.8)',
+    backdropFilter: 'blur(10px)',
+    borderBottom: '1px solid rgba(26, 115, 232, 0.1)',
+    zIndex: 10,
+    flexShrink: 0,
   },
   titleBlock: { display: 'flex', alignItems: 'center', gap: '8px' },
   title: {
-    margin: 0, fontSize: '16px', fontWeight: 700, letterSpacing: '3px',
+    margin: 0,
+    fontSize: '15px',
+    fontWeight: 700,
+    letterSpacing: 2,
     color: '#1a73e8',
-    textShadow: '0 0 8px rgba(26,115,232,0.6)',
   },
-  statsBlock: { display: 'flex', gap: '24px', alignItems: 'center' },
-  statItem: { fontSize: '12px', color: '#c5cad1', letterSpacing: '1px' },
-  statValue: { color: '#e8eaed', fontSize: '14px', textShadow: '0 0 6px rgba(26,115,232,0.4)' },
-  actionBlock: { display: 'flex', gap: '6px', alignItems: 'center' },
+  statsBlock: { display: 'flex', gap: '20px', alignItems: 'center' },
+  statItem: { fontSize: '12px', color: '#9aa0a6', fontWeight: 500 },
+  statValue: { color: '#e8eaed', fontSize: '13px', fontWeight: 700 },
+  actionBlock: { display: 'flex', gap: '8px', alignItems: 'center' },
   headerBtn: {
-    padding: '3px 12px', background: 'rgba(26,115,232,0.1)', border: '1px solid rgba(26,115,232,0.3)',
-    color: '#1a73e8', fontSize: '10px', fontFamily: 'system-ui, -apple-system, sans-serif',
-    letterSpacing: '2px', textTransform: 'uppercase', cursor: 'pointer', borderRadius: 4,
+    padding: '4px 14px',
+    background: 'rgba(26, 115, 232, 0.08)',
+    border: '1px solid rgba(26, 115, 232, 0.2)',
+    color: '#1a73e8',
+    fontSize: '10px',
+    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    fontWeight: 600,
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+    cursor: 'pointer',
+    borderRadius: 8,
+    transition: 'all 0.15s ease',
   },
-  logoutBtn: { borderColor: 'rgba(234,67,53,0.3)', color: '#ea4335', background: 'rgba(234,67,53,0.05)' },
+  logoutBtn: {
+    borderColor: 'rgba(234, 67, 53, 0.2)',
+    color: '#ea4335',
+    background: 'rgba(234, 67, 53, 0.05)',
+  },
 
-  // Desktop columns
-  main: { display: 'flex', flex: 1, overflow: 'hidden' },
+  // 2-column layout
+  main: { display: 'flex', flex: 1, overflow: 'hidden', gap: 6, padding: '4px 6px' },
+
   leftCol: {
-    width: '260px', flexShrink: 0, display: 'flex', flexDirection: 'column',
-    gap: '4px', padding: '4px', overflowY: 'auto', borderRight: '1px solid rgba(26,115,232,0.1)',
-  },
-  centerCol: {
-    flex: 1, display: 'flex', flexDirection: 'column',
-    gap: '4px', padding: '4px', overflow: 'hidden',
-  },
-  centerWorkArea: {
+    flex: '0 0 60%',
     display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+    overflow: 'hidden',
+  },
+  workerWorkArea: {
+    display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
+    padding: '4px 0',
   },
-  centerLogArea: {
+  logArea: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
     minHeight: 0,
   },
+
   rightCol: {
-    width: '340px', flexShrink: 0, display: 'flex', flexDirection: 'column',
-    padding: '4px', overflowY: 'auto', borderLeft: '1px solid rgba(26,115,232,0.1)',
+    flex: '0 0 40%',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+    overflow: 'hidden',
+  },
+  shopArea: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    minHeight: 0,
   },
 
   // Mobile top bar
   topBarMobile: {
     position: 'relative',
-    display: 'flex', alignItems: 'center', justifyContent: 'center',
-    padding: '4px 10px', background: '#1a2332',
-    borderBottom: '1px solid rgba(26,115,232,0.2)', zIndex: 10, flexShrink: 0,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '4px 10px',
+    height: 36,
+    background: 'rgba(26, 35, 50, 0.8)',
+    backdropFilter: 'blur(10px)',
+    borderBottom: '1px solid rgba(26, 115, 232, 0.1)',
+    zIndex: 10,
+    flexShrink: 0,
   },
   statsBlockMobile: {
-    display: 'flex', justifyContent: 'center', gap: '12px',
+    display: 'flex',
+    justifyContent: 'center',
+    gap: '12px',
   },
   actionBlockMobile: {
-    position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-    display: 'flex', gap: '4px',
+    position: 'absolute',
+    right: '8px',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    display: 'flex',
+    gap: '4px',
   },
 
   // Mobile content
