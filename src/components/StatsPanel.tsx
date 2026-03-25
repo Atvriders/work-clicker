@@ -1,6 +1,6 @@
 // ============================================================
 // Work Clicker — Stats Panel ("Late Night at the Office")
-// Terminal monitor style — dark card with green tint
+// Compact horizontal strip — clean dark style
 // ============================================================
 
 import React from 'react';
@@ -43,68 +43,54 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
 
   return (
     <div style={styles.container}>
-      <div style={styles.inner}>
-        <div style={styles.titleBar}>
-          <span style={styles.titleDots}>
-            <span style={styles.dotRed} />
-            <span style={styles.dotYellow} />
-            <span style={styles.dotGreen} />
-          </span>
-          <span style={styles.title}>SYSTEM STATUS</span>
-          <span style={styles.titleRight}>v2.4.1</span>
-        </div>
-
-        {/* Stats grid */}
-        <div style={styles.grid}>
-          <StatItem label="TOTAL_WP" value={formatNumber(wp)} highlight />
-          <StatItem label="WP/SEC" value={wps.toFixed(1)} />
-          <StatItem label="WP/CLICK" value={wpPerClick.toFixed(1)} />
-          <StatItem label="SHIFTS" value={String(shiftsCompleted)} />
-          <StatItem
-            label="OVERTIME"
-            value={`${overtimeMinutes.toFixed(0)}m`}
-            danger={overtimeMinutes > 0}
-          />
-          {isOnShift && (
-            <StatItem label="PROGRESS" value={`${progressPct}%`} />
-          )}
-        </div>
-
-        {/* Shift progress bar */}
+      <div style={styles.statsRow}>
+        <StatBlock label="TOTAL WP" value={formatNumber(wp)} highlight />
+        <StatBlock label="WP/SEC" value={wps.toFixed(1)} />
+        <StatBlock label="WP/CLICK" value={wpPerClick.toFixed(1)} />
+        <StatBlock label="SHIFTS" value={String(shiftsCompleted)} />
+        <StatBlock
+          label="OVERTIME"
+          value={`${overtimeMinutes.toFixed(0)}m`}
+          danger={overtimeMinutes > 0}
+        />
         {isOnShift && (
-          <div style={styles.progressTrack}>
-            <div
-              style={{
-                ...styles.progressBar,
-                width: `${progress * 100}%`,
-                background: progress > 0.9 ? '#66BB6A' : progress > 0.7 ? '#FFA726' : '#E8D44D',
-                boxShadow: `0 0 4px ${progress > 0.9 ? '#66BB6A' : '#E8D44D'}40`,
-              }}
-            />
-          </div>
+          <StatBlock label="PROGRESS" value={`${progressPct}%`} />
         )}
-
-        {/* Active event — yellow pill */}
         {activeEventName && (
-          <div style={styles.eventBlock}>
+          <div style={styles.statBlock}>
+            <span style={styles.statLabel}>EVENT</span>
             <span style={styles.eventPill}>{activeEventName}</span>
           </div>
         )}
       </div>
+
+      {/* Shift progress bar */}
+      {isOnShift && (
+        <div style={styles.progressTrack}>
+          <div
+            style={{
+              ...styles.progressBar,
+              width: `${progress * 100}%`,
+              background: progress > 0.9 ? '#66BB6A' : progress > 0.7 ? '#FFA726' : '#E8D44D',
+              boxShadow: `0 0 4px ${progress > 0.9 ? '#66BB6A' : '#E8D44D'}40`,
+            }}
+          />
+        </div>
+      )}
     </div>
   );
 };
 
-interface StatItemProps {
+interface StatBlockProps {
   label: string;
   value: string;
   highlight?: boolean;
   danger?: boolean;
 }
 
-const StatItem: React.FC<StatItemProps> = ({ label, value, highlight, danger }) => (
-  <div style={styles.statCell}>
-    <span style={styles.statLabel}>{label}:</span>
+const StatBlock: React.FC<StatBlockProps> = ({ label, value, highlight, danger }) => (
+  <div style={styles.statBlock}>
+    <span style={styles.statLabel}>{label}</span>
     <span
       className="tabular-nums"
       style={{
@@ -120,93 +106,44 @@ const StatItem: React.FC<StatItemProps> = ({ label, value, highlight, danger }) 
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    padding: 0,
-    background: '#1E2420',
+    background: '#222226',
     borderRadius: 8,
-    borderTop: '2px solid #66BB6A',
-    color: '#E8E6E1',
+    padding: '8px 16px',
     display: 'flex',
     flexDirection: 'column',
-    position: 'relative',
-  },
-  inner: {
-    padding: '14px 16px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 10,
-    position: 'relative',
-    zIndex: 2,
-  },
-  titleBar: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 8,
-    paddingBottom: 8,
-    borderBottom: '1px solid rgba(102,187,106,0.15)',
-  },
-  titleDots: {
-    display: 'flex',
-    gap: 4,
-  },
-  dotRed: {
-    width: 8,
-    height: 8,
-    borderRadius: '50%',
-    background: '#EF5350',
-  },
-  dotYellow: {
-    width: 8,
-    height: 8,
-    borderRadius: '50%',
-    background: '#E8D44D',
-  },
-  dotGreen: {
-    width: 8,
-    height: 8,
-    borderRadius: '50%',
-    background: '#66BB6A',
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: 700,
-    color: '#66BB6A',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-    letterSpacing: 2,
-    flex: 1,
-  },
-  titleRight: {
-    fontSize: 10,
-    color: 'rgba(102,187,106,0.4)',
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  grid: {
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: 4,
-  },
-  statCell: {
-    display: 'flex',
-    alignItems: 'center',
     gap: 6,
-    padding: '4px 8px',
-    borderRadius: 2,
-    fontFamily: "'IBM Plex Mono', monospace",
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  statsRow: {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: 16,
+    alignItems: 'center',
+  },
+  statBlock: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: 2,
   },
   statLabel: {
-    fontSize: 10,
-    color: '#9E9B94',
+    fontSize: 9,
+    color: '#6B6860',
     fontWeight: 600,
-    whiteSpace: 'nowrap',
+    fontFamily: "'IBM Plex Mono', monospace",
+    letterSpacing: 1,
+    textTransform: 'uppercase' as const,
   },
   statValue: {
     fontSize: 14,
-    fontWeight: 600,
+    fontWeight: 700,
     color: '#E8E6E1',
     lineHeight: 1.2,
     fontFamily: "'IBM Plex Mono', monospace",
   },
   statHighlight: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 700,
     color: '#E8D44D',
     textShadow: '0 0 6px rgba(232,212,77,0.3)',
@@ -215,9 +152,20 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#EF5350',
     textShadow: '0 0 4px rgba(239,83,80,0.3)',
   },
+  eventPill: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: '#1A1A1E',
+    background: '#E8D44D',
+    padding: '2px 8px',
+    borderRadius: 10,
+    fontFamily: "'IBM Plex Mono', monospace",
+    letterSpacing: 0.5,
+    whiteSpace: 'nowrap',
+  },
   progressTrack: {
-    height: 4,
-    background: 'rgba(102,187,106,0.1)',
+    height: 3,
+    background: 'rgba(255,255,255,0.06)',
     borderRadius: 2,
     overflow: 'hidden',
   },
@@ -225,22 +173,6 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100%',
     borderRadius: 2,
     transition: 'width 1s linear',
-  },
-  eventBlock: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    padding: '4px 8px',
-  },
-  eventPill: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: '#1A1A1E',
-    background: '#E8D44D',
-    padding: '3px 10px',
-    borderRadius: 12,
-    fontFamily: "'IBM Plex Mono', monospace",
-    letterSpacing: 0.5,
   },
 };
 

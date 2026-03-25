@@ -46,6 +46,7 @@ function useIsMobile() {
 }
 
 type MobileTab = 'work' | 'stats' | 'shop' | 'log';
+type BottomTab = 'log' | 'shop';
 
 const TABS: { key: MobileTab; icon: string; label: string }[] = [
   { key: 'work', icon: '\uD83D\uDCBC', label: 'Work' },
@@ -120,6 +121,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
 
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<MobileTab>('work');
+  const [bottomTab, setBottomTab] = useState<BottomTab>('log');
   const [showWelcome, setShowWelcome] = useState(!!loginMessage);
 
   const effectiveWpPerClick = (() => {
@@ -263,14 +265,14 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     );
   }
 
-  // Desktop layout — 2-column "office desk"
+  // Desktop layout — single centered column
   return (
     <div style={styles.wrapper}>
       {showWelcome && loginMessage && (
         <div style={styles.welcomeBanner}>{loginMessage}</div>
       )}
 
-      {/* Top Bar: header with #222226 bg */}
+      {/* Top Bar: sticky header */}
       <header style={styles.topBar}>
         <div style={styles.titleBlock}>
           <h1 style={styles.title}>WORK CLICKER</h1>
@@ -290,53 +292,78 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
         </div>
       </header>
 
-      {/* Clock-Out Timer - Full Width below header */}
-      <div style={{ padding: '4px 12px', flexShrink: 0 }}>
-        <ClockOutTimer
-          shiftStart={shiftStart}
-          clockOutTime={clockOutTime}
-          isOnShift={isOnShift}
-          onClockOutTimeChange={handleClockOutTimeChange}
-          onStartShift={handleStartShift}
-        />
-      </div>
-
-      {/* Main Two-Column Layout */}
+      {/* Single centered column */}
       <main style={styles.main}>
-        {/* Left Column (55%) — Worker + Work Button + Event + Log */}
-        <section style={styles.leftCol}>
-          <div className="desk-card" style={styles.workerWorkArea}>
+        <div style={styles.centerCol}>
+          {/* 1. ClockOutTimer — full width card */}
+          <div style={styles.timerWrap}>
+            <ClockOutTimer
+              shiftStart={shiftStart}
+              clockOutTime={clockOutTime}
+              isOnShift={isOnShift}
+              onClockOutTimeChange={handleClockOutTimeChange}
+              onStartShift={handleStartShift}
+            />
+          </div>
+
+          {/* 2. WorkerAvatar + WorkButton side by side */}
+          <div className="desk-card" style={styles.workerWorkRow}>
             <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
             <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
           </div>
-          <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
-          <div className="desk-card" style={styles.logArea}>
-            <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
-          </div>
-        </section>
 
-        {/* Right Column (45%) — Stats + Stations + Shop */}
-        <aside style={styles.rightCol}>
-          <div className="desk-card">
-            <StatsPanel
-              wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
-              shiftStart={shiftStart} clockOutTime={clockOutTime}
-              shiftsCompleted={shiftsCompleted} overtimeMinutes={overtimeMinutes}
-              activeEventName={activeEventName} isOnShift={isOnShift}
-            />
+          {/* 3. StatsPanel — compact horizontal strip */}
+          <StatsPanel
+            wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
+            shiftStart={shiftStart} clockOutTime={clockOutTime}
+            shiftsCompleted={shiftsCompleted} overtimeMinutes={overtimeMinutes}
+            activeEventName={activeEventName} isOnShift={isOnShift}
+          />
+
+          {/* 4. EventPopup — inline when active */}
+          <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
+
+          {/* 5. Tab buttons: LOG / SHOP */}
+          <div style={styles.bottomTabRow}>
+            <button
+              style={{
+                ...styles.bottomTabBtn,
+                ...(bottomTab === 'log' ? styles.bottomTabActive : {}),
+              }}
+              onClick={() => setBottomTab('log')}
+            >
+              {'\uD83D\uDCCB'} LOG
+            </button>
+            <button
+              style={{
+                ...styles.bottomTabBtn,
+                ...(bottomTab === 'shop' ? styles.bottomTabActive : {}),
+              }}
+              onClick={() => setBottomTab('shop')}
+            >
+              {'\uD83D\uDED2'} SHOP
+            </button>
           </div>
-          <div className="desk-card">
-            <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
+
+          {/* 6. Tab content area — takes remaining height */}
+          <div style={styles.bottomPanel}>
+            {bottomTab === 'log' ? (
+              <div style={styles.logArea}>
+                <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
+              </div>
+            ) : (
+              <div style={styles.shopArea}>
+                <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
+                <Shop
+                  wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
+                  ownedStations={stations} purchasedUpgrades={upgrades}
+                  onBuyStation={handleBuyStation} onBuyUpgrade={handleBuyUpgrade}
+                  upgrades={UPGRADES} achievements={achievements}
+                />
+              </div>
+            )}
           </div>
-          <div className="desk-card" style={styles.shopArea}>
-            <Shop
-              wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
-              ownedStations={stations} purchasedUpgrades={upgrades}
-              onBuyStation={handleBuyStation} onBuyUpgrade={handleBuyUpgrade}
-              upgrades={UPGRADES} achievements={achievements}
-            />
-          </div>
-        </aside>
+        </div>
       </main>
 
       {/* Footer */}
@@ -394,9 +421,10 @@ const styles: Record<string, React.CSSProperties> = {
     fontFamily: "'IBM Plex Mono', monospace",
   },
 
-  // Desktop top bar — #222226 bg
+  // Desktop top bar
   topBar: {
-    position: 'relative',
+    position: 'sticky',
+    top: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -408,7 +436,6 @@ const styles: Record<string, React.CSSProperties> = {
     flexShrink: 0,
   },
   titleBlock: { display: 'flex', alignItems: 'center', gap: '4px' },
-  // Title: IBM Plex Mono, yellow, subtle flicker animation
   title: {
     margin: 0,
     fontSize: '20px',
@@ -426,7 +453,6 @@ const styles: Record<string, React.CSSProperties> = {
     animation: 'blink-cursor 1s step-end infinite',
   },
   statsBlock: { display: 'flex', gap: '20px', alignItems: 'center' },
-  // WP count — large yellow
   wpDisplay: {
     fontSize: '28px',
     fontWeight: 700,
@@ -462,24 +488,75 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#EF5350',
   },
 
-  // 2-column layout
-  main: { display: 'flex', flex: 1, overflow: 'hidden', gap: 12, padding: '8px 12px', position: 'relative', zIndex: 1 },
-
-  // LEFT 55%
-  leftCol: {
-    flex: '0 0 55%',
+  // Single centered column layout
+  main: {
+    flex: 1,
+    overflow: 'hidden',
+    display: 'flex',
+    justifyContent: 'center',
+    padding: '0 12px',
+    position: 'relative',
+    zIndex: 1,
+  },
+  centerCol: {
+    width: '100%',
+    maxWidth: 700,
     display: 'flex',
     flexDirection: 'column',
     gap: 8,
     overflow: 'hidden',
+    padding: '8px 0',
   },
-  workerWorkArea: {
+
+  // Timer wrapper
+  timerWrap: {
+    flexShrink: 0,
+  },
+
+  // Worker + Work button side-by-side row
+  workerWorkRow: {
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 24,
     flexShrink: 0,
+    padding: '8px 16px',
+  },
+
+  // Bottom tab row: LOG / SHOP toggle
+  bottomTabRow: {
+    display: 'flex',
+    gap: 4,
+    flexShrink: 0,
+  },
+  bottomTabBtn: {
+    flex: 1,
     padding: '8px 0',
+    textAlign: 'center' as const,
+    fontSize: 12,
+    letterSpacing: 1,
+    cursor: 'pointer',
+    border: 'none',
+    background: '#2A2A2F',
+    color: '#6B6860',
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontWeight: 700,
+    transition: 'all 0.2s ease',
+    borderRadius: '6px 6px 0 0',
+  },
+  bottomTabActive: {
+    background: '#1E1E22',
+    color: '#E8D44D',
+  },
+
+  // Bottom panel that fills remaining space
+  bottomPanel: {
+    flex: 1,
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 0,
   },
   logArea: {
     flex: 1,
@@ -488,20 +565,12 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
     minHeight: 0,
   },
-
-  // RIGHT 45%
-  rightCol: {
-    flex: '0 0 45%',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
-    overflow: 'hidden',
-  },
   shopArea: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
-    overflow: 'hidden',
+    gap: 8,
+    overflow: 'auto',
     minHeight: 0,
   },
 

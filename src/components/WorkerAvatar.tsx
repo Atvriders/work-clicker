@@ -3,7 +3,7 @@
 // Worker at desk with glowing monitor, coffee cup, sticky note speech bubbles
 // ============================================================
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface WorkerAvatarProps {
   shiftStart: number;
@@ -186,16 +186,33 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
 const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, isOnShift }) => {
   const [now, setNow] = useState(Date.now());
   const [messageKey, setMessageKey] = useState(0);
+  const [speechOpacity, setSpeechOpacity] = useState(1);
+  const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 500);
     return () => clearInterval(interval);
   }, []);
 
-  // Rotate speech bubbles every 6 seconds
+  // Rotate speech bubbles every 5 seconds with fade in/out
   useEffect(() => {
-    const interval = setInterval(() => setMessageKey((k) => k + 1), 6000);
-    return () => clearInterval(interval);
+    // Initial fade in
+    setSpeechOpacity(1);
+
+    const interval = setInterval(() => {
+      // Start fade out at 4s (700ms fade out duration)
+      setSpeechOpacity(0);
+      fadeTimerRef.current = setTimeout(() => {
+        // After fade out completes, change message and fade in
+        setMessageKey((k) => k + 1);
+        setSpeechOpacity(1);
+      }, 700);
+    }, 5000);
+
+    return () => {
+      clearInterval(interval);
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+    };
   }, []);
 
   const state = getWorkerState(shiftStart, clockOutTime, isOnShift, now);
@@ -207,7 +224,15 @@ const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, i
   return (
     <div style={styles.container}>
       {/* Speech bubble — sticky note style */}
-      <div key={messageKey} style={styles.speechBubble} className={`worker-speech-bubble ${state.mood}`}>
+      <div
+        key={messageKey}
+        style={{
+          ...styles.speechBubble,
+          opacity: speechOpacity,
+          transition: speechOpacity === 1 ? 'opacity 0.3s ease-in' : 'opacity 0.7s ease-out',
+        }}
+        className={`worker-speech-bubble ${state.mood}`}
+      >
         <span style={styles.speechText}>{state.message}</span>
       </div>
 
@@ -266,7 +291,6 @@ const styles: Record<string, React.CSSProperties> = {
     maxWidth: 220,
     textAlign: 'center' as const,
     lineHeight: 1.35,
-    animation: 'fade-in-speech 0.4s ease',
   },
   speechText: {
     color: '#1A1A1E',
