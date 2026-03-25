@@ -1,5 +1,6 @@
 // ============================================================
-// Work Clicker — Main "DO WORK" Click Button (Modern Office)
+// Work Clicker — "DO WORK" Button ("Golden Hour Office")
+// Large pill, amber gradient, floating WP feedback
 // ============================================================
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -29,8 +30,8 @@ const WorkButton: React.FC<WorkButtonProps> = ({ wpPerClick, onWork }) => {
 
     // Floating text
     const id = ++floatIdCounter;
-    const x = 30 + Math.random() * 40;
-    const y = 5 + Math.random() * 20;
+    const x = 25 + Math.random() * 50;
+    const y = 5 + Math.random() * 15;
     setFloaters((prev) => [...prev.slice(-8), { id, value: `+${wpPerClick.toFixed(1)} WP`, x, y }]);
     setTimeout(() => {
       setFloaters((prev) => prev.filter((f) => f.id !== id));
@@ -62,16 +63,14 @@ const WorkButton: React.FC<WorkButtonProps> = ({ wpPerClick, onWork }) => {
         ref={buttonRef}
         style={{
           ...styles.button,
-          transform: isPressed ? 'scale(0.96)' : 'scale(1)',
+          transform: isPressed ? 'scale(0.95)' : 'scale(1)',
           boxShadow: isPressed
-            ? '0 2px 8px rgba(26, 115, 232, 0.4), 0 0 30px rgba(26, 115, 232, 0.2), inset 0 2px 4px rgba(0,0,0,0.2)'
-            : '0 4px 16px rgba(26, 115, 232, 0.3), 0 0 40px rgba(26, 115, 232, 0.1)',
+            ? '0 2px 8px rgba(232, 144, 12, 0.3), inset 0 2px 4px rgba(0,0,0,0.1)'
+            : '0 4px 16px rgba(232, 144, 12, 0.25), 0 2px 6px rgba(232, 144, 12, 0.15)',
         }}
         onClick={handleClick}
       >
-        <span style={styles.buttonIcon}>{'\uD83D\uDCBC'}</span>
         <span style={styles.buttonLabel}>DO WORK</span>
-        <span style={styles.buttonSub}>+{wpPerClick.toFixed(1)} WP per click</span>
       </button>
 
       {/* Floating "+X WP" text */}
@@ -88,7 +87,9 @@ const WorkButton: React.FC<WorkButtonProps> = ({ wpPerClick, onWork }) => {
         </div>
       ))}
 
-      <span style={styles.hint}>or press SPACEBAR</span>
+      <span style={styles.hint}>
+        +{wpPerClick.toFixed(1)} WP per click &middot; or press SPACEBAR
+      </span>
     </div>
   );
 };
@@ -99,59 +100,47 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
     padding: '8px 0',
   },
   button: {
-    width: 240,
-    height: 80,
-    background: 'linear-gradient(135deg, #1a73e8 0%, #1557b0 50%, #1a73e8 100%)',
+    width: 260,
+    height: 64,
+    background: 'linear-gradient(135deg, #E8900C 0%, #D07E08 100%)',
     border: 'none',
-    borderRadius: 12,
-    color: '#ffffff',
+    borderRadius: 32,
+    color: '#FFFFFF',
     cursor: 'pointer',
     display: 'flex',
-    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 2,
     transition: 'all 0.15s ease',
     userSelect: 'none',
     position: 'relative',
     overflow: 'hidden',
   },
-  buttonIcon: {
-    fontSize: 18,
-    lineHeight: 1,
-  },
   buttonLabel: {
-    fontSize: 22,
-    fontWeight: 800,
-    letterSpacing: 3,
-    color: '#ffffff',
-  },
-  buttonSub: {
-    fontSize: 10,
-    color: 'rgba(255, 255, 255, 0.7)',
-    letterSpacing: 0.5,
-    fontWeight: 500,
+    fontSize: 24,
+    fontWeight: 700,
+    letterSpacing: 4,
+    color: '#FFFFFF',
+    fontFamily: "'Source Sans 3', sans-serif",
   },
   floater: {
     position: 'absolute',
-    color: '#1a73e8',
+    color: '#E8900C',
     fontSize: 18,
     fontWeight: 700,
+    fontFamily: "'Source Sans 3', sans-serif",
     pointerEvents: 'none',
     animation: 'float-up 1s ease-out forwards',
-    textShadow: '0 0 12px rgba(26, 115, 232, 0.6)',
     zIndex: 10,
   },
   hint: {
-    fontSize: 10,
-    color: '#9aa0a6',
-    opacity: 0.4,
-    letterSpacing: 0.5,
-    fontWeight: 500,
+    fontSize: 12,
+    color: '#B5AFA6',
+    letterSpacing: 0.3,
+    fontWeight: 400,
   },
 };
 

@@ -1,5 +1,6 @@
 // ============================================================
-// Work Clicker — Login Screen (Modern Office)
+// Work Clicker — Login Screen ("Golden Hour Office")
+// Warm welcome with editorial typography
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -59,7 +60,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
   if (loading) {
     return (
       <div style={styles.wrapper}>
-        <div style={styles.container} className="glass-card">
+        <div style={styles.container}>
           <div style={styles.loadingText}>CONNECTING...</div>
         </div>
       </div>
@@ -68,18 +69,17 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
 
   return (
     <div style={styles.wrapper}>
-      <div style={styles.container} className="glass-card">
-        <div style={styles.logoIcon}>{'\uD83D\uDCBC'}</div>
+      <div style={styles.container}>
         <h1 style={styles.title}>WORK CLICKER</h1>
-        <div style={styles.subtitle}>EMPLOYEE LOGIN</div>
+        <div style={styles.subtitle}>Clock in. Get to work. Clock out.</div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
-          <label style={styles.label}>ENTER YOUR NAME</label>
+          <label style={styles.label}>YOUR NAME</label>
           <input
             type="text"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            placeholder="Your name"
+            placeholder="Enter your name"
             style={styles.input}
             autoFocus
             maxLength={20}
@@ -88,7 +88,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           {error && <div style={styles.error}>{error}</div>}
 
           <button type="submit" style={styles.button}>
-            CLOCK IN
+            LOG IN
           </button>
         </form>
 
@@ -108,95 +108,95 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     height: '100vh',
     width: '100vw',
-    background: 'linear-gradient(135deg, #0f1923 0%, #141e2b 50%, #0f1923 100%)',
+    background: '#FDFAF5',
   },
   container: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '40px',
+    padding: '48px 40px',
     maxWidth: '420px',
     width: '90%',
-  },
-  logoIcon: {
-    fontSize: '52px',
-    marginBottom: '8px',
+    background: '#FFFFFF',
+    borderRadius: 16,
+    border: '1px solid #E8E2D8',
+    boxShadow: '0 8px 32px rgba(45,42,38,0.08)',
   },
   title: {
     margin: '0 0 8px 0',
-    fontSize: '26px',
-    fontWeight: 700,
-    letterSpacing: 2,
-    color: '#1a73e8',
+    fontSize: '36px',
+    fontWeight: 900,
+    letterSpacing: 4,
+    color: '#2D2A26',
     textAlign: 'center',
+    fontFamily: "'Playfair Display', Georgia, serif",
   },
   subtitle: {
-    fontSize: '12px',
-    letterSpacing: 3,
-    color: '#9aa0a6',
-    marginBottom: '32px',
-    fontWeight: 600,
+    fontSize: '15px',
+    color: '#B5AFA6',
+    marginBottom: '36px',
+    fontWeight: 400,
+    letterSpacing: 0.5,
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '12px',
+    gap: '14px',
     width: '100%',
   },
   label: {
     fontSize: '11px',
-    letterSpacing: 1.5,
-    color: '#9aa0a6',
+    letterSpacing: 2,
+    color: '#B5AFA6',
     fontWeight: 600,
   },
   input: {
     width: '100%',
-    padding: '12px 16px',
-    background: 'rgba(15, 25, 35, 0.6)',
-    border: '1px solid rgba(26, 115, 232, 0.3)',
-    borderRadius: '8px',
-    color: '#e8eaed',
+    padding: '14px 18px',
+    background: '#FDFAF5',
+    border: '1px solid #E8E2D8',
+    borderRadius: '10px',
+    color: '#2D2A26',
     fontSize: '18px',
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
-    letterSpacing: 1,
+    fontFamily: "'Source Sans 3', sans-serif",
+    letterSpacing: 0.5,
     textAlign: 'center',
     outline: 'none',
     boxSizing: 'border-box',
-    transition: 'border-color 0.2s ease',
+    transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
   },
   error: {
-    color: '#ea4335',
-    fontSize: '12px',
+    color: '#C45A3C',
+    fontSize: '13px',
     fontWeight: 500,
   },
   button: {
-    padding: '12px 36px',
-    background: 'linear-gradient(135deg, #1a73e8, #1557b0)',
+    padding: '14px 48px',
+    background: 'linear-gradient(135deg, #E8900C, #D07E08)',
     border: 'none',
-    borderRadius: '8px',
-    color: '#ffffff',
-    fontSize: '14px',
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    borderRadius: '28px',
+    color: '#FFFFFF',
+    fontSize: '15px',
+    fontFamily: "'Source Sans 3', sans-serif",
     fontWeight: 700,
-    letterSpacing: 2,
+    letterSpacing: 3,
     textTransform: 'uppercase',
     cursor: 'pointer',
     marginTop: '8px',
     transition: 'all 0.2s ease',
-    boxShadow: '0 4px 14px rgba(26, 115, 232, 0.3)',
+    boxShadow: '0 4px 16px rgba(232, 144, 12, 0.3)',
   },
   hint: {
-    marginTop: '24px',
-    fontSize: '11px',
-    color: '#9aa0a6',
-    letterSpacing: 0.5,
+    marginTop: '28px',
+    fontSize: '12px',
+    color: '#B5AFA6',
+    letterSpacing: 0.3,
     textAlign: 'center',
-    opacity: 0.5,
   },
   loadingText: {
     fontSize: '16px',
-    color: '#1a73e8',
+    color: '#E8900C',
     letterSpacing: 3,
     fontWeight: 600,
   },

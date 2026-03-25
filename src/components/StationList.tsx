@@ -1,5 +1,6 @@
 // ============================================================
-// Work Clicker — Station List (Glassmorphism)
+// Work Clicker — Station List ("Golden Hour Office")
+// Clean white card with amber progress bars
 // ============================================================
 
 import React from 'react';
@@ -10,23 +11,15 @@ interface StationListProps {
   wpPerSecond: number;
 }
 
-const COLORS = {
-  blue: '#1a73e8',
-  amber: '#fbbc04',
-  green: '#34a853',
-  text: '#e8eaed',
-  muted: '#9aa0a6',
-};
-
 const StationList: React.FC<StationListProps> = ({ ownedStations, wpPerSecond }) => {
   const owned = STATIONS
     .filter((st) => (ownedStations[st.id] ?? 0) > 0)
     .sort((a, b) => a.tier - b.tier);
 
   return (
-    <div style={styles.container} className="glass-card">
-      <div style={styles.title}>
-        {'\uD83C\uDFE2'} Stations
+    <div style={styles.container} className="warm-card">
+      <div style={styles.titleRow}>
+        <span style={styles.title}>Your Stations</span>
         <span style={styles.titleLabel}>{owned.length} active</span>
       </div>
 
@@ -49,13 +42,8 @@ const StationList: React.FC<StationListProps> = ({ ownedStations, wpPerSecond })
                 <div style={{
                   height: '100%',
                   width: `${Math.min(100, pct)}%`,
-                  background: pct > 50
-                    ? `linear-gradient(90deg, ${COLORS.blue}, ${COLORS.green})`
-                    : pct > 20
-                      ? COLORS.amber
-                      : 'rgba(26, 115, 232, 0.4)',
+                  background: 'linear-gradient(90deg, #E8900C, #E8B30C)',
                   borderRadius: 2,
-                  boxShadow: pct > 50 ? `0 0 4px ${COLORS.blue}40` : 'none',
                   transition: 'width 0.3s ease',
                 }} />
               </div>
@@ -69,81 +57,85 @@ const StationList: React.FC<StationListProps> = ({ ownedStations, wpPerSecond })
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    padding: '10px 12px',
-    color: '#e8eaed',
+    padding: '12px 14px',
+    color: '#2D2A26',
     overflow: 'auto',
     flexShrink: 0,
   },
-  title: {
-    fontSize: 13,
-    fontWeight: 700,
-    color: COLORS.blue,
-    borderBottom: '1px solid rgba(26, 115, 232, 0.1)',
-    paddingBottom: 6,
-    marginBottom: 6,
+  titleRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
+    justifyContent: 'space-between',
+    borderBottom: '1px solid #E8E2D8',
+    paddingBottom: 8,
+    marginBottom: 8,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 700,
+    color: '#2D2A26',
+    fontFamily: "'Playfair Display', Georgia, serif",
   },
   titleLabel: {
-    fontSize: 10,
-    color: COLORS.muted,
-    opacity: 0.6,
+    fontSize: 11,
+    color: '#B5AFA6',
     fontWeight: 500,
-    marginLeft: 'auto',
   },
   emptyMsg: {
-    color: COLORS.muted,
-    fontSize: 12,
+    color: '#B5AFA6',
+    fontSize: 13,
     textAlign: 'center',
     padding: '12px 0',
-    opacity: 0.5,
   },
   row: {
     display: 'flex',
     flexDirection: 'column',
-    gap: 2,
-    padding: '4px 0',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+    gap: 3,
+    padding: '6px 0',
+    borderBottom: '1px solid #F5F0E8',
   },
   rowTop: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
-    fontSize: 11,
+    gap: 8,
+    fontSize: 13,
   },
   icon: {
-    fontSize: 14,
-    width: 20,
+    fontSize: 16,
+    width: 22,
     textAlign: 'center',
     flexShrink: 0,
   },
   name: {
     flex: 1,
-    color: '#e8eaed',
+    color: '#2D2A26',
     whiteSpace: 'nowrap',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
-    fontSize: 11,
+    fontSize: 13,
     fontWeight: 500,
   },
   count: {
-    color: COLORS.amber,
+    color: '#FFFFFF',
     fontWeight: 700,
     flexShrink: 0,
     fontSize: 11,
+    background: '#E8900C',
+    padding: '1px 8px',
+    borderRadius: 12,
   },
   wps: {
-    color: COLORS.muted,
-    fontSize: 10,
+    color: '#7A736A',
+    fontSize: 11,
     flexShrink: 0,
-    minWidth: 50,
+    minWidth: 55,
     textAlign: 'right',
-    fontWeight: 500,
+    fontWeight: 600,
+    fontVariantNumeric: 'tabular-nums',
   },
   barTrack: {
     height: 3,
-    background: 'rgba(255, 255, 255, 0.06)',
+    background: '#F5F0E8',
     borderRadius: 2,
     overflow: 'hidden',
     marginTop: 2,

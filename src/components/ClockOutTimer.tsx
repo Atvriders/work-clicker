@@ -1,5 +1,6 @@
 // ============================================================
-// Work Clicker — Clock-Out Countdown Timer (Compact Single Row)
+// Work Clicker — Clock-Out Timer ("Golden Hour Office")
+// Compact warm bar with amber progress
 // ============================================================
 
 import React, { useEffect, useRef } from 'react';
@@ -11,15 +12,6 @@ interface ClockOutTimerProps {
   onClockOutTimeChange: (hours: number, minutes: number) => void;
   onStartShift: () => void;
 }
-
-const COLORS = {
-  blue: '#1a73e8',
-  green: '#34a853',
-  amber: '#fbbc04',
-  red: '#ea4335',
-  text: '#e8eaed',
-  muted: '#9aa0a6',
-};
 
 function formatCountdown(ms: number): string {
   const totalSeconds = Math.floor(Math.abs(ms) / 1000);
@@ -59,19 +51,19 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   const absRemaining = Math.abs(remaining);
 
   // Color logic
-  let timerColor = COLORS.green;
+  let timerColor = '#4A8B5C'; // success green
   let isPulsing = false;
   if (isOvertime) {
-    timerColor = COLORS.red;
+    timerColor = '#C45A3C';
     isPulsing = true;
   } else if (remaining < 30 * 60 * 1000) {
-    timerColor = COLORS.red;
+    timerColor = '#C45A3C';
     if (remaining < 5 * 60 * 1000) isPulsing = true;
   } else if (remaining < 2 * 60 * 60 * 1000) {
-    timerColor = COLORS.amber;
+    timerColor = '#E8900C';
   }
 
-  // Shift progress
+  // Progress
   const shiftDuration = clockOutTime - shiftStart;
   const elapsed = now - shiftStart;
   const progress = shiftDuration > 0 ? Math.min(1, Math.max(0, elapsed / shiftDuration)) : 0;
@@ -86,7 +78,7 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   // Not on shift
   if (!isOnShift) {
     return (
-      <div style={styles.container} className="glass-card">
+      <div style={styles.container} className="warm-card">
         <div style={styles.offShiftRow}>
           <span style={styles.offShiftLabel}>NOT CLOCKED IN</span>
           <button style={styles.startButton} onClick={onStartShift}>
@@ -98,7 +90,7 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   }
 
   return (
-    <div style={styles.container} className="glass-card">
+    <div style={styles.container} className="warm-card">
       <div style={styles.mainRow}>
         {/* Status label */}
         <span style={styles.statusLabel}>
@@ -107,11 +99,11 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
 
         {/* Countdown */}
         <span
+          className="tabular-nums"
           style={{
             ...styles.countdown,
             color: timerColor,
-            textShadow: `0 0 12px ${timerColor}60`,
-            animation: isPulsing ? 'pulse-red 1s ease-in-out infinite' : 'none',
+            animation: isPulsing ? 'gentle-pulse 1s ease-in-out infinite' : 'none',
           }}
         >
           {isOvertime ? '+' : ''}{formatCountdown(absRemaining)}
@@ -123,8 +115,7 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
             style={{
               ...styles.progressBar,
               width: `${progress * 100}%`,
-              background: `linear-gradient(90deg, ${COLORS.blue}, ${timerColor})`,
-              boxShadow: `0 0 6px ${timerColor}60`,
+              background: `linear-gradient(90deg, #E8900C, ${timerColor})`,
             }}
           />
         </div>
@@ -140,20 +131,13 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
           />
         </div>
       </div>
-
-      <style>{`
-        @keyframes pulse-red {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.4; }
-        }
-      `}</style>
     </div>
   );
 };
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    padding: '8px 16px',
+    padding: '10px 18px',
     flexShrink: 0,
   },
   mainRow: {
@@ -165,28 +149,29 @@ const styles: Record<string, React.CSSProperties> = {
   statusLabel: {
     fontSize: 10,
     letterSpacing: 2,
-    color: '#9aa0a6',
+    color: '#B5AFA6',
     textTransform: 'uppercase',
     fontWeight: 600,
     flexShrink: 0,
   },
   countdown: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: 700,
     letterSpacing: 1,
     flexShrink: 0,
+    fontFamily: "'Playfair Display', Georgia, serif",
   },
   progressTrack: {
     flex: 1,
-    height: 6,
-    background: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 3,
+    height: 8,
+    background: '#F5F0E8',
+    borderRadius: 4,
     overflow: 'hidden',
     minWidth: 80,
   },
   progressBar: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 4,
     transition: 'width 0.5s linear',
   },
   clockOutGroup: {
@@ -196,19 +181,19 @@ const styles: Record<string, React.CSSProperties> = {
     flexShrink: 0,
   },
   clockOutLabel: {
-    fontSize: 10,
-    color: '#9aa0a6',
+    fontSize: 11,
+    color: '#B5AFA6',
     letterSpacing: 0.5,
     fontWeight: 600,
   },
   timeInput: {
-    padding: '4px 8px',
-    background: 'rgba(15, 25, 35, 0.6)',
-    border: '1px solid rgba(26, 115, 232, 0.25)',
-    borderRadius: 6,
-    color: '#e8eaed',
-    fontSize: 12,
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    padding: '5px 10px',
+    background: '#FDFAF5',
+    border: '1px solid #E8E2D8',
+    borderRadius: 8,
+    color: '#2D2A26',
+    fontSize: 13,
+    fontFamily: "'Source Sans 3', sans-serif",
     outline: 'none',
   },
   offShiftRow: {
@@ -218,22 +203,24 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 16,
   },
   offShiftLabel: {
-    fontSize: 12,
+    fontSize: 13,
     letterSpacing: 2,
-    color: '#9aa0a6',
+    color: '#B5AFA6',
     fontWeight: 600,
   },
   startButton: {
-    padding: '8px 24px',
-    background: 'linear-gradient(135deg, #1a73e8, #1557b0)',
+    padding: '10px 28px',
+    background: 'linear-gradient(135deg, #E8900C, #D07E08)',
     border: 'none',
-    borderRadius: 8,
-    color: '#ffffff',
+    borderRadius: 24,
+    color: '#FFFFFF',
     fontSize: 13,
+    fontFamily: "'Source Sans 3', sans-serif",
     fontWeight: 700,
     letterSpacing: 2,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
+    boxShadow: '0 4px 12px rgba(232, 144, 12, 0.25)',
   },
 };
 

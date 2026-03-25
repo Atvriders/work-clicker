@@ -1,17 +1,10 @@
 // ============================================================
-// Work Clicker — Event Popup (Toast-Style, Slide from Right)
+// Work Clicker — Event Popup ("Golden Hour Office")
+// Inline warm card with colored left border
 // ============================================================
 
 import React, { useEffect, useState } from 'react';
 import { ActiveEvent, RandomEvent } from '../types';
-
-const COLORS = {
-  green: '#34a853',
-  red: '#ea4335',
-  amber: '#fbbc04',
-  text: '#e8eaed',
-  muted: '#9aa0a6',
-};
 
 interface EventPopupProps {
   activeEvent: ActiveEvent | null;
@@ -27,7 +20,7 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
     ? eventDefs.find((e) => e.id === activeEvent.event.id)
     : null;
   const isPositive = eventDef?.isPositive ?? true;
-  const accentColor = isPositive ? COLORS.green : COLORS.red;
+  const accentColor = isPositive ? '#4A8B5C' : '#C45A3C';
 
   useEffect(() => {
     if (activeEvent) {
@@ -61,7 +54,7 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
     <div
       style={{
         ...styles.wrapper,
-        animation: visible ? 'slide-up 0.4s ease-out' : 'none',
+        animation: visible ? 'slide-in 0.4s ease-out' : 'none',
         opacity: visible ? 1 : 0,
         pointerEvents: visible ? 'auto' : 'none',
       }}
@@ -69,23 +62,21 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
       <div
         style={{
           ...styles.banner,
-          borderLeft: `3px solid ${accentColor}`,
-          boxShadow: `0 4px 24px rgba(0, 0, 0, 0.4), 0 0 12px ${accentColor}15`,
+          borderLeft: `4px solid ${accentColor}`,
         }}
-        className="glass-card"
+        className="warm-card"
       >
         <div style={styles.header}>
           <span style={styles.icon}>{eventDef.icon}</span>
           <span style={{ ...styles.name, color: accentColor }}>{eventDef.name}</span>
-          <span style={styles.timer}>{secs}s</span>
+          <span style={styles.description}>{eventDef.description}</span>
+          <span style={styles.timer} className="tabular-nums">{secs}s</span>
         </div>
-        <div style={styles.description}>{eventDef.description}</div>
         <div style={styles.progressTrack}>
           <div
             style={{
               ...styles.progressBar,
               background: accentColor,
-              boxShadow: `0 0 6px ${accentColor}80`,
               width: `${progress * 100}%`,
             }}
           />
@@ -101,38 +92,41 @@ const styles: Record<string, React.CSSProperties> = {
     flexShrink: 0,
   },
   banner: {
-    padding: '6px 10px',
-    borderRadius: 8,
-    borderLeft: '3px solid #34a853',
+    padding: '8px 12px',
+    borderRadius: 10,
   },
   header: {
     display: 'flex',
     alignItems: 'center',
-    gap: 6,
-    marginBottom: 2,
+    gap: 8,
+    marginBottom: 6,
+    flexWrap: 'wrap',
   },
   icon: {
-    fontSize: 16,
+    fontSize: 18,
+    flexShrink: 0,
   },
   name: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: 700,
-    flex: 1,
-  },
-  timer: {
-    fontSize: 11,
-    color: COLORS.amber,
-    fontWeight: 700,
+    flexShrink: 0,
   },
   description: {
-    fontSize: 10,
-    color: COLORS.muted,
-    marginBottom: 4,
+    fontSize: 11,
+    color: '#7A736A',
+    flex: 1,
+    minWidth: 0,
     lineHeight: 1.3,
   },
+  timer: {
+    fontSize: 12,
+    color: '#E8900C',
+    fontWeight: 700,
+    flexShrink: 0,
+  },
   progressTrack: {
-    height: 2,
-    background: 'rgba(255, 255, 255, 0.08)',
+    height: 3,
+    background: '#F5F0E8',
     borderRadius: 2,
     overflow: 'hidden',
   },

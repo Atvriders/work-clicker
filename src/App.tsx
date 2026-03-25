@@ -1,8 +1,8 @@
 // ============================================================
-// Work Clicker — Main App Layout (Modern Office Dashboard)
+// Work Clicker — Main App Layout ("Golden Hour Office")
 // ============================================================
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { useGameStore } from './stores/useGameStore';
 import { useGameLoop } from './hooks/useGameLoop';
 import { UPGRADES } from './data/upgrades';
@@ -53,6 +53,31 @@ const TABS: { key: MobileTab; icon: string; label: string }[] = [
   { key: 'shop', icon: '\uD83D\uDED2', label: 'Shop' },
   { key: 'log', icon: '\uD83D\uDCDC', label: 'Log' },
 ];
+
+/** Returns a CSS background based on shift progress */
+function getShiftBackground(shiftStart: number, clockOutTime: number, isOnShift: boolean): string {
+  if (!isOnShift) return '#FDFAF5';
+  const now = Date.now();
+  const total = clockOutTime - shiftStart;
+  const elapsed = now - shiftStart;
+  const progress = total > 0 ? Math.max(0, Math.min(1, elapsed / total)) : 0;
+  const remaining = clockOutTime - now;
+
+  if (remaining < 0) {
+    // Overtime: warm red tint
+    return 'linear-gradient(180deg, #FFF0EE 0%, #FFEAE5 100%)';
+  }
+  if (progress < 0.25) {
+    // Morning: cool to warm
+    return 'linear-gradient(180deg, #F0F4F8 0%, #FDFAF5 100%)';
+  }
+  if (progress < 0.75) {
+    // Midday: warm white
+    return '#FDFAF5';
+  }
+  // Golden hour
+  return 'linear-gradient(180deg, #FFF8EE 0%, #FFF3E0 100%)';
+}
 
 const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState<string | null>(() => localStorage.getItem(USERNAME_KEY));
@@ -170,16 +195,21 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     ? activeEvent.event.name
     : null;
 
+  const bgStyle = useMemo(
+    () => getShiftBackground(shiftStart, clockOutTime, isOnShift),
+    [shiftStart, clockOutTime, isOnShift]
+  );
+
   // Mobile layout
   if (isMobile) {
     return (
-      <div style={styles.wrapper}>
+      <div style={{ ...styles.wrapper, background: bgStyle }}>
         {showWelcome && loginMessage && (
           <div style={styles.welcomeBanner}>{loginMessage}</div>
         )}
 
         {/* Top: Timer always visible */}
-        <div style={{ padding: '4px 6px', flexShrink: 0 }}>
+        <div style={{ padding: '4px 8px', flexShrink: 0 }}>
           <ClockOutTimer
             shiftStart={shiftStart}
             clockOutTime={clockOutTime}
@@ -193,10 +223,10 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
         <header style={styles.topBarMobile}>
           <div style={styles.statsBlockMobile}>
             <span style={styles.statItem}>
-              WP: <strong style={styles.statValue}>{formatNumber(wp)}</strong>
+              WP: <strong style={styles.statValueAmber} className="tabular-nums">{formatNumber(wp)}</strong>
             </span>
             <span style={styles.statItem}>
-              WP/s: <strong style={styles.statValue}>{wpPerSecond.toFixed(1)}</strong>
+              WP/s: <strong style={styles.statValueAmber} className="tabular-nums">{wpPerSecond.toFixed(1)}</strong>
             </span>
           </div>
           <div style={styles.actionBlockMobile}>
@@ -265,36 +295,32 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
 
   // Desktop layout — 2-column
   return (
-    <div style={styles.wrapper}>
+    <div style={{ ...styles.wrapper, background: bgStyle }}>
       {showWelcome && loginMessage && (
         <div style={styles.welcomeBanner}>{loginMessage}</div>
       )}
 
-      {/* Top Bar — Slim Header */}
+      {/* Top Bar — Warm Header */}
       <header style={styles.topBar}>
         <div style={styles.titleBlock}>
-          <span style={{ fontSize: 18 }}>{'\uD83D\uDCBC'}</span>
           <h1 style={styles.title}>WORK CLICKER</h1>
         </div>
         <div style={styles.statsBlock}>
-          <span style={styles.statItem}>
-            {'\uD83D\uDCB0'} WP: <strong style={styles.statValue}>{formatNumber(wp)}</strong>
-          </span>
-          <span style={styles.statItem}>
-            {'\u26A1'} WP/s: <strong style={styles.statValue}>{wpPerSecond.toFixed(1)}</strong>
+          <span style={styles.wpDisplay} className="tabular-nums">
+            {formatNumber(wp)} <span style={styles.wpLabel}>WP</span>
           </span>
         </div>
         <div style={styles.actionBlock}>
-          <span style={styles.usernameLabel}>{'\uD83D\uDC64'} {username}</span>
+          <span style={styles.usernameLabel}>{username}</span>
           <button style={styles.headerBtn} onClick={() => setShowLeaderboard(true)}>
-            {'\uD83C\uDFC6'} LEADERBOARD
+            LEADERBOARD
           </button>
           <button style={{ ...styles.headerBtn, ...styles.logoutBtn }} onClick={onLogout}>LOG OUT</button>
         </div>
       </header>
 
       {/* Clock-Out Timer - Full Width */}
-      <div style={{ padding: '4px 8px', flexShrink: 0 }}>
+      <div style={{ padding: '4px 12px', flexShrink: 0 }}>
         <ClockOutTimer
           shiftStart={shiftStart}
           clockOutTime={clockOutTime}
@@ -306,7 +332,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
 
       {/* Main Two-Column Layout */}
       <main style={styles.main}>
-        {/* Left Column (60%) — Worker + Work Button + Event Log */}
+        {/* Left Column (55%) — Worker + Work Button + Event + Log */}
         <section style={styles.leftCol}>
           <div style={styles.workerWorkArea}>
             <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
@@ -318,7 +344,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
           </div>
         </section>
 
-        {/* Right Column (40%) — Stats + Shop */}
+        {/* Right Column (45%) — Stats + Stations + Shop */}
         <aside style={styles.rightCol}>
           <StatsPanel
             wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
@@ -337,6 +363,11 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
           </div>
         </aside>
       </main>
+
+      {/* Footer */}
+      <footer style={styles.footer}>
+        Built with Claude Code
+      </footer>
 
       {/* Leaderboard Modal */}
       {showLeaderboard && (
@@ -357,7 +388,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100vh',
     width: '100vw',
     overflow: 'hidden',
-    background: 'linear-gradient(135deg, #0f1923 0%, #141e2b 50%, #0f1923 100%)',
+    transition: 'background 2s ease',
   },
 
   // Welcome banner
@@ -366,81 +397,92 @@ const styles: Record<string, React.CSSProperties> = {
     top: '56px',
     left: '50%',
     transform: 'translateX(-50%)',
-    background: 'rgba(26, 35, 50, 0.9)',
-    backdropFilter: 'blur(10px)',
-    border: '1px solid rgba(26, 115, 232, 0.3)',
-    color: '#1a73e8',
+    background: '#FFFFFF',
+    border: '1px solid #E8E2D8',
+    color: '#E8900C',
     padding: '10px 28px',
-    fontSize: '13px',
-    fontWeight: 600,
-    letterSpacing: 1,
-    zIndex: 6000,
-    boxShadow: '0 4px 20px rgba(26, 115, 232, 0.15)',
-    whiteSpace: 'nowrap',
-    borderRadius: 10,
-  },
-
-  // Username display
-  usernameLabel: {
-    color: '#fbbc04',
-    fontSize: '12px',
+    fontSize: '14px',
+    fontFamily: "'Source Sans 3', sans-serif",
     fontWeight: 600,
     letterSpacing: 0.5,
+    zIndex: 6000,
+    boxShadow: '0 4px 20px rgba(45,42,38,0.1)',
+    whiteSpace: 'nowrap',
+    borderRadius: 12,
   },
 
-  // Desktop top bar (40px height)
+  // Username
+  usernameLabel: {
+    color: '#7A736A',
+    fontSize: '13px',
+    fontWeight: 600,
+  },
+
+  // Desktop top bar
   topBar: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 16px',
-    height: 40,
-    background: 'rgba(26, 35, 50, 0.8)',
-    backdropFilter: 'blur(10px)',
-    borderBottom: '1px solid rgba(26, 115, 232, 0.1)',
+    padding: '0 20px',
+    height: 52,
+    background: '#FFFFFF',
+    borderBottom: '1px solid #E8E2D8',
     zIndex: 10,
     flexShrink: 0,
   },
   titleBlock: { display: 'flex', alignItems: 'center', gap: '8px' },
   title: {
     margin: 0,
-    fontSize: '15px',
-    fontWeight: 700,
-    letterSpacing: 2,
-    color: '#1a73e8',
+    fontSize: '20px',
+    fontWeight: 900,
+    letterSpacing: 3,
+    color: '#2D2A26',
+    fontFamily: "'Playfair Display', Georgia, serif",
   },
   statsBlock: { display: 'flex', gap: '20px', alignItems: 'center' },
-  statItem: { fontSize: '12px', color: '#9aa0a6', fontWeight: 500 },
-  statValue: { color: '#e8eaed', fontSize: '13px', fontWeight: 700 },
-  actionBlock: { display: 'flex', gap: '8px', alignItems: 'center' },
+  wpDisplay: {
+    fontSize: '28px',
+    fontWeight: 700,
+    color: '#E8900C',
+    fontFamily: "'Source Sans 3', sans-serif",
+    lineHeight: 1,
+  },
+  wpLabel: {
+    fontSize: '14px',
+    fontWeight: 600,
+    color: '#B5AFA6',
+    letterSpacing: 1,
+  },
+  statItem: { fontSize: '13px', color: '#7A736A', fontWeight: 500 },
+  statValueAmber: { color: '#E8900C', fontSize: '14px', fontWeight: 700 },
+  actionBlock: { display: 'flex', gap: '10px', alignItems: 'center' },
   headerBtn: {
-    padding: '4px 14px',
-    background: 'rgba(26, 115, 232, 0.08)',
-    border: '1px solid rgba(26, 115, 232, 0.2)',
-    color: '#1a73e8',
+    padding: '6px 16px',
+    background: 'transparent',
+    border: '1px solid #E8E2D8',
+    color: '#7A736A',
     fontSize: '10px',
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    fontFamily: "'Source Sans 3', sans-serif",
     fontWeight: 600,
     letterSpacing: 1,
-    textTransform: 'uppercase',
+    textTransform: 'uppercase' as const,
     cursor: 'pointer',
-    borderRadius: 8,
+    borderRadius: 20,
     transition: 'all 0.15s ease',
   },
   logoutBtn: {
-    borderColor: 'rgba(234, 67, 53, 0.2)',
-    color: '#ea4335',
-    background: 'rgba(234, 67, 53, 0.05)',
+    borderColor: 'rgba(196, 90, 60, 0.3)',
+    color: '#C45A3C',
   },
 
   // 2-column layout
-  main: { display: 'flex', flex: 1, overflow: 'hidden', gap: 6, padding: '4px 6px' },
+  main: { display: 'flex', flex: 1, overflow: 'hidden', gap: 12, padding: '8px 12px' },
 
   leftCol: {
-    flex: '0 0 60%',
+    flex: '0 0 55%',
     display: 'flex',
     flexDirection: 'column',
-    gap: 6,
+    gap: 8,
     overflow: 'hidden',
   },
   workerWorkArea: {
@@ -449,7 +491,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     flexShrink: 0,
-    padding: '4px 0',
+    padding: '8px 0',
   },
   logArea: {
     flex: 1,
@@ -460,10 +502,10 @@ const styles: Record<string, React.CSSProperties> = {
   },
 
   rightCol: {
-    flex: '0 0 40%',
+    flex: '0 0 45%',
     display: 'flex',
     flexDirection: 'column',
-    gap: 6,
+    gap: 8,
     overflow: 'hidden',
   },
   shopArea: {
@@ -474,6 +516,17 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 0,
   },
 
+  // Footer
+  footer: {
+    padding: '4px 0',
+    textAlign: 'center' as const,
+    fontSize: '11px',
+    color: '#B5AFA6',
+    fontWeight: 400,
+    letterSpacing: 0.3,
+    flexShrink: 0,
+  },
+
   // Mobile top bar
   topBarMobile: {
     position: 'relative',
@@ -481,17 +534,16 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     justifyContent: 'center',
     padding: '4px 10px',
-    height: 36,
-    background: 'rgba(26, 35, 50, 0.8)',
-    backdropFilter: 'blur(10px)',
-    borderBottom: '1px solid rgba(26, 115, 232, 0.1)',
+    height: 40,
+    background: '#FFFFFF',
+    borderBottom: '1px solid #E8E2D8',
     zIndex: 10,
     flexShrink: 0,
   },
   statsBlockMobile: {
     display: 'flex',
     justifyContent: 'center',
-    gap: '12px',
+    gap: '16px',
   },
   actionBlockMobile: {
     position: 'absolute',
@@ -506,7 +558,7 @@ const styles: Record<string, React.CSSProperties> = {
   mobileContent: {
     flex: 1,
     overflowY: 'auto',
-    paddingBottom: '56px',
+    paddingBottom: '60px',
   },
   mobileSection: {
     display: 'flex',

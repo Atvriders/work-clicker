@@ -1,5 +1,6 @@
 // ============================================================
-// Work Clicker — Global Leaderboard (Glassmorphism)
+// Work Clicker — Leaderboard ("Golden Hour Office")
+// Clean modal with warm borders
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -24,14 +25,6 @@ function formatNum(n: number): string {
   if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
   return Math.floor(n).toString();
 }
-
-const COLORS = {
-  blue: '#1a73e8',
-  green: '#34a853',
-  amber: '#fbbc04',
-  text: '#e8eaed',
-  muted: '#9aa0a6',
-};
 
 const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -60,16 +53,18 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
 
   return (
     <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.panel} className="glass-card" onClick={(e) => e.stopPropagation()}>
+      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
-          <h2 style={styles.title}>{'\uD83C\uDFC6'} LEADERBOARD</h2>
-          <button style={styles.closeBtn} onClick={onClose}>X</button>
+          <h2 style={styles.title}>Leaderboard</h2>
+          <button style={styles.closeBtn} onClick={onClose}>
+            &times;
+          </button>
         </div>
         <div style={styles.subtitleRow}>
           <span style={styles.subtitle}>TOP WORKERS WORLDWIDE</span>
           <span style={styles.onlineCount}>
             <span style={styles.onlineDotSmall} />
-            {onlineCount} worker{onlineCount !== 1 ? 's' : ''} online
+            {onlineCount} online
           </span>
         </div>
 
@@ -92,12 +87,19 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
               <tbody>
                 {entries.map((entry, i) => {
                   const isMe = entry.username === currentUsername;
-                  const rowStyle = isMe ? styles.rowHighlight : styles.row;
                   const online = entry.is_online === 1;
                   return (
-                    <tr key={entry.username} style={rowStyle}>
+                    <tr
+                      key={entry.username}
+                      style={isMe ? styles.rowHighlight : styles.row}
+                    >
                       <td style={styles.td}>{i + 1}</td>
-                      <td style={{ ...styles.td, textAlign: 'left', fontWeight: isMe ? 700 : 400 }}>
+                      <td style={{
+                        ...styles.td,
+                        textAlign: 'left',
+                        fontWeight: isMe ? 700 : 400,
+                        color: isMe ? '#E8900C' : '#2D2A26',
+                      }}>
                         <span style={styles.callsignCell}>
                           <span
                             style={online ? styles.onlineDot : styles.offlineDot}
@@ -118,13 +120,6 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
         )}
 
         <div style={styles.footer}>Refreshes every 30 seconds</div>
-
-        <style>{`
-          @keyframes pulse-online-lb {
-            0%, 100% { opacity: 1; box-shadow: 0 0 4px #34a853; }
-            50% { opacity: 0.5; box-shadow: 0 0 8px #34a853; }
-          }
-        `}</style>
       </div>
     </div>
   );
@@ -134,7 +129,7 @@ const styles: Record<string, React.CSSProperties> = {
   overlay: {
     position: 'fixed',
     top: 0, left: 0, width: '100%', height: '100%',
-    background: 'rgba(0, 0, 0, 0.7)',
+    background: 'rgba(45, 42, 38, 0.3)',
     backdropFilter: 'blur(4px)',
     display: 'flex',
     alignItems: 'center',
@@ -142,12 +137,16 @@ const styles: Record<string, React.CSSProperties> = {
     zIndex: 5000,
   },
   panel: {
-    padding: '24px',
+    padding: '28px',
     maxWidth: '700px',
     width: '95%',
     maxHeight: '80vh',
     display: 'flex',
     flexDirection: 'column',
+    background: '#FFFFFF',
+    borderRadius: 16,
+    border: '1px solid #E8E2D8',
+    boxShadow: '0 16px 48px rgba(45,42,38,0.15)',
   },
   header: {
     display: 'flex',
@@ -156,39 +155,40 @@ const styles: Record<string, React.CSSProperties> = {
   },
   title: {
     margin: 0,
-    fontSize: '18px',
+    fontSize: '22px',
     fontWeight: 700,
-    letterSpacing: 2,
-    color: COLORS.blue,
+    color: '#2D2A26',
+    fontFamily: "'Playfair Display', Georgia, serif",
   },
   closeBtn: {
-    background: 'rgba(26, 115, 232, 0.08)',
-    border: '1px solid rgba(26, 115, 232, 0.2)',
-    color: COLORS.blue,
-    fontSize: '13px',
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    background: 'transparent',
+    border: '1px solid #E8E2D8',
+    color: '#7A736A',
+    fontSize: '20px',
+    fontFamily: "'Source Sans 3', sans-serif",
     cursor: 'pointer',
-    padding: '4px 12px',
-    borderRadius: 8,
-    fontWeight: 600,
+    padding: '2px 12px',
+    borderRadius: 20,
+    fontWeight: 400,
+    lineHeight: 1.2,
   },
   subtitleRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: '16px',
-    marginTop: '6px',
+    marginTop: '8px',
   },
   subtitle: {
     fontSize: '10px',
     letterSpacing: 2,
-    color: COLORS.muted,
+    color: '#B5AFA6',
     fontWeight: 600,
   },
   onlineCount: {
-    fontSize: '10px',
+    fontSize: '11px',
     letterSpacing: 0.5,
-    color: COLORS.green,
+    color: '#4A8B5C',
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
@@ -196,25 +196,23 @@ const styles: Record<string, React.CSSProperties> = {
   },
   onlineDotSmall: {
     display: 'inline-block',
-    width: '6px',
-    height: '6px',
+    width: '7px',
+    height: '7px',
     borderRadius: '50%',
-    background: COLORS.green,
-    boxShadow: `0 0 4px ${COLORS.green}`,
-    animation: 'pulse-online-lb 2s ease-in-out infinite',
+    background: '#4A8B5C',
   },
   loading: {
-    color: COLORS.blue,
+    color: '#E8900C',
     textAlign: 'center',
     padding: '32px',
     letterSpacing: 2,
     fontWeight: 600,
   },
   empty: {
-    color: COLORS.muted,
+    color: '#B5AFA6',
     textAlign: 'center',
     padding: '32px',
-    fontSize: '12px',
+    fontSize: '13px',
   },
   tableWrap: {
     overflowY: 'auto',
@@ -223,31 +221,31 @@ const styles: Record<string, React.CSSProperties> = {
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    fontSize: '12px',
+    fontSize: '13px',
   },
   th: {
-    padding: '8px',
+    padding: '10px 8px',
     textAlign: 'right',
-    color: COLORS.muted,
-    borderBottom: '1px solid rgba(26, 115, 232, 0.12)',
+    color: '#B5AFA6',
+    borderBottom: '1px solid #E8E2D8',
     fontSize: '10px',
     letterSpacing: 0.5,
     fontWeight: 700,
     whiteSpace: 'nowrap',
   },
   td: {
-    padding: '6px 8px',
+    padding: '8px',
     textAlign: 'right',
-    color: COLORS.text,
-    borderBottom: '1px solid rgba(255, 255, 255, 0.04)',
+    color: '#2D2A26',
+    borderBottom: '1px solid #F5F0E8',
     whiteSpace: 'nowrap',
+    fontVariantNumeric: 'tabular-nums',
   },
   row: {
     background: 'transparent',
   },
   rowHighlight: {
-    background: 'rgba(26, 115, 232, 0.06)',
-    borderRadius: 6,
+    background: '#FFF3E0',
   },
   callsignCell: {
     display: 'inline-flex',
@@ -259,9 +257,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '7px',
     height: '7px',
     borderRadius: '50%',
-    background: COLORS.green,
-    boxShadow: `0 0 4px ${COLORS.green}`,
-    animation: 'pulse-online-lb 2s ease-in-out infinite',
+    background: '#4A8B5C',
     flexShrink: 0,
   },
   offlineDot: {
@@ -269,16 +265,15 @@ const styles: Record<string, React.CSSProperties> = {
     width: '7px',
     height: '7px',
     borderRadius: '50%',
-    background: '#444',
+    background: '#D8D3CC',
     flexShrink: 0,
   },
   footer: {
-    marginTop: '12px',
-    fontSize: '10px',
-    color: COLORS.muted,
-    letterSpacing: 1,
+    marginTop: '14px',
+    fontSize: '11px',
+    color: '#B5AFA6',
+    letterSpacing: 0.5,
     textAlign: 'center',
-    opacity: 0.4,
   },
 };
 

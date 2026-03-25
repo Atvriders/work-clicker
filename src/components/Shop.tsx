@@ -1,5 +1,6 @@
 // ============================================================
-// Work Clicker — Shop (Modern Glassmorphism Cards)
+// Work Clicker — Shop ("Golden Hour Office")
+// Editorial cards with amber accents
 // ============================================================
 
 import React, { useState } from 'react';
@@ -28,15 +29,6 @@ interface UpgradeDef {
   requires?: string;
   tier: number;
 }
-
-const COLORS = {
-  blue: '#1a73e8',
-  green: '#34a853',
-  amber: '#fbbc04',
-  red: '#ea4335',
-  text: '#e8eaed',
-  muted: '#9aa0a6',
-};
 
 type ShopTab = 'STATIONS' | 'UPGRADES' | 'TROPHIES';
 
@@ -70,19 +62,16 @@ const Shop: React.FC<ShopProps> = ({
     .sort((a, b) => a.cost - b.cost);
 
   return (
-    <div style={styles.container} className="glass-card">
-      <div style={styles.title}>
-        {'\uD83D\uDED2'} Shop
-      </div>
+    <div style={styles.container} className="warm-card">
+      <div style={styles.title}>Shop</div>
 
-      {/* Tab Toggle */}
+      {/* Tab Toggle — Pill style */}
       <div style={styles.tabRow}>
-        {(['STATIONS', 'UPGRADES', 'TROPHIES'] as ShopTab[]).map((t, i) => (
+        {(['STATIONS', 'UPGRADES', 'TROPHIES'] as ShopTab[]).map((t) => (
           <button
             key={t}
             style={{
               ...styles.tab,
-              ...(i === 0 ? styles.tabLeft : i === 2 ? styles.tabRight : {}),
               ...(tab === t ? styles.tabActive : {}),
             }}
             onClick={() => setTab(t)}
@@ -130,7 +119,7 @@ const Shop: React.FC<ShopProps> = ({
                   </div>
                   <div style={styles.cardFlavor}>{st.flavor}</div>
                   <div style={styles.cardFooter}>
-                    <span style={styles.cardCost}>
+                    <span style={styles.cardCost} className="tabular-nums">
                       {formatNumber(cost)} WP
                     </span>
                     <span style={styles.cardEffect}>
@@ -171,7 +160,7 @@ const Shop: React.FC<ShopProps> = ({
                 style={{
                   ...styles.card,
                   ...(!prereqMet
-                    ? { ...styles.cardDisabled, borderColor: 'rgba(234, 67, 53, 0.15)' }
+                    ? { ...styles.cardDisabled, opacity: 0.35 }
                     : canAfford
                       ? styles.cardAffordable
                       : styles.cardDisabled),
@@ -185,7 +174,7 @@ const Shop: React.FC<ShopProps> = ({
                 <div style={styles.cardFlavor}>{up.flavor}</div>
                 <div style={styles.cardDesc}>{up.description}</div>
                 <div style={styles.cardFooter}>
-                  <span style={styles.cardCost}>
+                  <span style={styles.cardCost} className="tabular-nums">
                     {formatNumber(up.cost)} WP
                   </span>
                   {!prereqMet ? (
@@ -219,8 +208,8 @@ const Shop: React.FC<ShopProps> = ({
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    padding: '12px',
-    color: '#e8eaed',
+    padding: '14px',
+    color: '#2D2A26',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -228,97 +217,92 @@ const styles: Record<string, React.CSSProperties> = {
     overflow: 'hidden',
   },
   title: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: 700,
-    color: COLORS.blue,
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    paddingBottom: 8,
+    color: '#2D2A26',
+    fontFamily: "'Playfair Display', Georgia, serif",
+    paddingBottom: 10,
   },
   tabRow: {
     display: 'flex',
-    gap: 0,
-    marginBottom: 10,
+    gap: 6,
+    marginBottom: 12,
     flexShrink: 0,
   },
   tab: {
     flex: 1,
-    padding: '7px 0',
+    padding: '8px 0',
     textAlign: 'center',
     fontSize: 10,
     letterSpacing: 0.5,
     cursor: 'pointer',
-    border: '1px solid rgba(26, 115, 232, 0.15)',
-    background: 'rgba(255, 255, 255, 0.03)',
-    color: '#9aa0a6',
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    border: '1px solid #E8E2D8',
+    background: '#FDFAF5',
+    color: '#7A736A',
+    fontFamily: "'Source Sans 3', sans-serif",
     fontWeight: 600,
     transition: 'all 0.2s ease',
+    borderRadius: 20,
   },
   tabActive: {
-    background: 'rgba(26, 115, 232, 0.12)',
-    color: COLORS.blue,
-    borderColor: 'rgba(26, 115, 232, 0.3)',
-  },
-  tabLeft: {
-    borderRadius: '8px 0 0 8px',
-  },
-  tabRight: {
-    borderRadius: '0 8px 8px 0',
+    background: '#E8900C',
+    color: '#FFFFFF',
+    borderColor: '#E8900C',
   },
   list: {
     flex: 1,
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: 6,
+    gap: 8,
     minHeight: 0,
   },
   card: {
-    border: '1px solid rgba(26, 115, 232, 0.12)',
+    border: '1px solid #E8E2D8',
     borderRadius: 10,
-    padding: '8px 10px',
-    background: 'rgba(255, 255, 255, 0.03)',
+    padding: '10px 12px',
+    background: '#FFFFFF',
+    transition: 'all 0.2s ease',
   },
   cardAffordable: {
-    borderColor: 'rgba(26, 115, 232, 0.25)',
-    background: 'rgba(26, 115, 232, 0.04)',
+    borderLeft: '3px solid #E8900C',
+    background: '#FFFDF9',
   },
   cardDisabled: {
-    opacity: 0.4,
+    opacity: 0.5,
   },
   cardHeader: {
     display: 'flex',
     alignItems: 'center',
     gap: 6,
-    marginBottom: 3,
+    marginBottom: 4,
   },
   cardIcon: {
-    fontSize: 16,
+    fontSize: 18,
   },
   cardName: {
     flex: 1,
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: 600,
-    color: '#e8eaed',
+    color: '#2D2A26',
   },
   cardCount: {
     fontSize: 11,
-    color: COLORS.amber,
+    color: '#E8900C',
     fontWeight: 700,
   },
   cardFlavor: {
-    fontSize: 10,
-    color: '#9aa0a6',
-    opacity: 0.8,
-    lineHeight: 1.3,
+    fontSize: 11,
+    color: '#B5AFA6',
+    lineHeight: 1.4,
     marginBottom: 4,
+    fontStyle: 'italic',
   },
   cardDesc: {
-    fontSize: 10,
-    color: 'rgba(26, 115, 232, 0.7)',
+    fontSize: 11,
+    color: '#7A736A',
     marginBottom: 4,
+    fontWeight: 500,
   },
   cardFooter: {
     display: 'flex',
@@ -327,50 +311,47 @@ const styles: Record<string, React.CSSProperties> = {
     gap: 6,
   },
   cardCost: {
-    fontSize: 11,
-    color: COLORS.amber,
+    fontSize: 13,
+    color: '#E8900C',
     fontWeight: 700,
   },
   cardEffect: {
-    fontSize: 10,
-    color: COLORS.blue,
-    fontWeight: 500,
+    fontSize: 11,
+    color: '#4A8B5C',
+    fontWeight: 600,
   },
   cardPct: {
-    fontSize: 9,
-    color: '#9aa0a6',
-    opacity: 0.6,
+    fontSize: 10,
+    color: '#B5AFA6',
   },
   buyBtn: {
-    background: 'linear-gradient(135deg, rgba(26, 115, 232, 0.2), rgba(26, 115, 232, 0.1))',
-    border: '1px solid rgba(26, 115, 232, 0.35)',
-    color: COLORS.blue,
-    fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, sans-serif',
+    background: 'linear-gradient(135deg, #E8900C, #D07E08)',
+    border: 'none',
+    color: '#FFFFFF',
+    fontFamily: "'Source Sans 3', sans-serif",
     fontSize: 10,
-    padding: '3px 12px',
-    borderRadius: 6,
+    padding: '4px 14px',
+    borderRadius: 16,
     cursor: 'pointer',
     fontWeight: 700,
     letterSpacing: 0.5,
     transition: 'all 0.15s ease',
   },
   buyBtnDisabled: {
-    background: 'transparent',
-    borderColor: 'rgba(26, 115, 232, 0.1)',
-    color: 'rgba(26, 115, 232, 0.25)',
+    background: '#E8E2D8',
+    color: '#B5AFA6',
     cursor: 'not-allowed',
   },
   reqLabel: {
-    fontSize: 9,
-    color: COLORS.red,
+    fontSize: 10,
+    color: '#C45A3C',
     fontWeight: 600,
   },
   emptyMsg: {
-    color: '#9aa0a6',
-    fontSize: 12,
+    color: '#B5AFA6',
+    fontSize: 13,
     textAlign: 'center',
     padding: '24px 0',
-    opacity: 0.6,
   },
 };
 

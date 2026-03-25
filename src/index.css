@@ -1,7 +1,31 @@
 /* ============================================================
-   Work Clicker — Global Styles
-   Modern Corporate Office Dashboard Theme
+   Work Clicker — "Golden Hour Office" Theme
+   Warm, light, editorial corporate satire
    ============================================================ */
+
+/* --- Google Fonts --- */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@400;600;700&display=swap');
+
+/* --- CSS Variables --- */
+:root {
+  --bg-primary: #FDFAF5;
+  --bg-secondary: #F5F0E8;
+  --bg-card: #FFFFFF;
+  --text-primary: #2D2A26;
+  --text-secondary: #7A736A;
+  --text-muted: #B5AFA6;
+  --accent: #E8900C;
+  --accent-hover: #D07E08;
+  --accent-light: #FFF3E0;
+  --success: #4A8B5C;
+  --danger: #C45A3C;
+  --warning: #E8B30C;
+  --border: #E8E2D8;
+  --shadow: 0 2px 8px rgba(45,42,38,0.08);
+  --shadow-lg: 0 8px 24px rgba(45,42,38,0.12);
+  --font-heading: 'Playfair Display', Georgia, serif;
+  --font-body: 'Source Sans 3', -apple-system, sans-serif;
+}
 
 /* --- Reset --- */
 *, *::before, *::after {
@@ -12,11 +36,13 @@
 body {
   margin: 0;
   padding: 0;
-  background: linear-gradient(135deg, #0f1923 0%, #141e2b 50%, #0f1923 100%);
-  color: #e8eaed;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-body);
   overflow-x: hidden;
   min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -25,71 +51,60 @@ body {
 
 /* --- Scrollbar --- */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 7px;
+  height: 7px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 25, 35, 0.5);
-  border-radius: 3px;
+  background: var(--bg-secondary);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(26, 115, 232, 0.3);
-  border-radius: 3px;
+  background: var(--accent);
+  border-radius: 4px;
+  opacity: 0.6;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(26, 115, 232, 0.6);
+  background: var(--accent-hover);
 }
 
 /* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgba(26, 115, 232, 0.3) rgba(15, 25, 35, 0.5);
+  scrollbar-color: var(--accent) var(--bg-secondary);
 }
 
 /* --- Selection --- */
 ::selection {
-  background: #1a73e8;
-  color: #ffffff;
+  background: var(--accent-light);
+  color: var(--text-primary);
 }
 
 /* --- Base resets --- */
 button {
-  font-family: inherit;
+  font-family: var(--font-body);
   cursor: pointer;
 }
 
 input {
-  font-family: inherit;
+  font-family: var(--font-body);
 }
 
 /* ============================================================
-   Glassmorphism Card Utility
+   Warm Card Utility
    ============================================================ */
-.glass-card {
-  background: rgba(26, 35, 50, 0.7);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(26, 115, 232, 0.15);
-  border-radius: 10px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+.warm-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow);
 }
 
 /* ============================================================
    Keyframe Animations
    ============================================================ */
-
-/* Blue glow pulse */
-@keyframes pulse-glow {
-  0%, 100% {
-    box-shadow: 0 0 4px rgba(26, 115, 232, 0.3);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(26, 115, 232, 0.6), 0 0 40px rgba(26, 115, 232, 0.2);
-  }
-}
 
 /* Rise and fade — click feedback text */
 @keyframes float-up {
@@ -98,16 +113,45 @@ input {
     transform: translateY(0) scale(1);
   }
   60% {
-    opacity: 0.7;
-    transform: translateY(-50px) scale(1.15);
+    opacity: 0.8;
+    transform: translateY(-45px) scale(1.1);
   }
   100% {
     opacity: 0;
-    transform: translateY(-90px) scale(0.8);
+    transform: translateY(-80px) scale(0.85);
   }
 }
 
-/* Pulsing red for overtime / low time */
+/* Gentle pulse */
+@keyframes gentle-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+/* Slide in from below */
+@keyframes slide-in {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Progress fill */
+@keyframes progress-fill {
+  0% {
+    width: 0%;
+  }
+}
+
+/* Pulsing for overtime / low time */
 @keyframes pulse-red {
   0%, 100% {
     opacity: 1;
@@ -117,46 +161,11 @@ input {
   }
 }
 
-/* Flash red for overtime text */
-@keyframes flash-overtime {
-  0%, 100% {
-    color: #ea4335;
-    text-shadow: 0 0 10px rgba(234, 67, 53, 0.8);
-  }
-  50% {
-    color: #ff6b5e;
-    text-shadow: 0 0 20px rgba(234, 67, 53, 1), 0 0 40px rgba(234, 67, 53, 0.5);
-  }
-}
-
-/* Event popup slide in from right */
-@keyframes slide-in-right {
-  0% {
-    opacity: 0;
-    transform: translateX(100px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slide-out-right {
-  0% {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateX(100px);
-  }
-}
-
 /* Ripple effect for work button */
 @keyframes ripple {
   0% {
     transform: scale(0);
-    opacity: 0.5;
+    opacity: 0.4;
   }
   100% {
     transform: scale(4);
@@ -167,14 +176,14 @@ input {
 /* Worker avatar animations */
 @keyframes worker-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-4px); }
+  50% { transform: translateY(-5px); }
 }
 
 @keyframes worker-bounce {
   0%, 100% { transform: translateY(0) scale(1); }
-  25% { transform: translateY(-10px) scale(1.05); }
+  25% { transform: translateY(-12px) scale(1.05); }
   50% { transform: translateY(0) scale(1); }
-  75% { transform: translateY(-6px) scale(1.02); }
+  75% { transform: translateY(-7px) scale(1.02); }
 }
 
 @keyframes worker-shake {
@@ -194,7 +203,7 @@ input {
 
 @keyframes worker-pulse {
   0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.05); }
+  50% { transform: scale(1.06); }
 }
 
 @keyframes confetti-fall {
@@ -203,9 +212,14 @@ input {
 }
 
 @keyframes speech-pop {
-  0% { transform: scale(0.8); opacity: 0; }
-  50% { transform: scale(1.05); }
+  0% { transform: scale(0.85); opacity: 0; }
+  50% { transform: scale(1.04); }
   100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes slide-up {
+  0% { opacity: 0; transform: translateY(10px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
 /* ============================================================
@@ -216,25 +230,50 @@ input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 110px;
+  height: 120px;
   position: relative;
   user-select: none;
 }
 
+.worker-desk {
+  position: absolute;
+  bottom: 0;
+  width: 140px;
+  height: 12px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 3px 3px 0 0;
+}
+
+.worker-desk::before {
+  content: '';
+  position: absolute;
+  top: -28px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 36px;
+  height: 26px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: 3px 3px 0 0;
+  border-bottom: none;
+}
+
 .worker-speech-bubble {
-  background: rgba(26, 35, 50, 0.85);
-  backdrop-filter: blur(6px);
-  border: 1px solid rgba(26, 115, 232, 0.25);
+  background: var(--bg-card);
+  border: 1px solid var(--border);
   border-radius: 12px;
   padding: 6px 14px;
   font-size: 12px;
-  color: #c5cad1;
+  color: var(--text-secondary);
   margin-bottom: 8px;
   position: relative;
   animation: speech-pop 0.3s ease-out;
-  max-width: 220px;
+  max-width: 240px;
   text-align: center;
   white-space: nowrap;
+  box-shadow: var(--shadow);
+  font-weight: 500;
 }
 
 .worker-speech-bubble::after {
@@ -245,22 +284,23 @@ input {
   transform: translateX(-50%);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid rgba(26, 35, 50, 0.85);
+  border-top: 6px solid var(--bg-card);
 }
 
-.worker-speech-bubble.sleeping { color: #9aa0a6; }
-.worker-speech-bubble.arriving { color: #fbbc04; }
-.worker-speech-bubble.focused { color: #1a73e8; }
-.worker-speech-bubble.stressed { color: #ea4335; }
-.worker-speech-bubble.anxious { color: #fbbc04; }
-.worker-speech-bubble.excited { color: #34a853; }
-.worker-speech-bubble.overtime { color: #ea4335; }
-.worker-speech-bubble.overtime-bad { color: #ea4335; font-weight: 700; }
+.worker-speech-bubble.sleeping { color: var(--text-muted); }
+.worker-speech-bubble.arriving { color: var(--accent); }
+.worker-speech-bubble.focused { color: var(--success); }
+.worker-speech-bubble.stressed { color: var(--danger); }
+.worker-speech-bubble.anxious { color: var(--warning); }
+.worker-speech-bubble.excited { color: var(--success); }
+.worker-speech-bubble.overtime { color: var(--danger); }
+.worker-speech-bubble.overtime-bad { color: var(--danger); font-weight: 700; }
 
 .worker-character {
   display: flex;
   align-items: center;
   gap: 4px;
+  transition: all 0.3s ease;
 }
 
 .worker-character.worker-float { animation: worker-float 3s ease-in-out infinite; }
@@ -270,12 +310,13 @@ input {
 .worker-character.worker-pulse { animation: worker-pulse 1.5s ease-in-out infinite; }
 
 .worker-emoji {
-  font-size: 42px;
+  font-size: 48px;
   line-height: 1;
+  transition: all 0.3s ease;
 }
 
 .worker-accessory {
-  font-size: 22px;
+  font-size: 24px;
   line-height: 1;
 }
 
@@ -307,7 +348,7 @@ input {
 .work-btn-ripple {
   position: absolute;
   border-radius: 50%;
-  background: rgba(26, 115, 232, 0.4);
+  background: rgba(232, 144, 12, 0.35);
   animation: ripple 0.6s ease-out forwards;
   pointer-events: none;
   width: 30px;
@@ -324,7 +365,7 @@ input {
 
 .shop-item-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3), 0 0 15px rgba(26, 115, 232, 0.1);
+  box-shadow: var(--shadow-lg);
 }
 
 .shop-item-card.disabled {
@@ -346,21 +387,28 @@ input {
   border-radius: 50%;
   margin-right: 6px;
   flex-shrink: 0;
-  margin-top: 6px;
+  margin-top: 7px;
 }
 
-.log-dot.milestone { background: #fbbc04; box-shadow: 0 0 4px rgba(251, 188, 4, 0.5); }
-.log-dot.event { background: #1a73e8; box-shadow: 0 0 4px rgba(26, 115, 232, 0.5); }
-.log-dot.achievement { background: #fbbc04; box-shadow: 0 0 4px rgba(251, 188, 4, 0.5); }
-.log-dot.warning { background: #ea4335; box-shadow: 0 0 4px rgba(234, 67, 53, 0.5); }
-.log-dot.shift { background: #34a853; box-shadow: 0 0 4px rgba(52, 168, 83, 0.5); }
+.log-dot.milestone { background: var(--accent); }
+.log-dot.event { background: var(--accent); }
+.log-dot.achievement { background: var(--warning); }
+.log-dot.warning { background: var(--danger); }
+.log-dot.shift { background: var(--success); }
+
+/* ============================================================
+   Tabular Numbers for Stats
+   ============================================================ */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
 
 /* ============================================================
    Mobile Responsive — 768px and below
    ============================================================ */
 @media (max-width: 768px) {
   body {
-    font-size: 13px;
+    font-size: 14px;
   }
 
   /* --- Bottom tab bar --- */
@@ -369,14 +417,13 @@ input {
     bottom: 0;
     left: 0;
     right: 0;
-    height: 52px;
+    height: 56px;
     display: flex;
     align-items: center;
     justify-content: space-around;
-    background: rgba(15, 25, 35, 0.95);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-top: 1px solid rgba(26, 115, 232, 0.15);
+    background: var(--bg-card);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 12px rgba(45,42,38,0.06);
     z-index: 1000;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -391,8 +438,8 @@ input {
     height: 100%;
     background: none;
     border: none;
-    color: #9aa0a6;
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: var(--text-muted);
+    font-family: var(--font-body);
     font-size: 10px;
     letter-spacing: 0.5px;
     cursor: pointer;
@@ -401,11 +448,11 @@ input {
   }
 
   .mobile-tab.active {
-    color: #1a73e8;
+    color: var(--accent);
   }
 
   .mobile-tab-icon {
-    font-size: 18px;
+    font-size: 20px;
     line-height: 1;
   }
 
@@ -420,6 +467,6 @@ input {
   .mobile-content {
     flex: 1;
     overflow-y: auto;
-    padding-bottom: 56px;
+    padding-bottom: 60px;
   }
 }

@@ -1,5 +1,6 @@
 // ============================================================
-// Work Clicker — Event Log (Clean Modern Log)
+// Work Clicker — Event Log ("Golden Hour Office")
+// Clean editorial log with colored dots
 // ============================================================
 
 import React, { useEffect, useRef } from 'react';
@@ -76,9 +77,9 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
   const visible = eventLog.slice(-30);
 
   return (
-    <div style={styles.container} className="glass-card">
+    <div style={styles.container} className="warm-card">
       <div style={styles.titleRow}>
-        <span style={styles.title}>{'\uD83D\uDCDD'} Work Log</span>
+        <span style={styles.title}>Work Log</span>
         <span style={styles.headerRight}>
           <span style={styles.entryCount}>{eventLog.length} entries</span>
           {onClearLog && (
@@ -90,13 +91,17 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
       </div>
       <div style={styles.logArea} ref={scrollRef}>
         {visible.map((entry: EventLogEntry, i: number) => {
-          const age = visible.length - 1 - i;
-          const opacity = Math.max(0.4, 1 - age * 0.02);
-
+          const isEven = i % 2 === 0;
           return (
-            <div key={entry.id} style={{ ...styles.entry, opacity }}>
+            <div
+              key={entry.id}
+              style={{
+                ...styles.entry,
+                background: isEven ? '#FDFAF5' : '#FFFFFF',
+              }}
+            >
               <span className={`log-dot ${entry.type}`} />
-              <span style={styles.timestamp}>
+              <span style={styles.timestamp} className="tabular-nums">
                 {formatTimestamp(entry.timestamp)}
               </span>
               <span style={styles.message}>{entry.message}</span>
@@ -110,8 +115,8 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    padding: '10px 12px',
-    color: '#e8eaed',
+    padding: '12px 14px',
+    color: '#2D2A26',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
@@ -123,67 +128,66 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottom: '1px solid rgba(26, 115, 232, 0.1)',
-    paddingBottom: 6,
+    borderBottom: '1px solid #E8E2D8',
+    paddingBottom: 8,
     marginBottom: 6,
     flexShrink: 0,
   },
   title: {
-    fontSize: 13,
+    fontSize: 16,
     fontWeight: 700,
-    color: '#1a73e8',
-    display: 'flex',
-    alignItems: 'center',
-    gap: 4,
+    color: '#2D2A26',
+    fontFamily: "'Playfair Display', Georgia, serif",
   },
   headerRight: {
     display: 'flex',
     alignItems: 'center',
-    gap: 8,
+    gap: 10,
   },
   entryCount: {
-    fontSize: 10,
-    color: '#9aa0a6',
-    opacity: 0.6,
+    fontSize: 11,
+    color: '#B5AFA6',
     fontWeight: 500,
   },
   clrButton: {
-    fontSize: 10,
-    padding: '2px 8px',
-    background: 'rgba(255, 255, 255, 0.04)',
-    border: '1px solid rgba(26, 115, 232, 0.15)',
-    borderRadius: 6,
-    color: '#9aa0a6',
+    fontSize: 11,
+    padding: 0,
+    background: 'none',
+    border: 'none',
+    color: '#E8900C',
     cursor: 'pointer',
-    fontWeight: 500,
+    fontWeight: 600,
+    textDecoration: 'underline',
+    textUnderlineOffset: '2px',
+    fontFamily: "'Source Sans 3', sans-serif",
   },
   logArea: {
     flex: 1,
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
-    gap: 2,
+    gap: 0,
     minHeight: 0,
   },
   entry: {
     display: 'flex',
     alignItems: 'flex-start',
     gap: 0,
-    fontSize: 12,
+    fontSize: 13,
     lineHeight: 1.5,
-    padding: '1px 0',
+    padding: '3px 6px',
+    borderRadius: 4,
   },
   timestamp: {
-    color: '#9aa0a6',
+    color: '#B5AFA6',
     fontSize: 10,
-    opacity: 0.6,
-    marginRight: 6,
+    marginRight: 8,
     flexShrink: 0,
     fontWeight: 500,
-    lineHeight: 1.8,
+    lineHeight: 1.9,
   },
   message: {
-    color: '#c5cad1',
+    color: '#7A736A',
     lineHeight: 1.5,
   },
 };
