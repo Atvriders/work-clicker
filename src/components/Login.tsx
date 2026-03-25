@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Login Screen ("Golden Hour Office")
-// Warm welcome with editorial typography
+// Work Clicker — Login Screen ("Late Night Office")
+// Clock-in terminal with dark theme
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -71,7 +71,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     <div style={styles.wrapper}>
       <div style={styles.container}>
         <h1 style={styles.title}>WORK CLICKER</h1>
-        <div style={styles.subtitle}>Clock in. Get to work. Clock out.</div>
+        <div style={styles.subtitle}>Clock in to start your shift</div>
 
         <form onSubmit={handleSubmit} style={styles.form}>
           <label style={styles.label}>YOUR NAME</label>
@@ -88,7 +88,7 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
           {error && <div style={styles.error}>{error}</div>}
 
           <button type="submit" style={styles.button}>
-            LOG IN
+            CLOCK IN
           </button>
         </form>
 
@@ -108,7 +108,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     height: '100vh',
     width: '100vw',
-    background: '#FDFAF5',
+    background: '#1A1A1E',
   },
   container: {
     display: 'flex',
@@ -117,26 +117,27 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '48px 40px',
     maxWidth: '420px',
     width: '90%',
-    background: '#FFFFFF',
+    background: '#2A2A2F',
     borderRadius: 16,
-    border: '1px solid #E8E2D8',
-    boxShadow: '0 8px 32px rgba(45,42,38,0.08)',
+    border: '1px solid #3A3A3F',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
   },
   title: {
     margin: '0 0 8px 0',
-    fontSize: '36px',
-    fontWeight: 900,
+    fontSize: '28px',
+    fontWeight: 700,
     letterSpacing: 4,
-    color: '#2D2A26',
+    color: '#E8D44D',
     textAlign: 'center',
-    fontFamily: "'Playfair Display', Georgia, serif",
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   subtitle: {
     fontSize: '15px',
-    color: '#B5AFA6',
+    color: '#9E9B94',
     marginBottom: '36px',
     fontWeight: 400,
     letterSpacing: 0.5,
+    fontFamily: "'Nunito', 'Source Sans 3', sans-serif",
   },
   form: {
     display: 'flex',
@@ -148,18 +149,19 @@ const styles: Record<string, React.CSSProperties> = {
   label: {
     fontSize: '11px',
     letterSpacing: 2,
-    color: '#B5AFA6',
+    color: '#9E9B94',
     fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   input: {
     width: '100%',
     padding: '14px 18px',
-    background: '#FDFAF5',
-    border: '1px solid #E8E2D8',
+    background: '#1A1A1E',
+    border: '1px solid #E8D44D',
     borderRadius: '10px',
-    color: '#2D2A26',
+    color: '#E8D44D',
     fontSize: '18px',
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
     letterSpacing: 0.5,
     textAlign: 'center',
     outline: 'none',
@@ -167,38 +169,39 @@ const styles: Record<string, React.CSSProperties> = {
     transition: 'border-color 0.2s ease, box-shadow 0.2s ease',
   },
   error: {
-    color: '#C45A3C',
+    color: '#EF5350',
     fontSize: '13px',
     fontWeight: 500,
   },
   button: {
     padding: '14px 48px',
-    background: 'linear-gradient(135deg, #E8900C, #D07E08)',
+    background: '#E8D44D',
     border: 'none',
     borderRadius: '28px',
-    color: '#FFFFFF',
+    color: '#1A1A1E',
     fontSize: '15px',
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
     fontWeight: 700,
     letterSpacing: 3,
     textTransform: 'uppercase',
     cursor: 'pointer',
     marginTop: '8px',
     transition: 'all 0.2s ease',
-    boxShadow: '0 4px 16px rgba(232, 144, 12, 0.3)',
+    boxShadow: '0 4px 16px rgba(232, 212, 77, 0.25)',
   },
   hint: {
     marginTop: '28px',
     fontSize: '12px',
-    color: '#B5AFA6',
+    color: '#6B6860',
     letterSpacing: 0.3,
     textAlign: 'center',
   },
   loadingText: {
     fontSize: '16px',
-    color: '#E8900C',
+    color: '#E8D44D',
     letterSpacing: 3,
     fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
 };
 

@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Event Log ("Golden Hour Office")
-// Clean editorial log with colored dots
+// Work Clicker — Event Log ("Late Night at the Office")
+// Clipboard / work log — dark theme with ruled lines
 // ============================================================
 
 import React, { useEffect, useRef } from 'react';
@@ -53,6 +53,14 @@ function formatTimestamp(ts: number): string {
   return `${h}:${m}:${s}`;
 }
 
+function getDotColor(type: EventLogEntry['type']): string {
+  switch (type) {
+    case 'achievement': return '#66BB6A';
+    case 'warning': return '#EF5350';
+    default: return '#E8D44D';
+  }
+}
+
 const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog }) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const addLogRef = useRef(onAddLogEntry);
@@ -77,14 +85,14 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
   const visible = eventLog.slice(-30);
 
   return (
-    <div style={styles.container} className="warm-card">
+    <div style={styles.container} className="desk-card">
       <div style={styles.titleRow}>
-        <span style={styles.title}>Work Log</span>
+        <span style={styles.title}>WORK LOG ✏️</span>
         <span style={styles.headerRight}>
           <span style={styles.entryCount}>{eventLog.length} entries</span>
           {onClearLog && (
-            <button style={styles.clrButton} onClick={onClearLog}>
-              Clear
+            <button style={styles.clrButton} onClick={onClearLog} title="Clear log">
+              🗑️
             </button>
           )}
         </span>
@@ -97,10 +105,15 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
               key={entry.id}
               style={{
                 ...styles.entry,
-                background: isEven ? '#FDFAF5' : '#FFFFFF',
+                background: isEven ? '#2A2A2F' : '#262629',
               }}
             >
-              <span className={`log-dot ${entry.type}`} />
+              <span
+                style={{
+                  ...styles.dot,
+                  background: getDotColor(entry.type),
+                }}
+              />
               <span style={styles.timestamp} className="tabular-nums">
                 {formatTimestamp(entry.timestamp)}
               </span>
@@ -116,28 +129,31 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
 const styles: Record<string, React.CSSProperties> = {
   container: {
     padding: '12px 14px',
-    color: '#2D2A26',
+    color: '#E8E6E1',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
     boxSizing: 'border-box',
     overflow: 'hidden',
     minHeight: 0,
+    background: '#1E1E22',
+    borderRadius: 10,
   },
   titleRow: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottom: '1px solid #E8E2D8',
+    borderBottom: '1px solid #3A3A3F',
     paddingBottom: 8,
     marginBottom: 6,
     flexShrink: 0,
   },
   title: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 700,
-    color: '#2D2A26',
-    fontFamily: "'Playfair Display', Georgia, serif",
+    color: '#E8E6E1',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    letterSpacing: 1.5,
   },
   headerRight: {
     display: 'flex',
@@ -146,20 +162,19 @@ const styles: Record<string, React.CSSProperties> = {
   },
   entryCount: {
     fontSize: 11,
-    color: '#B5AFA6',
+    color: '#6B6860',
     fontWeight: 500,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   clrButton: {
-    fontSize: 11,
-    padding: 0,
+    fontSize: 16,
+    padding: '2px 4px',
     background: 'none',
     border: 'none',
-    color: '#E8900C',
     cursor: 'pointer',
-    fontWeight: 600,
-    textDecoration: 'underline',
-    textUnderlineOffset: '2px',
-    fontFamily: "'Source Sans 3', sans-serif",
+    lineHeight: 1,
+    borderRadius: 4,
+    transition: 'background 0.15s ease',
   },
   logArea: {
     flex: 1,
@@ -168,6 +183,8 @@ const styles: Record<string, React.CSSProperties> = {
     flexDirection: 'column',
     gap: 0,
     minHeight: 0,
+    backgroundImage:
+      'repeating-linear-gradient(to bottom, transparent, transparent 23px, #3A3A3F 23px, #3A3A3F 24px)',
   },
   entry: {
     display: 'flex',
@@ -178,16 +195,25 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '3px 6px',
     borderRadius: 4,
   },
+  dot: {
+    width: 7,
+    height: 7,
+    borderRadius: '50%',
+    flexShrink: 0,
+    marginTop: 6,
+    marginRight: 8,
+  },
   timestamp: {
-    color: '#B5AFA6',
+    color: '#6B6860',
     fontSize: 10,
     marginRight: 8,
     flexShrink: 0,
     fontWeight: 500,
     lineHeight: 1.9,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   message: {
-    color: '#7A736A',
+    color: '#9E9B94',
     lineHeight: 1.5,
   },
 };

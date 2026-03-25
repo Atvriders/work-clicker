@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — "DO WORK" Button ("Golden Hour Office")
-// Large pill, amber gradient, floating WP feedback
+// Work Clicker — "DO WORK" Button ("Late Night at the Office")
+// Stamp-style — large square, yellow, stamp-press animation
 // ============================================================
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -63,10 +63,10 @@ const WorkButton: React.FC<WorkButtonProps> = ({ wpPerClick, onWork }) => {
         ref={buttonRef}
         style={{
           ...styles.button,
-          transform: isPressed ? 'scale(0.95)' : 'scale(1)',
+          transform: isPressed ? 'scale(0.92) rotate(-1.5deg)' : 'scale(1)',
           boxShadow: isPressed
-            ? '0 2px 8px rgba(232, 144, 12, 0.3), inset 0 2px 4px rgba(0,0,0,0.1)'
-            : '0 4px 16px rgba(232, 144, 12, 0.25), 0 2px 6px rgba(232, 144, 12, 0.15)',
+            ? '0 2px 4px rgba(0,0,0,0.5), inset 0 2px 4px rgba(0,0,0,0.2)'
+            : '0 6px 20px rgba(232,212,77,0.2), 0 2px 8px rgba(0,0,0,0.4)',
         }}
         onClick={handleClick}
       >
@@ -104,43 +104,48 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '8px 0',
   },
   button: {
-    width: 260,
-    height: 64,
-    background: 'linear-gradient(135deg, #E8900C 0%, #D07E08 100%)',
-    border: 'none',
-    borderRadius: 32,
-    color: '#FFFFFF',
+    width: 160,
+    height: 160,
+    background: '#E8D44D',
+    border: '3px solid #4A3F2F',
+    borderRadius: 12,
+    color: '#1A1A1E',
     cursor: 'pointer',
     display: 'flex',
+    flexDirection: 'column',
     alignItems: 'center',
     justifyContent: 'center',
-    transition: 'all 0.15s ease',
+    gap: 2,
+    transition: 'transform 0.12s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.12s ease',
     userSelect: 'none',
     position: 'relative',
     overflow: 'hidden',
+    borderBottom: '5px solid #4A3F2F',
   },
   buttonLabel: {
-    fontSize: 24,
+    fontSize: 18,
     fontWeight: 700,
-    letterSpacing: 4,
-    color: '#FFFFFF',
-    fontFamily: "'Source Sans 3', sans-serif",
+    letterSpacing: 3,
+    color: '#1A1A1E',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   floater: {
     position: 'absolute',
-    color: '#E8900C',
+    color: '#E8D44D',
     fontSize: 18,
     fontWeight: 700,
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', monospace",
     pointerEvents: 'none',
     animation: 'float-up 1s ease-out forwards',
     zIndex: 10,
+    textShadow: '0 0 8px rgba(232,212,77,0.5)',
   },
   hint: {
     fontSize: 12,
-    color: '#B5AFA6',
+    color: '#6B6860',
     letterSpacing: 0.3,
     fontWeight: 400,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
 };
 

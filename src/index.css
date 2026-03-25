@@ -1,30 +1,29 @@
 /* ============================================================
-   Work Clicker — "Golden Hour Office" Theme
-   Warm, light, editorial corporate satire
+   Work Clicker — "Late Night at the Office" Dark Theme
    ============================================================ */
 
 /* --- Google Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Source+Sans+3:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Nunito:wght@400;600;700&display=swap');
 
 /* --- CSS Variables --- */
 :root {
-  --bg-primary: #FDFAF5;
-  --bg-secondary: #F5F0E8;
-  --bg-card: #FFFFFF;
-  --text-primary: #2D2A26;
-  --text-secondary: #7A736A;
-  --text-muted: #B5AFA6;
-  --accent: #E8900C;
-  --accent-hover: #D07E08;
-  --accent-light: #FFF3E0;
-  --success: #4A8B5C;
-  --danger: #C45A3C;
-  --warning: #E8B30C;
-  --border: #E8E2D8;
-  --shadow: 0 2px 8px rgba(45,42,38,0.08);
-  --shadow-lg: 0 8px 24px rgba(45,42,38,0.12);
-  --font-heading: 'Playfair Display', Georgia, serif;
-  --font-body: 'Source Sans 3', -apple-system, sans-serif;
+  --bg-primary: #1A1A1E;
+  --bg-secondary: #222226;
+  --bg-card: #2A2A2F;
+  --text-primary: #E8E6E1;
+  --text-secondary: #9E9B94;
+  --text-muted: #6B6860;
+  --accent: #E8D44D;
+  --accent-hover: #D4C040;
+  --accent-dim: rgba(232,212,77,0.15);
+  --success: #66BB6A;
+  --danger: #EF5350;
+  --warning: #FFA726;
+  --border: #3A3A3F;
+  --shadow: 0 2px 8px rgba(0,0,0,0.3);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --font-heading: 'IBM Plex Mono', 'Courier New', monospace;
+  --font-body: 'Nunito', -apple-system, sans-serif;
 }
 
 /* --- Reset --- */
@@ -45,11 +44,26 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-#root {
-  min-height: 100vh;
+/* Subtle grain texture overlay */
+body::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
 }
 
-/* --- Scrollbar --- */
+#root {
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+/* --- Scrollbars (dark track, yellow thumb) --- */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
@@ -76,10 +90,10 @@ body {
   scrollbar-color: var(--accent) var(--bg-secondary);
 }
 
-/* --- Selection --- */
+/* --- Selection (yellow highlight) --- */
 ::selection {
-  background: var(--accent-light);
-  color: var(--text-primary);
+  background: var(--accent);
+  color: var(--bg-primary);
 }
 
 /* --- Base resets --- */
@@ -93,12 +107,13 @@ input {
 }
 
 /* ============================================================
-   Warm Card Utility
+   .desk-card — dark card, border, rounded 8px, padding 12px
    ============================================================ */
-.warm-card {
+.desk-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 12px;
+  border-radius: 8px;
+  padding: 12px;
   box-shadow: var(--shadow);
 }
 
@@ -106,7 +121,7 @@ input {
    Keyframe Animations
    ============================================================ */
 
-/* Rise and fade — click feedback text */
+/* float-up — rise and fade for click feedback */
 @keyframes float-up {
   0% {
     opacity: 1;
@@ -122,55 +137,52 @@ input {
   }
 }
 
-/* Gentle pulse */
+/* stamp-press — scale 1 -> 0.92 -> 1 with rotation */
+@keyframes stamp-press {
+  0% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(0.92) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* sticky-wobble */
+@keyframes sticky-wobble {
+  0%, 100% { transform: rotate(-1deg); }
+  25% { transform: rotate(1deg); }
+  50% { transform: rotate(-0.5deg); }
+  75% { transform: rotate(0.5deg); }
+}
+
+/* flicker — fluorescent light flicker */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  3% { opacity: 0.85; }
+  6% { opacity: 1; }
+  8% { opacity: 0.9; }
+  10% { opacity: 1; }
+  50% { opacity: 1; }
+  52% { opacity: 0.88; }
+  54% { opacity: 1; }
+}
+
+/* Additional utility animations */
 @keyframes gentle-pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.6; }
 }
 
-/* Slide in from below */
 @keyframes slide-in {
-  0% {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
 }
 
-/* Progress fill */
-@keyframes progress-fill {
-  0% {
-    width: 0%;
-  }
-}
-
-/* Pulsing for overtime / low time */
 @keyframes pulse-red {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.4;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
 }
 
-/* Ripple effect for work button */
-@keyframes ripple {
-  0% {
-    transform: scale(0);
-    opacity: 0.4;
-  }
-  100% {
-    transform: scale(4);
-    opacity: 0;
-  }
+@keyframes blink-cursor {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
 }
 
 /* Worker avatar animations */
@@ -212,14 +224,24 @@ input {
 }
 
 @keyframes speech-pop {
-  0% { transform: scale(0.85); opacity: 0; }
-  50% { transform: scale(1.04); }
-  100% { transform: scale(1); opacity: 1; }
+  0% { transform: scale(0.85) rotate(-1deg); opacity: 0; }
+  50% { transform: scale(1.04) rotate(0.5deg); }
+  100% { transform: scale(1) rotate(-1deg); opacity: 1; }
 }
 
 @keyframes slide-up {
   0% { opacity: 0; transform: translateY(10px); }
   100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes monitor-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(102,187,106,0.15), inset 0 0 15px rgba(102,187,106,0.03); }
+  50% { box-shadow: 0 0 12px rgba(102,187,106,0.25), inset 0 0 20px rgba(102,187,106,0.06); }
+}
+
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 0.4; }
+  100% { transform: scale(4); opacity: 0; }
 }
 
 /* ============================================================
@@ -230,7 +252,7 @@ input {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 120px;
+  height: 140px;
   position: relative;
   user-select: none;
 }
@@ -238,42 +260,66 @@ input {
 .worker-desk {
   position: absolute;
   bottom: 0;
-  width: 140px;
-  height: 12px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  width: 160px;
+  height: 14px;
+  background: #3A3530;
+  border: 1px solid #4A4540;
   border-radius: 3px 3px 0 0;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
 }
 
 .worker-desk::before {
   content: '';
   position: absolute;
-  top: -28px;
+  top: -32px;
   left: 50%;
   transform: translateX(-50%);
-  width: 36px;
-  height: 26px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border);
+  width: 40px;
+  height: 28px;
+  background: #1A2218;
+  border: 2px solid #444;
   border-radius: 3px 3px 0 0;
   border-bottom: none;
+  box-shadow: 0 0 8px rgba(102,187,106,0.15);
+}
+
+.worker-desk::after {
+  content: '\2615';
+  position: absolute;
+  top: -14px;
+  right: 12px;
+  font-size: 14px;
 }
 
 .worker-speech-bubble {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 12px;
+  background: #FFEB3B;
+  color: #3E3A00;
+  border: none;
+  border-radius: 2px;
   padding: 6px 14px;
   font-size: 12px;
-  color: var(--text-secondary);
   margin-bottom: 8px;
   position: relative;
   animation: speech-pop 0.3s ease-out;
   max-width: 240px;
   text-align: center;
   white-space: nowrap;
-  box-shadow: var(--shadow);
-  font-weight: 500;
+  box-shadow: 2px 3px 6px rgba(0,0,0,0.3);
+  font-weight: 600;
+  font-family: var(--font-body);
+  transform: rotate(-1deg);
+}
+
+.worker-speech-bubble::before {
+  content: '';
+  position: absolute;
+  top: -5px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 10px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 1px;
 }
 
 .worker-speech-bubble::after {
@@ -284,17 +330,25 @@ input {
   transform: translateX(-50%);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid var(--bg-card);
+  border-top: 6px solid #FFEB3B;
 }
 
-.worker-speech-bubble.sleeping { color: var(--text-muted); }
-.worker-speech-bubble.arriving { color: var(--accent); }
-.worker-speech-bubble.focused { color: var(--success); }
-.worker-speech-bubble.stressed { color: var(--danger); }
-.worker-speech-bubble.anxious { color: var(--warning); }
-.worker-speech-bubble.excited { color: var(--success); }
-.worker-speech-bubble.overtime { color: var(--danger); }
-.worker-speech-bubble.overtime-bad { color: var(--danger); font-weight: 700; }
+.worker-speech-bubble.sleeping { background: #9E9B94; color: #2A2A2F; }
+.worker-speech-bubble.sleeping::after { border-top-color: #9E9B94; }
+.worker-speech-bubble.arriving { background: #FFEB3B; color: #3E3A00; }
+.worker-speech-bubble.arriving::after { border-top-color: #FFEB3B; }
+.worker-speech-bubble.focused { background: #A5D6A7; color: #1B3B1E; }
+.worker-speech-bubble.focused::after { border-top-color: #A5D6A7; }
+.worker-speech-bubble.stressed { background: #F48FB1; color: #4A0020; }
+.worker-speech-bubble.stressed::after { border-top-color: #F48FB1; }
+.worker-speech-bubble.anxious { background: #81D4FA; color: #003050; }
+.worker-speech-bubble.anxious::after { border-top-color: #81D4FA; }
+.worker-speech-bubble.excited { background: #A5D6A7; color: #1B3B1E; }
+.worker-speech-bubble.excited::after { border-top-color: #A5D6A7; }
+.worker-speech-bubble.overtime { background: #F48FB1; color: #4A0020; }
+.worker-speech-bubble.overtime::after { border-top-color: #F48FB1; }
+.worker-speech-bubble.overtime-bad { background: #EF5350; color: #fff; font-weight: 700; }
+.worker-speech-bubble.overtime-bad::after { border-top-color: #EF5350; }
 
 .worker-character {
   display: flex;
@@ -348,7 +402,7 @@ input {
 .work-btn-ripple {
   position: absolute;
   border-radius: 50%;
-  background: rgba(232, 144, 12, 0.35);
+  background: rgba(232, 212, 77, 0.35);
   animation: ripple 0.6s ease-out forwards;
   pointer-events: none;
   width: 30px;
@@ -366,6 +420,7 @@ input {
 .shop-item-card:hover {
   transform: translateY(-2px);
   box-shadow: var(--shadow-lg);
+  border-color: var(--accent) !important;
 }
 
 .shop-item-card.disabled {
@@ -375,6 +430,7 @@ input {
 .shop-item-card.disabled:hover {
   transform: none;
   box-shadow: none;
+  border-color: var(--border) !important;
 }
 
 /* ============================================================
@@ -404,6 +460,116 @@ input {
 }
 
 /* ============================================================
+   Lined Paper Effect (for clipboard log)
+   ============================================================ */
+.lined-paper {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 23px,
+    rgba(232,212,77,0.06) 23px,
+    rgba(232,212,77,0.06) 24px
+  );
+}
+
+/* ============================================================
+   Sticky Note
+   ============================================================ */
+.sticky-note {
+  position: relative;
+  border-radius: 2px;
+  padding: 12px;
+  box-shadow: 2px 3px 8px rgba(0,0,0,0.3);
+  transform: rotate(-1deg);
+}
+
+.sticky-note::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 12px;
+  background: rgba(255,255,255,0.25);
+  border-radius: 1px;
+}
+
+.sticky-note.yellow { background: #FFEB3B; color: #3E3A00; }
+.sticky-note.pink   { background: #F48FB1; color: #4A0020; }
+.sticky-note.blue   { background: #81D4FA; color: #003050; }
+.sticky-note.green  { background: #A5D6A7; color: #1B3B1E; }
+
+/* ============================================================
+   Clipboard
+   ============================================================ */
+.clipboard {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  box-shadow: var(--shadow);
+}
+
+.clipboard::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 16px;
+  background: #6B6860;
+  border-radius: 4px 4px 0 0;
+  border: 2px solid #555;
+  border-bottom: none;
+  z-index: 1;
+}
+
+.clipboard::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 6px;
+  background: #888;
+  border-radius: 0 0 3px 3px;
+  z-index: 2;
+}
+
+/* ============================================================
+   Terminal Screen
+   ============================================================ */
+.terminal-screen {
+  position: relative;
+  background: #1A2218;
+  border: 3px solid #444;
+  border-radius: 10px;
+  box-shadow: var(--shadow), inset 0 0 30px rgba(102,187,106,0.05);
+  overflow: hidden;
+}
+
+.terminal-screen::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.08) 2px,
+    rgba(0,0,0,0.08) 4px
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* ============================================================
    Mobile Responsive — 768px and below
    ============================================================ */
 @media (max-width: 768px) {
@@ -411,7 +577,7 @@ input {
     font-size: 14px;
   }
 
-  /* --- Bottom tab bar --- */
+  /* --- Bottom tab bar (dark with yellow active) --- */
   .mobile-tab-bar {
     position: fixed;
     bottom: 0;
@@ -423,7 +589,7 @@ input {
     justify-content: space-around;
     background: var(--bg-card);
     border-top: 1px solid var(--border);
-    box-shadow: 0 -2px 12px rgba(45,42,38,0.06);
+    box-shadow: 0 -2px 12px rgba(0,0,0,0.3);
     z-index: 1000;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -461,6 +627,7 @@ input {
     text-transform: uppercase;
     letter-spacing: 0.5px;
     font-weight: 600;
+    font-family: var(--font-heading);
   }
 
   /* --- Mobile content area needs bottom padding for tab bar --- */

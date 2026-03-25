@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Clock-Out Timer ("Golden Hour Office")
-// Compact warm bar with amber progress
+// Work Clicker — Clock-Out Timer ("Late Night at the Office")
+// Dark card with yellow LED countdown, color-shifting numbers
 // ============================================================
 
 import React, { useEffect, useRef } from 'react';
@@ -50,17 +50,17 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   const isOvertime = remaining < 0;
   const absRemaining = Math.abs(remaining);
 
-  // Color logic
-  let timerColor = '#4A8B5C'; // success green
+  // Color logic: green → amber → red
+  let timerColor = '#66BB6A';
   let isPulsing = false;
   if (isOvertime) {
-    timerColor = '#C45A3C';
+    timerColor = '#EF5350';
     isPulsing = true;
   } else if (remaining < 30 * 60 * 1000) {
-    timerColor = '#C45A3C';
+    timerColor = '#EF5350';
     if (remaining < 5 * 60 * 1000) isPulsing = true;
   } else if (remaining < 2 * 60 * 60 * 1000) {
-    timerColor = '#E8900C';
+    timerColor = '#FFA726';
   }
 
   // Progress
@@ -78,11 +78,11 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   // Not on shift
   if (!isOnShift) {
     return (
-      <div style={styles.container} className="warm-card">
+      <div style={styles.container}>
         <div style={styles.offShiftRow}>
           <span style={styles.offShiftLabel}>NOT CLOCKED IN</span>
           <button style={styles.startButton} onClick={onStartShift}>
-            START NEW SHIFT
+            PUNCH IN
           </button>
         </div>
       </div>
@@ -90,39 +90,42 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
   }
 
   return (
-    <div style={styles.container} className="warm-card">
+    <div style={styles.container}>
       <div style={styles.mainRow}>
         {/* Status label */}
         <span style={styles.statusLabel}>
-          {isOvertime ? 'OVERTIME' : 'CLOCK-OUT IN'}
+          {isOvertime ? '\u26A0 OVERTIME' : 'CLOCK-OUT IN'}
         </span>
 
-        {/* Countdown */}
+        {/* Countdown — LED style */}
         <span
           className="tabular-nums"
           style={{
             ...styles.countdown,
             color: timerColor,
             animation: isPulsing ? 'gentle-pulse 1s ease-in-out infinite' : 'none',
+            textShadow: `0 0 10px ${timerColor}50, 0 0 2px ${timerColor}30`,
           }}
         >
           {isOvertime ? '+' : ''}{formatCountdown(absRemaining)}
         </span>
 
-        {/* Progress bar */}
+        {/* Progress bar — yellow on dark track, rounded */}
         <div style={styles.progressTrack}>
           <div
             style={{
               ...styles.progressBar,
               width: `${progress * 100}%`,
-              background: `linear-gradient(90deg, #E8900C, ${timerColor})`,
+              background: isOvertime
+                ? '#EF5350'
+                : '#E8D44D',
             }}
           />
         </div>
 
         {/* Clock-out time input */}
         <div style={styles.clockOutGroup}>
-          <span style={styles.clockOutLabel}>Out:</span>
+          <span style={styles.clockOutLabel}>CLOCK-OUT AT:</span>
           <input
             type="time"
             value={formatTimeValue(new Date(clockOutTime))}
@@ -137,8 +140,10 @@ const ClockOutTimer: React.FC<ClockOutTimerProps> = ({
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    padding: '10px 18px',
+    padding: '12px 18px',
     flexShrink: 0,
+    background: '#2A2A2F',
+    borderRadius: 8,
   },
   mainRow: {
     display: 'flex',
@@ -149,25 +154,27 @@ const styles: Record<string, React.CSSProperties> = {
   statusLabel: {
     fontSize: 10,
     letterSpacing: 2,
-    color: '#B5AFA6',
+    color: '#9E9B94',
     textTransform: 'uppercase',
     fontWeight: 600,
     flexShrink: 0,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   countdown: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: 700,
     letterSpacing: 1,
     flexShrink: 0,
-    fontFamily: "'Playfair Display', Georgia, serif",
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   progressTrack: {
     flex: 1,
     height: 8,
-    background: '#F5F0E8',
+    background: '#3A3A3F',
     borderRadius: 4,
     overflow: 'hidden',
     minWidth: 80,
+    position: 'relative',
   },
   progressBar: {
     height: '100%',
@@ -181,20 +188,22 @@ const styles: Record<string, React.CSSProperties> = {
     flexShrink: 0,
   },
   clockOutLabel: {
-    fontSize: 11,
-    color: '#B5AFA6',
+    fontSize: 10,
+    color: '#9E9B94',
     letterSpacing: 0.5,
     fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   timeInput: {
     padding: '5px 10px',
-    background: '#FDFAF5',
-    border: '1px solid #E8E2D8',
-    borderRadius: 8,
-    color: '#2D2A26',
+    background: '#1A1A1E',
+    border: '1px solid #3A3A3F',
+    borderRadius: 4,
+    color: '#E8D44D',
     fontSize: 13,
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', monospace",
     outline: 'none',
+    // focus yellow border handled via CSS class if needed
   },
   offShiftRow: {
     display: 'flex',
@@ -205,22 +214,23 @@ const styles: Record<string, React.CSSProperties> = {
   offShiftLabel: {
     fontSize: 13,
     letterSpacing: 2,
-    color: '#B5AFA6',
+    color: '#9E9B94',
     fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   startButton: {
     padding: '10px 28px',
-    background: 'linear-gradient(135deg, #E8900C, #D07E08)',
+    background: '#E8D44D',
     border: 'none',
-    borderRadius: 24,
-    color: '#FFFFFF',
+    borderRadius: 6,
+    color: '#1A1A1E',
     fontSize: 13,
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', monospace",
     fontWeight: 700,
     letterSpacing: 2,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    boxShadow: '0 4px 12px rgba(232, 144, 12, 0.25)',
+    boxShadow: '0 4px 12px rgba(232, 212, 77, 0.2)',
   },
 };
 

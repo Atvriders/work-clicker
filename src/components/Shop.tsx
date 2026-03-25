@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Shop ("Golden Hour Office")
-// Editorial cards with amber accents
+// Work Clicker — Shop ("Late Night at the Office")
+// Office supply closet — dark theme
 // ============================================================
 
 import React, { useState } from 'react';
@@ -62,10 +62,10 @@ const Shop: React.FC<ShopProps> = ({
     .sort((a, b) => a.cost - b.cost);
 
   return (
-    <div style={styles.container} className="warm-card">
-      <div style={styles.title}>Shop</div>
+    <div style={styles.container} className="desk-card">
+      <div style={styles.title}>SUPPLY CLOSET</div>
 
-      {/* Tab Toggle — Pill style */}
+      {/* Tab Toggle — pill style */}
       <div style={styles.tabRow}>
         {(['STATIONS', 'UPGRADES', 'TROPHIES'] as ShopTab[]).map((t) => (
           <button
@@ -119,7 +119,7 @@ const Shop: React.FC<ShopProps> = ({
                   </div>
                   <div style={styles.cardFlavor}>{st.flavor}</div>
                   <div style={styles.cardFooter}>
-                    <span style={styles.cardCost} className="tabular-nums">
+                    <span style={styles.priceTag} className="tabular-nums">
                       {formatNumber(cost)} WP
                     </span>
                     <span style={styles.cardEffect}>
@@ -160,7 +160,7 @@ const Shop: React.FC<ShopProps> = ({
                 style={{
                   ...styles.card,
                   ...(!prereqMet
-                    ? { ...styles.cardDisabled, opacity: 0.35 }
+                    ? styles.cardLocked
                     : canAfford
                       ? styles.cardAffordable
                       : styles.cardDisabled),
@@ -174,7 +174,7 @@ const Shop: React.FC<ShopProps> = ({
                 <div style={styles.cardFlavor}>{up.flavor}</div>
                 <div style={styles.cardDesc}>{up.description}</div>
                 <div style={styles.cardFooter}>
-                  <span style={styles.cardCost} className="tabular-nums">
+                  <span style={styles.priceTag} className="tabular-nums">
                     {formatNumber(up.cost)} WP
                   </span>
                   {!prereqMet ? (
@@ -209,19 +209,22 @@ const Shop: React.FC<ShopProps> = ({
 const styles: Record<string, React.CSSProperties> = {
   container: {
     padding: '14px',
-    color: '#2D2A26',
+    color: '#E8E6E1',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
     boxSizing: 'border-box',
     overflow: 'hidden',
+    background: '#1E1E22',
+    borderRadius: 10,
   },
   title: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: 700,
-    color: '#2D2A26',
-    fontFamily: "'Playfair Display', Georgia, serif",
+    color: '#E8D44D',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
     paddingBottom: 10,
+    letterSpacing: 2,
   },
   tabRow: {
     display: 'flex',
@@ -232,44 +235,49 @@ const styles: Record<string, React.CSSProperties> = {
   tab: {
     flex: 1,
     padding: '8px 0',
-    textAlign: 'center',
+    textAlign: 'center' as const,
     fontSize: 10,
     letterSpacing: 0.5,
     cursor: 'pointer',
-    border: '1px solid #E8E2D8',
-    background: '#FDFAF5',
-    color: '#7A736A',
-    fontFamily: "'Source Sans 3', sans-serif",
+    border: 'none',
+    background: '#3A3A3F',
+    color: '#9E9B94',
+    fontFamily: "'IBM Plex Mono', monospace",
     fontWeight: 600,
     transition: 'all 0.2s ease',
-    borderRadius: 20,
+    borderRadius: 9999,
   },
   tabActive: {
-    background: '#E8900C',
-    color: '#FFFFFF',
-    borderColor: '#E8900C',
+    background: '#E8D44D',
+    color: '#1A1A1E',
   },
   list: {
     flex: 1,
-    overflowY: 'auto',
+    overflowY: 'auto' as const,
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     gap: 8,
     minHeight: 0,
   },
   card: {
-    border: '1px solid #E8E2D8',
-    borderRadius: 10,
+    border: '1px dotted #3A3A3F',
+    borderRadius: 6,
     padding: '10px 12px',
-    background: '#FFFFFF',
+    background: '#2A2A2F',
     transition: 'all 0.2s ease',
+    cursor: 'pointer',
   },
   cardAffordable: {
-    borderLeft: '3px solid #E8900C',
-    background: '#FFFDF9',
+    borderLeft: '3px solid #E8D44D',
+    borderLeftStyle: 'solid' as const,
+    background: '#2A2A2F',
   },
   cardDisabled: {
     opacity: 0.5,
+  },
+  cardLocked: {
+    opacity: 0.35,
+    border: '1px solid #EF5350',
   },
   cardHeader: {
     display: 'flex',
@@ -284,23 +292,25 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     fontSize: 13,
     fontWeight: 600,
-    color: '#2D2A26',
+    color: '#E8E6E1',
+    fontFamily: "'Nunito', sans-serif",
   },
   cardCount: {
     fontSize: 11,
-    color: '#E8900C',
+    color: '#E8D44D',
     fontWeight: 700,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   cardFlavor: {
     fontSize: 11,
-    color: '#B5AFA6',
+    color: '#6B6860',
     lineHeight: 1.4,
     marginBottom: 4,
     fontStyle: 'italic',
   },
   cardDesc: {
     fontSize: 11,
-    color: '#7A736A',
+    color: '#9E9B94',
     marginBottom: 4,
     fontWeight: 500,
   },
@@ -310,48 +320,58 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: 6,
   },
-  cardCost: {
+  priceTag: {
     fontSize: 13,
-    color: '#E8900C',
+    color: '#E8D44D',
     fontWeight: 700,
+    fontFamily: "'IBM Plex Mono', monospace",
+    background: 'rgba(232,212,77,0.1)',
+    padding: '2px 8px',
+    borderRadius: 3,
+    border: '1px solid rgba(232,212,77,0.2)',
   },
   cardEffect: {
     fontSize: 11,
-    color: '#4A8B5C',
+    color: '#66BB6A',
     fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   cardPct: {
     fontSize: 10,
-    color: '#B5AFA6',
+    color: '#6B6860',
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   buyBtn: {
-    background: 'linear-gradient(135deg, #E8900C, #D07E08)',
+    background: '#E8D44D',
     border: 'none',
-    color: '#FFFFFF',
-    fontFamily: "'Source Sans 3', sans-serif",
+    color: '#1A1A1E',
+    fontFamily: "'IBM Plex Mono', monospace",
     fontSize: 10,
     padding: '4px 14px',
-    borderRadius: 16,
+    borderRadius: 4,
     cursor: 'pointer',
     fontWeight: 700,
     letterSpacing: 0.5,
     transition: 'all 0.15s ease',
   },
   buyBtnDisabled: {
-    background: '#E8E2D8',
-    color: '#B5AFA6',
+    background: '#2A2A2F',
+    color: '#6B6860',
+    border: '1px solid #3A3A3F',
     cursor: 'not-allowed',
   },
   reqLabel: {
     fontSize: 10,
-    color: '#C45A3C',
+    color: '#EF5350',
     fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   emptyMsg: {
-    color: '#B5AFA6',
+    color: '#6B6860',
     fontSize: 13,
-    textAlign: 'center',
+    textAlign: 'center' as const,
     padding: '24px 0',
+    fontFamily: "'IBM Plex Mono', monospace",
   },
 };
 

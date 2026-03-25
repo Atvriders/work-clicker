@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Achievements ("Golden Hour Office")
-// Trophy case with gold borders
+// Work Clicker — Achievements ("Late Night Office")
+// Employee of the Month wall with dark theme
 // ============================================================
 
 import React, { useState } from 'react';
@@ -19,7 +19,7 @@ const Achievements: React.FC<AchievementsProps> = ({ unlockedIds }) => {
   return (
     <div style={styles.container}>
       <div style={styles.header}>
-        <div style={styles.title}>Trophies</div>
+        <div style={styles.title}>EMPLOYEE OF THE MONTH</div>
         <div style={styles.count}>
           {unlockedCount} / {totalCount}
         </div>
@@ -82,20 +82,22 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    borderBottom: '1px solid #E8E2D8',
+    borderBottom: '1px solid #3A3A3F',
     paddingBottom: 8,
     marginBottom: 12,
   },
   title: {
     fontSize: 14,
     fontWeight: 700,
-    color: '#2D2A26',
-    fontFamily: "'Playfair Display', Georgia, serif",
+    color: '#E8D44D',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    letterSpacing: 1,
   },
   count: {
     fontSize: 12,
-    color: '#E8900C',
+    color: '#E8D44D',
     fontWeight: 700,
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   grid: {
     display: 'grid',
@@ -110,21 +112,21 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     padding: 10,
     borderRadius: 10,
-    border: '1px solid #E8E2D8',
+    border: '1px solid #3A3A3F',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
     minHeight: 75,
     textAlign: 'center',
-    background: '#FFFFFF',
+    background: '#2A2A2F',
   },
   badgeUnlocked: {
-    background: '#FFFDF9',
-    borderColor: '#E8B30C',
-    boxShadow: '0 2px 8px rgba(232, 179, 12, 0.12)',
+    background: '#2A2A2F',
+    borderColor: '#E8D44D',
+    boxShadow: '0 0 12px rgba(232, 212, 77, 0.2)',
   },
   badgeLocked: {
-    background: '#F9F7F4',
-    borderColor: '#E8E2D8',
+    background: '#252528',
+    borderColor: '#3A3A3F',
   },
   badgeIcon: {
     fontSize: 26,
@@ -133,12 +135,12 @@ const styles: Record<string, React.CSSProperties> = {
   badgeIconLocked: {
     fontSize: 26,
     marginBottom: 4,
-    filter: 'grayscale(100%) brightness(0.6)',
+    filter: 'grayscale(100%) brightness(0.4)',
   },
   badgeName: {
     fontSize: 10,
     lineHeight: 1.2,
-    color: '#2D2A26',
+    color: '#D0CDC6',
     maxWidth: '100%',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
@@ -147,7 +149,7 @@ const styles: Record<string, React.CSSProperties> = {
   badgeNameLocked: {
     fontSize: 10,
     lineHeight: 1.2,
-    color: '#B5AFA6',
+    color: '#6B6860',
   },
   tooltip: {
     position: 'absolute',
@@ -156,26 +158,26 @@ const styles: Record<string, React.CSSProperties> = {
     transform: 'translateX(-50%)',
     padding: '10px 14px',
     fontSize: 12,
-    color: '#2D2A26',
+    color: '#D0CDC6',
     zIndex: 100,
     pointerEvents: 'none',
     marginBottom: 8,
     maxWidth: 220,
     whiteSpace: 'normal',
-    background: '#FFFFFF',
+    background: '#1A1A1E',
     borderRadius: 10,
-    border: '1px solid #E8E2D8',
-    boxShadow: '0 4px 16px rgba(45,42,38,0.1)',
+    border: '1px solid #3A3A3F',
+    boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
   },
   tooltipName: {
     fontWeight: 700,
     marginBottom: 3,
-    color: '#2D2A26',
-    fontFamily: "'Playfair Display', Georgia, serif",
+    color: '#E8D44D',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
     fontSize: 13,
   },
   tooltipDesc: {
-    color: '#7A736A',
+    color: '#9E9B94',
     fontSize: 11,
     lineHeight: 1.4,
   },

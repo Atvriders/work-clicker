@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Chat ("Golden Hour Office")
-// Minimal warm chat with amber accents
+// Work Clicker — Chat ("Late Night Office")
+// Office IM client with dark theme
 // ============================================================
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
@@ -158,7 +158,7 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
         }}
         onClick={() => setOpen(true)}
       >
-        Chat
+        <span role="img" aria-label="chat">💬</span>
         {unread > 0 && (
           <span style={styles.badge}>{unread > 99 ? '99+' : unread}</span>
         )}
@@ -176,7 +176,7 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
     >
       <div style={styles.chatHeader}>
         <span style={styles.chatTitle}>Office Chat</span>
-        <span style={styles.tempLabel}>Messages are temporary</span>
+        <span style={styles.tempLabel}>Temporary — lost on reload</span>
         <button style={styles.chatCloseBtn} onClick={() => setOpen(false)}>&times;</button>
       </div>
 
@@ -187,7 +187,7 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
             {u}
           </span>
         )) : (
-          <span style={{ color: '#B5AFA6', fontSize: 10 }}>No one else online</span>
+          <span style={{ color: '#6B6860', fontSize: 10 }}>No one else online</span>
         )}
       </div>
 
@@ -202,7 +202,7 @@ const Chat: React.FC<ChatProps> = ({ username, isMobile = false }) => {
                 key={msg.id}
                 style={{
                   ...styles.messageRow,
-                  background: isOwn ? '#FFF3E0' : 'transparent',
+                  background: isOwn ? 'rgba(232,212,77,0.1)' : '#333338',
                 }}
               >
                 <span style={styles.timestamp}>{formatTime(msg.timestamp)}</span>
@@ -249,24 +249,26 @@ const styles: Record<string, React.CSSProperties> = {
     position: 'fixed',
     right: '16px',
     zIndex: 4000,
-    background: '#E8900C',
+    background: '#E8D44D',
     border: 'none',
-    color: '#FFFFFF',
-    fontFamily: "'Source Sans 3', sans-serif",
-    fontSize: '12px',
+    color: '#1A1A1E',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    fontSize: '16px',
     fontWeight: 700,
-    letterSpacing: 0.5,
-    padding: '8px 20px',
-    borderRadius: '20px',
+    padding: '10px 12px',
+    borderRadius: '8px',
     cursor: 'pointer',
     display: 'flex',
     alignItems: 'center',
     gap: '8px',
-    boxShadow: '0 4px 12px rgba(232, 144, 12, 0.3)',
+    boxShadow: '0 4px 12px rgba(232, 212, 77, 0.25)',
     transition: 'all 0.2s ease',
+    width: '42px',
+    height: '42px',
+    justifyContent: 'center',
   },
   badge: {
-    background: '#C45A3C',
+    background: '#EF5350',
     color: '#fff',
     fontSize: '9px',
     fontWeight: 700,
@@ -275,6 +277,9 @@ const styles: Record<string, React.CSSProperties> = {
     minWidth: '16px',
     textAlign: 'center',
     letterSpacing: 0,
+    position: 'absolute',
+    top: '-4px',
+    right: '-4px',
   },
 
   chatWindow: {
@@ -285,11 +290,11 @@ const styles: Record<string, React.CSSProperties> = {
     zIndex: 4000,
     display: 'flex',
     flexDirection: 'column',
-    fontFamily: "'Source Sans 3', sans-serif",
-    background: '#FFFFFF',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    background: '#2A2A2F',
     borderRadius: 14,
-    border: '1px solid #E8E2D8',
-    boxShadow: '0 8px 32px rgba(45,42,38,0.12)',
+    border: '1px solid #3A3A3F',
+    boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
     overflow: 'hidden',
   },
   chatHeader: {
@@ -297,38 +302,38 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '12px 14px',
-    borderBottom: '1px solid #E8E2D8',
+    background: '#E8D44D',
     flexShrink: 0,
   },
   chatTitle: {
-    color: '#2D2A26',
+    color: '#1A1A1E',
     fontSize: '14px',
     fontWeight: 700,
-    fontFamily: "'Playfair Display', Georgia, serif",
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   tempLabel: {
     fontSize: 9,
-    color: '#B5AFA6',
+    color: '#6B6860',
     fontWeight: 400,
   },
   chatCloseBtn: {
-    background: 'transparent',
-    border: '1px solid #E8E2D8',
-    color: '#7A736A',
+    background: 'rgba(26,26,30,0.15)',
+    border: 'none',
+    color: '#1A1A1E',
     fontSize: '16px',
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
     cursor: 'pointer',
     padding: '0 8px',
     borderRadius: 12,
-    fontWeight: 400,
+    fontWeight: 700,
     lineHeight: '22px',
   },
 
   onlineBar: {
     padding: '6px 14px',
     fontSize: '10px',
-    color: '#4A8B5C',
-    borderBottom: '1px solid #F5F0E8',
+    color: '#E8D44D',
+    borderBottom: '1px solid #3A3A3F',
     flexShrink: 0,
     display: 'flex',
     gap: 10,
@@ -345,7 +350,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: 5,
     height: 5,
     borderRadius: '50%',
-    background: '#4A8B5C',
+    background: '#66BB6A',
   },
 
   messageList: {
@@ -357,10 +362,11 @@ const styles: Record<string, React.CSSProperties> = {
     gap: '2px',
   },
   emptyChat: {
-    color: '#B5AFA6',
+    color: '#6B6860',
     fontSize: '12px',
     textAlign: 'center',
     marginTop: '40px',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   messageRow: {
     fontSize: '12px',
@@ -368,48 +374,49 @@ const styles: Record<string, React.CSSProperties> = {
     wordBreak: 'break-word',
     padding: '3px 6px',
     borderRadius: 6,
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   timestamp: {
-    color: '#B5AFA6',
+    color: '#6B6860',
     fontSize: '10px',
     marginRight: 4,
     fontVariantNumeric: 'tabular-nums',
   },
   ownCallsign: {
-    color: '#E8900C',
+    color: '#E8D44D',
     fontWeight: 700,
   },
   otherCallsign: {
-    color: '#2D2A26',
+    color: '#D0CDC6',
     fontWeight: 700,
   },
   messageText: {
-    color: '#7A736A',
+    color: '#9E9B94',
   },
 
   inputRow: {
     display: 'flex',
     gap: '6px',
     padding: '10px 14px',
-    borderTop: '1px solid #E8E2D8',
+    borderTop: '1px solid #3A3A3F',
     flexShrink: 0,
   },
   chatInput: {
     flex: 1,
-    background: '#FDFAF5',
-    border: '1px solid #E8E2D8',
-    color: '#2D2A26',
-    fontFamily: "'Source Sans 3', sans-serif",
+    background: '#1A1A1E',
+    border: '1px solid #3A3A3F',
+    color: '#D0CDC6',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
     fontSize: '12px',
     padding: '8px 12px',
     outline: 'none',
     borderRadius: '10px',
   },
   sendBtn: {
-    background: '#E8900C',
+    background: '#E8D44D',
     border: 'none',
-    color: '#FFFFFF',
-    fontFamily: "'Source Sans 3', sans-serif",
+    color: '#1A1A1E',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
     fontSize: '10px',
     fontWeight: 700,
     letterSpacing: 0.5,

@@ -1,5 +1,5 @@
 // ============================================================
-// Work Clicker — Main App Layout ("Golden Hour Office")
+// Work Clicker — Main App Layout ("Late Night at the Office")
 // ============================================================
 
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
@@ -53,31 +53,6 @@ const TABS: { key: MobileTab; icon: string; label: string }[] = [
   { key: 'shop', icon: '\uD83D\uDED2', label: 'Shop' },
   { key: 'log', icon: '\uD83D\uDCDC', label: 'Log' },
 ];
-
-/** Returns a CSS background based on shift progress */
-function getShiftBackground(shiftStart: number, clockOutTime: number, isOnShift: boolean): string {
-  if (!isOnShift) return '#FDFAF5';
-  const now = Date.now();
-  const total = clockOutTime - shiftStart;
-  const elapsed = now - shiftStart;
-  const progress = total > 0 ? Math.max(0, Math.min(1, elapsed / total)) : 0;
-  const remaining = clockOutTime - now;
-
-  if (remaining < 0) {
-    // Overtime: warm red tint
-    return 'linear-gradient(180deg, #FFF0EE 0%, #FFEAE5 100%)';
-  }
-  if (progress < 0.25) {
-    // Morning: cool to warm
-    return 'linear-gradient(180deg, #F0F4F8 0%, #FDFAF5 100%)';
-  }
-  if (progress < 0.75) {
-    // Midday: warm white
-    return '#FDFAF5';
-  }
-  // Golden hour
-  return 'linear-gradient(180deg, #FFF8EE 0%, #FFF3E0 100%)';
-}
 
 const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState<string | null>(() => localStorage.getItem(USERNAME_KEY));
@@ -195,15 +170,10 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     ? activeEvent.event.name
     : null;
 
-  const bgStyle = useMemo(
-    () => getShiftBackground(shiftStart, clockOutTime, isOnShift),
-    [shiftStart, clockOutTime, isOnShift]
-  );
-
   // Mobile layout
   if (isMobile) {
     return (
-      <div style={{ ...styles.wrapper, background: bgStyle }}>
+      <div style={styles.wrapper}>
         {showWelcome && loginMessage && (
           <div style={styles.welcomeBanner}>{loginMessage}</div>
         )}
@@ -223,10 +193,10 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
         <header style={styles.topBarMobile}>
           <div style={styles.statsBlockMobile}>
             <span style={styles.statItem}>
-              WP: <strong style={styles.statValueAmber} className="tabular-nums">{formatNumber(wp)}</strong>
+              WP: <strong style={styles.statValueYellow} className="tabular-nums">{formatNumber(wp)}</strong>
             </span>
             <span style={styles.statItem}>
-              WP/s: <strong style={styles.statValueAmber} className="tabular-nums">{wpPerSecond.toFixed(1)}</strong>
+              WP/s: <strong style={styles.statValueYellow} className="tabular-nums">{wpPerSecond.toFixed(1)}</strong>
             </span>
           </div>
           <div style={styles.actionBlockMobile}>
@@ -293,17 +263,18 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     );
   }
 
-  // Desktop layout — 2-column
+  // Desktop layout — 2-column "office desk"
   return (
-    <div style={{ ...styles.wrapper, background: bgStyle }}>
+    <div style={styles.wrapper}>
       {showWelcome && loginMessage && (
         <div style={styles.welcomeBanner}>{loginMessage}</div>
       )}
 
-      {/* Top Bar — Warm Header */}
+      {/* Top Bar: header with #222226 bg */}
       <header style={styles.topBar}>
         <div style={styles.titleBlock}>
           <h1 style={styles.title}>WORK CLICKER</h1>
+          <span style={styles.titleFlicker}>_</span>
         </div>
         <div style={styles.statsBlock}>
           <span style={styles.wpDisplay} className="tabular-nums">
@@ -319,7 +290,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
         </div>
       </header>
 
-      {/* Clock-Out Timer - Full Width */}
+      {/* Clock-Out Timer - Full Width below header */}
       <div style={{ padding: '4px 12px', flexShrink: 0 }}>
         <ClockOutTimer
           shiftStart={shiftStart}
@@ -334,26 +305,30 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
       <main style={styles.main}>
         {/* Left Column (55%) — Worker + Work Button + Event + Log */}
         <section style={styles.leftCol}>
-          <div style={styles.workerWorkArea}>
+          <div className="desk-card" style={styles.workerWorkArea}>
             <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
             <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
           </div>
           <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
-          <div style={styles.logArea}>
+          <div className="desk-card" style={styles.logArea}>
             <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
           </div>
         </section>
 
         {/* Right Column (45%) — Stats + Stations + Shop */}
         <aside style={styles.rightCol}>
-          <StatsPanel
-            wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
-            shiftStart={shiftStart} clockOutTime={clockOutTime}
-            shiftsCompleted={shiftsCompleted} overtimeMinutes={overtimeMinutes}
-            activeEventName={activeEventName} isOnShift={isOnShift}
-          />
-          <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
-          <div style={styles.shopArea}>
+          <div className="desk-card">
+            <StatsPanel
+              wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
+              shiftStart={shiftStart} clockOutTime={clockOutTime}
+              shiftsCompleted={shiftsCompleted} overtimeMinutes={overtimeMinutes}
+              activeEventName={activeEventName} isOnShift={isOnShift}
+            />
+          </div>
+          <div className="desk-card">
+            <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
+          </div>
+          <div className="desk-card" style={styles.shopArea}>
             <Shop
               wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
               ownedStations={stations} purchasedUpgrades={upgrades}
@@ -366,7 +341,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
 
       {/* Footer */}
       <footer style={styles.footer}>
-        Built with Claude Code
+        Built with Claude Code &middot; It's 2am. Go home.
       </footer>
 
       {/* Leaderboard Modal */}
@@ -388,7 +363,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100vh',
     width: '100vw',
     overflow: 'hidden',
-    transition: 'background 2s ease',
+    background: '#1A1A1E',
   },
 
   // Welcome banner
@@ -397,87 +372,100 @@ const styles: Record<string, React.CSSProperties> = {
     top: '56px',
     left: '50%',
     transform: 'translateX(-50%)',
-    background: '#FFFFFF',
-    border: '1px solid #E8E2D8',
-    color: '#E8900C',
+    background: '#2A2A2F',
+    border: '1px solid #E8D44D',
+    color: '#E8D44D',
     padding: '10px 28px',
     fontSize: '14px',
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', monospace",
     fontWeight: 600,
     letterSpacing: 0.5,
     zIndex: 6000,
-    boxShadow: '0 4px 20px rgba(45,42,38,0.1)',
+    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
     whiteSpace: 'nowrap',
-    borderRadius: 12,
+    borderRadius: 4,
   },
 
   // Username
   usernameLabel: {
-    color: '#7A736A',
+    color: '#9E9B94',
     fontSize: '13px',
     fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
 
-  // Desktop top bar
+  // Desktop top bar — #222226 bg
   topBar: {
+    position: 'relative',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: '0 20px',
     height: 52,
-    background: '#FFFFFF',
-    borderBottom: '1px solid #E8E2D8',
+    background: '#222226',
+    borderBottom: '1px solid #3A3A3F',
     zIndex: 10,
     flexShrink: 0,
   },
-  titleBlock: { display: 'flex', alignItems: 'center', gap: '8px' },
+  titleBlock: { display: 'flex', alignItems: 'center', gap: '4px' },
+  // Title: IBM Plex Mono, yellow, subtle flicker animation
   title: {
     margin: 0,
     fontSize: '20px',
-    fontWeight: 900,
+    fontWeight: 700,
     letterSpacing: 3,
-    color: '#2D2A26',
-    fontFamily: "'Playfair Display', Georgia, serif",
+    color: '#E8D44D',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    animation: 'flicker 4s ease-in-out infinite',
+  },
+  titleFlicker: {
+    color: '#E8D44D',
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: '20px',
+    fontWeight: 700,
+    animation: 'blink-cursor 1s step-end infinite',
   },
   statsBlock: { display: 'flex', gap: '20px', alignItems: 'center' },
+  // WP count — large yellow
   wpDisplay: {
     fontSize: '28px',
     fontWeight: 700,
-    color: '#E8900C',
-    fontFamily: "'Source Sans 3', sans-serif",
+    color: '#E8D44D',
+    fontFamily: "'IBM Plex Mono', monospace",
     lineHeight: 1,
   },
   wpLabel: {
     fontSize: '14px',
     fontWeight: 600,
-    color: '#B5AFA6',
+    color: '#6B6860',
     letterSpacing: 1,
   },
-  statItem: { fontSize: '13px', color: '#7A736A', fontWeight: 500 },
-  statValueAmber: { color: '#E8900C', fontSize: '14px', fontWeight: 700 },
+  statItem: { fontSize: '13px', color: '#9E9B94', fontWeight: 500, fontFamily: "'IBM Plex Mono', monospace" },
+  statValueYellow: { color: '#E8D44D', fontSize: '14px', fontWeight: 700 },
   actionBlock: { display: 'flex', gap: '10px', alignItems: 'center' },
   headerBtn: {
     padding: '6px 16px',
     background: 'transparent',
-    border: '1px solid #E8E2D8',
-    color: '#7A736A',
+    border: '1px solid #3A3A3F',
+    color: '#9E9B94',
     fontSize: '10px',
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', monospace",
     fontWeight: 600,
     letterSpacing: 1,
     textTransform: 'uppercase' as const,
     cursor: 'pointer',
-    borderRadius: 20,
+    borderRadius: 4,
     transition: 'all 0.15s ease',
   },
   logoutBtn: {
-    borderColor: 'rgba(196, 90, 60, 0.3)',
-    color: '#C45A3C',
+    borderColor: 'rgba(239, 83, 80, 0.4)',
+    color: '#EF5350',
   },
 
   // 2-column layout
-  main: { display: 'flex', flex: 1, overflow: 'hidden', gap: 12, padding: '8px 12px' },
+  main: { display: 'flex', flex: 1, overflow: 'hidden', gap: 12, padding: '8px 12px', position: 'relative', zIndex: 1 },
 
+  // LEFT 55%
   leftCol: {
     flex: '0 0 55%',
     display: 'flex',
@@ -501,6 +489,7 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 0,
   },
 
+  // RIGHT 45%
   rightCol: {
     flex: '0 0 45%',
     display: 'flex',
@@ -518,13 +507,16 @@ const styles: Record<string, React.CSSProperties> = {
 
   // Footer
   footer: {
+    position: 'relative',
     padding: '4px 0',
     textAlign: 'center' as const,
     fontSize: '11px',
-    color: '#B5AFA6',
+    color: '#6B6860',
     fontWeight: 400,
     letterSpacing: 0.3,
     flexShrink: 0,
+    fontFamily: "'IBM Plex Mono', monospace",
+    zIndex: 1,
   },
 
   // Mobile top bar
@@ -535,8 +527,8 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     padding: '4px 10px',
     height: 40,
-    background: '#FFFFFF',
-    borderBottom: '1px solid #E8E2D8',
+    background: '#222226',
+    borderBottom: '1px solid #3A3A3F',
     zIndex: 10,
     flexShrink: 0,
   },
@@ -559,6 +551,8 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
     overflowY: 'auto',
     paddingBottom: '60px',
+    position: 'relative',
+    zIndex: 1,
   },
   mobileSection: {
     display: 'flex',

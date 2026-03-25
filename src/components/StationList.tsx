@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Station List ("Golden Hour Office")
-// Clean white card with amber progress bars
+// Work Clicker — Station List ("Late Night at the Office")
+// Dark rows with colored left borders, yellow badges, WPS bars
 // ============================================================
 
 import React from 'react';
@@ -11,45 +11,60 @@ interface StationListProps {
   wpPerSecond: number;
 }
 
+const BORDER_COLORS = ['#E8D44D', '#F48FB1', '#81D4FA', '#A5D6A7'];
+
 const StationList: React.FC<StationListProps> = ({ ownedStations, wpPerSecond }) => {
   const owned = STATIONS
     .filter((st) => (ownedStations[st.id] ?? 0) > 0)
     .sort((a, b) => a.tier - b.tier);
 
   return (
-    <div style={styles.container} className="warm-card">
+    <div style={styles.container}>
       <div style={styles.titleRow}>
-        <span style={styles.title}>Your Stations</span>
+        <span style={styles.title}>YOUR STATIONS</span>
         <span style={styles.titleLabel}>{owned.length} active</span>
       </div>
 
       {owned.length === 0 ? (
-        <div style={styles.emptyMsg}>No stations yet</div>
+        <div style={styles.emptyMsg}>No stations yet -- buy some from the supply closet</div>
       ) : (
-        owned.map((st) => {
-          const count = ownedStations[st.id] ?? 0;
-          const totalWps = +(st.baseWps * count).toFixed(1);
-          const pct = wpPerSecond > 0 ? (totalWps / wpPerSecond) * 100 : 0;
-          return (
-            <div key={st.id} style={styles.row}>
-              <div style={styles.rowTop}>
-                <span style={styles.icon}>{st.icon}</span>
-                <span style={styles.name}>{st.name}</span>
-                <span style={styles.count}>x{count}</span>
-                <span style={styles.wps}>{totalWps} w/s</span>
+        <div style={styles.stationGrid}>
+          {owned.map((st, i) => {
+            const count = ownedStations[st.id] ?? 0;
+            const totalWps = +(st.baseWps * count).toFixed(1);
+            const wpsContribution = wpPerSecond > 0 ? totalWps / wpPerSecond : 0;
+            const borderColor = BORDER_COLORS[i % BORDER_COLORS.length];
+
+            return (
+              <div
+                key={st.id}
+                style={{
+                  ...styles.stationRow,
+                  borderLeft: `3px solid ${borderColor}`,
+                }}
+              >
+                <span style={styles.stationIcon}>{st.icon}</span>
+                <div style={styles.stationInfo}>
+                  <div style={styles.stationNameRow}>
+                    <span style={styles.stationName}>{st.name}</span>
+                    <span style={styles.countBadge}>x{count}</span>
+                  </div>
+                  <div style={styles.wpsRow}>
+                    <span style={styles.wpsLabel}>{totalWps} w/s</span>
+                    <div style={styles.wpsTrack}>
+                      <div
+                        style={{
+                          ...styles.wpsBar,
+                          width: `${Math.min(100, wpsContribution * 100)}%`,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <div style={styles.barTrack}>
-                <div style={{
-                  height: '100%',
-                  width: `${Math.min(100, pct)}%`,
-                  background: 'linear-gradient(90deg, #E8900C, #E8B30C)',
-                  borderRadius: 2,
-                  transition: 'width 0.3s ease',
-                }} />
-              </div>
-            </div>
-          );
-        })
+            );
+          })}
+        </div>
       )}
     </div>
   );
@@ -58,87 +73,109 @@ const StationList: React.FC<StationListProps> = ({ ownedStations, wpPerSecond })
 const styles: Record<string, React.CSSProperties> = {
   container: {
     padding: '12px 14px',
-    color: '#2D2A26',
+    color: '#E8E6E1',
     overflow: 'auto',
     flexShrink: 0,
+    background: '#2A2A2F',
+    borderRadius: 8,
   },
   titleRow: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottom: '1px solid #E8E2D8',
+    borderBottom: '1px solid #3A3A3F',
     paddingBottom: 8,
-    marginBottom: 8,
+    marginBottom: 10,
   },
   title: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: 700,
-    color: '#2D2A26',
-    fontFamily: "'Playfair Display', Georgia, serif",
+    color: '#E8D44D',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    letterSpacing: 1.5,
   },
   titleLabel: {
     fontSize: 11,
-    color: '#B5AFA6',
+    color: '#9E9B94',
     fontWeight: 500,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   emptyMsg: {
-    color: '#B5AFA6',
-    fontSize: 13,
+    color: '#9E9B94',
+    fontSize: 12,
     textAlign: 'center',
     padding: '12px 0',
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontStyle: 'italic',
   },
-  row: {
+  stationGrid: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+  },
+  stationRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 10,
+    padding: '8px 10px',
+    background: '#232328',
+    borderRadius: 4,
+  },
+  stationIcon: {
+    fontSize: 20,
+    lineHeight: 1,
+    flexShrink: 0,
+  },
+  stationInfo: {
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
     gap: 3,
-    padding: '6px 0',
-    borderBottom: '1px solid #F5F0E8',
   },
-  rowTop: {
+  stationNameRow: {
     display: 'flex',
     alignItems: 'center',
-    gap: 8,
-    fontSize: 13,
+    justifyContent: 'space-between',
   },
-  icon: {
-    fontSize: 16,
-    width: 22,
-    textAlign: 'center',
-    flexShrink: 0,
-  },
-  name: {
-    flex: 1,
-    color: '#2D2A26',
-    whiteSpace: 'nowrap',
-    overflow: 'hidden',
-    textOverflow: 'ellipsis',
-    fontSize: 13,
-    fontWeight: 500,
-  },
-  count: {
-    color: '#FFFFFF',
-    fontWeight: 700,
-    flexShrink: 0,
-    fontSize: 11,
-    background: '#E8900C',
-    padding: '1px 8px',
-    borderRadius: 12,
-  },
-  wps: {
-    color: '#7A736A',
-    fontSize: 11,
-    flexShrink: 0,
-    minWidth: 55,
-    textAlign: 'right',
+  stationName: {
+    fontSize: 12,
     fontWeight: 600,
-    fontVariantNumeric: 'tabular-nums',
+    color: '#E8E6E1',
+    fontFamily: "'IBM Plex Mono', monospace",
   },
-  barTrack: {
-    height: 3,
-    background: '#F5F0E8',
+  countBadge: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: '#1A1A1E',
+    background: '#E8D44D',
+    padding: '1px 7px',
+    borderRadius: 10,
+    fontFamily: "'IBM Plex Mono', monospace",
+  },
+  wpsRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 6,
+  },
+  wpsLabel: {
+    fontSize: 10,
+    color: '#9E9B94',
+    fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', monospace",
+    whiteSpace: 'nowrap',
+  },
+  wpsTrack: {
+    flex: 1,
+    height: 4,
+    background: '#3A3A3F',
     borderRadius: 2,
     overflow: 'hidden',
-    marginTop: 2,
+  },
+  wpsBar: {
+    height: '100%',
+    background: '#E8D44D',
+    borderRadius: 2,
+    transition: 'width 0.3s ease',
   },
 };
 

@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Leaderboard ("Golden Hour Office")
-// Clean modal with warm borders
+// Work Clicker — Leaderboard ("Late Night Office")
+// Office whiteboard modal with dark theme
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -55,7 +55,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
     <div style={styles.overlay} onClick={onClose}>
       <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
         <div style={styles.header}>
-          <h2 style={styles.title}>Leaderboard</h2>
+          <h2 style={styles.title}>LEADERBOARD</h2>
           <button style={styles.closeBtn} onClick={onClose}>
             &times;
           </button>
@@ -76,7 +76,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
           <div style={styles.tableWrap}>
             <table style={styles.table}>
               <thead>
-                <tr>
+                <tr style={styles.headerRow}>
                   <th style={styles.th}>#</th>
                   <th style={{ ...styles.th, textAlign: 'left' }}>NAME</th>
                   <th style={styles.th}>BEST WP</th>
@@ -98,7 +98,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
                         ...styles.td,
                         textAlign: 'left',
                         fontWeight: isMe ? 700 : 400,
-                        color: isMe ? '#E8900C' : '#2D2A26',
+                        color: isMe ? '#E8D44D' : '#D0CDC6',
                       }}>
                         <span style={styles.callsignCell}>
                           <span
@@ -129,7 +129,7 @@ const styles: Record<string, React.CSSProperties> = {
   overlay: {
     position: 'fixed',
     top: 0, left: 0, width: '100%', height: '100%',
-    background: 'rgba(45, 42, 38, 0.3)',
+    background: 'rgba(0,0,0,0.7)',
     backdropFilter: 'blur(4px)',
     display: 'flex',
     alignItems: 'center',
@@ -143,10 +143,10 @@ const styles: Record<string, React.CSSProperties> = {
     maxHeight: '80vh',
     display: 'flex',
     flexDirection: 'column',
-    background: '#FFFFFF',
-    borderRadius: 16,
-    border: '1px solid #E8E2D8',
-    boxShadow: '0 16px 48px rgba(45,42,38,0.15)',
+    background: '#2A2A2F',
+    borderRadius: 12,
+    border: '1px solid #3A3A3F',
+    boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
   },
   header: {
     display: 'flex',
@@ -157,15 +157,16 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
     fontSize: '22px',
     fontWeight: 700,
-    color: '#2D2A26',
-    fontFamily: "'Playfair Display', Georgia, serif",
+    color: '#E8D44D',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    letterSpacing: 2,
   },
   closeBtn: {
     background: 'transparent',
-    border: '1px solid #E8E2D8',
-    color: '#7A736A',
+    border: '1px solid #3A3A3F',
+    color: '#9E9B94',
     fontSize: '20px',
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
     cursor: 'pointer',
     padding: '2px 12px',
     borderRadius: 20,
@@ -182,13 +183,14 @@ const styles: Record<string, React.CSSProperties> = {
   subtitle: {
     fontSize: '10px',
     letterSpacing: 2,
-    color: '#B5AFA6',
+    color: '#9E9B94',
     fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   onlineCount: {
     fontSize: '11px',
     letterSpacing: 0.5,
-    color: '#4A8B5C',
+    color: '#66BB6A',
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
@@ -199,17 +201,18 @@ const styles: Record<string, React.CSSProperties> = {
     width: '7px',
     height: '7px',
     borderRadius: '50%',
-    background: '#4A8B5C',
+    background: '#66BB6A',
   },
   loading: {
-    color: '#E8900C',
+    color: '#E8D44D',
     textAlign: 'center',
     padding: '32px',
     letterSpacing: 2,
     fontWeight: 600,
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   empty: {
-    color: '#B5AFA6',
+    color: '#9E9B94',
     textAlign: 'center',
     padding: '32px',
     fontSize: '13px',
@@ -223,21 +226,25 @@ const styles: Record<string, React.CSSProperties> = {
     borderCollapse: 'collapse',
     fontSize: '13px',
   },
+  headerRow: {
+    background: '#333338',
+  },
   th: {
     padding: '10px 8px',
     textAlign: 'right',
-    color: '#B5AFA6',
-    borderBottom: '1px solid #E8E2D8',
+    color: '#9E9B94',
+    borderBottom: '1px solid #3A3A3F',
     fontSize: '10px',
     letterSpacing: 0.5,
     fontWeight: 700,
     whiteSpace: 'nowrap',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   td: {
     padding: '8px',
     textAlign: 'right',
-    color: '#2D2A26',
-    borderBottom: '1px solid #F5F0E8',
+    color: '#D0CDC6',
+    borderBottom: '1px solid #3A3A3F',
     whiteSpace: 'nowrap',
     fontVariantNumeric: 'tabular-nums',
   },
@@ -245,7 +252,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'transparent',
   },
   rowHighlight: {
-    background: '#FFF3E0',
+    background: 'rgba(232,212,77,0.1)',
   },
   callsignCell: {
     display: 'inline-flex',
@@ -257,7 +264,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '7px',
     height: '7px',
     borderRadius: '50%',
-    background: '#4A8B5C',
+    background: '#66BB6A',
     flexShrink: 0,
   },
   offlineDot: {
@@ -265,13 +272,13 @@ const styles: Record<string, React.CSSProperties> = {
     width: '7px',
     height: '7px',
     borderRadius: '50%',
-    background: '#D8D3CC',
+    background: '#6B6860',
     flexShrink: 0,
   },
   footer: {
     marginTop: '14px',
     fontSize: '11px',
-    color: '#B5AFA6',
+    color: '#6B6860',
     letterSpacing: 0.5,
     textAlign: 'center',
   },

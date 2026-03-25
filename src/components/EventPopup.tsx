@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Event Popup ("Golden Hour Office")
-// Inline warm card with colored left border
+// Work Clicker — Event Popup ("Late Night at the Office")
+// Sticky note notification — inline, sits above EventLog
 // ============================================================
 
 import React, { useEffect, useState } from 'react';
@@ -20,7 +20,6 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
     ? eventDefs.find((e) => e.id === activeEvent.event.id)
     : null;
   const isPositive = eventDef?.isPositive ?? true;
-  const accentColor = isPositive ? '#4A8B5C' : '#C45A3C';
 
   useEffect(() => {
     if (activeEvent) {
@@ -50,6 +49,10 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
 
   const secs = Math.ceil(remaining / 1000);
 
+  const bgColor = isPositive ? '#FFEB3B' : '#F48FB1';
+  const rotation = isPositive ? '1deg' : '-1deg';
+  const barColor = isPositive ? '#C9B200' : '#C2185B';
+
   return (
     <div
       style={{
@@ -61,22 +64,22 @@ const EventPopup: React.FC<EventPopupProps> = ({ activeEvent, eventDefs }) => {
     >
       <div
         style={{
-          ...styles.banner,
-          borderLeft: `4px solid ${accentColor}`,
+          ...styles.note,
+          background: bgColor,
+          transform: `rotate(${rotation})`,
         }}
-        className="warm-card"
       >
-        <div style={styles.header}>
+        <div style={styles.topLine}>
           <span style={styles.icon}>{eventDef.icon}</span>
-          <span style={{ ...styles.name, color: accentColor }}>{eventDef.name}</span>
-          <span style={styles.description}>{eventDef.description}</span>
+          <span style={styles.name}>{eventDef.name}</span>
           <span style={styles.timer} className="tabular-nums">{secs}s</span>
         </div>
+        <div style={styles.description}>{eventDef.description}</div>
         <div style={styles.progressTrack}>
           <div
             style={{
               ...styles.progressBar,
-              background: accentColor,
+              background: barColor,
               width: `${progress * 100}%`,
             }}
           />
@@ -91,42 +94,44 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     flexShrink: 0,
   },
-  banner: {
+  note: {
     padding: '8px 12px',
-    borderRadius: 10,
+    borderRadius: 4,
+    boxShadow: '2px 2px 6px rgba(0,0,0,0.35)',
   },
-  header: {
+  topLine: {
     display: 'flex',
     alignItems: 'center',
     gap: 8,
-    marginBottom: 6,
-    flexWrap: 'wrap',
   },
   icon: {
-    fontSize: 18,
+    fontSize: 16,
     flexShrink: 0,
   },
   name: {
     fontSize: 13,
     fontWeight: 700,
-    flexShrink: 0,
-  },
-  description: {
-    fontSize: 11,
-    color: '#7A736A',
+    color: '#1A1A1E',
     flex: 1,
-    minWidth: 0,
-    lineHeight: 1.3,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   timer: {
     fontSize: 12,
-    color: '#E8900C',
+    color: '#1A1A1E',
     fontWeight: 700,
     flexShrink: 0,
+    fontFamily: "'IBM Plex Mono', monospace",
+  },
+  description: {
+    fontSize: 11,
+    color: '#333',
+    lineHeight: 1.3,
+    marginTop: 3,
+    marginBottom: 6,
   },
   progressTrack: {
-    height: 3,
-    background: '#F5F0E8',
+    height: 2,
+    background: 'rgba(0,0,0,0.12)',
     borderRadius: 2,
     overflow: 'hidden',
   },

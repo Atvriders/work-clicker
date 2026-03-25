@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Worker Avatar ("Golden Hour Office")
-// Bigger, more expressive, with desk illustration
+// Work Clicker — Worker Avatar ("Late Night at the Office")
+// Worker at desk with glowing monitor, coffee cup, sticky note speech bubbles
 // ============================================================
 
 import React, { useState, useEffect } from 'react';
@@ -17,6 +17,7 @@ interface WorkerState {
   message: string;
   animation: string;
   mood: string;
+  monitorContent: string;
 }
 
 const SLEEP_LINES = [
@@ -91,6 +92,7 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
       message: pickRandom(SLEEP_LINES),
       animation: 'worker-float',
       mood: 'sleeping',
+      monitorContent: '\u23FB',
     };
   }
 
@@ -109,6 +111,7 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
         message: pickRandom(OVERTIME_BAD_LINES),
         animation: 'worker-shake',
         mood: 'overtime-bad',
+        monitorContent: '\uD83D\uDD25',
       };
     }
     return {
@@ -117,6 +120,7 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
       message: pickRandom(OVERTIME_LINES),
       animation: 'worker-shake',
       mood: 'overtime',
+      monitorContent: '\u23F0',
     };
   }
 
@@ -128,6 +132,7 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
       message: pickRandom(EXCITED_LINES),
       animation: 'worker-bounce',
       mood: 'excited',
+      monitorContent: '\uD83C\uDF89',
     };
   }
 
@@ -139,6 +144,7 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
       message: pickRandom(ANXIOUS_LINES),
       animation: 'worker-wiggle',
       mood: 'anxious',
+      monitorContent: '\uD83D\uDD52',
     };
   }
 
@@ -150,6 +156,7 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
       message: pickRandom(STRESSED_LINES),
       animation: 'worker-shake',
       mood: 'stressed',
+      monitorContent: '\uD83D\uDCE7',
     };
   }
 
@@ -161,6 +168,7 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
       message: pickRandom(FOCUSED_LINES),
       animation: 'worker-pulse',
       mood: 'focused',
+      monitorContent: '\uD83D\uDCBB',
     };
   }
 
@@ -171,6 +179,7 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
     message: pickRandom(ARRIVING_LINES),
     animation: 'worker-float',
     mood: 'arriving',
+    monitorContent: '\uD83D\uDCE7',
   };
 }
 
@@ -196,20 +205,30 @@ const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, i
   const isComplete = isOnShift && remaining < 0 && remaining > -2000;
 
   return (
-    <div className="worker-avatar-container">
-      {/* Speech bubble */}
-      <div key={messageKey} className={`worker-speech-bubble ${state.mood}`}>
-        <span>{state.message}</span>
+    <div style={styles.container}>
+      {/* Speech bubble — sticky note style */}
+      <div key={messageKey} style={styles.speechBubble} className={`worker-speech-bubble ${state.mood}`}>
+        <span style={styles.speechText}>{state.message}</span>
       </div>
 
-      {/* Character */}
-      <div className={`worker-character ${state.animation}`}>
-        <span className="worker-emoji">{state.emoji}</span>
-        {state.accessory && <span className="worker-accessory">{state.accessory}</span>}
-      </div>
+      {/* Character sitting behind desk */}
+      <div style={styles.sceneWrap}>
+        {/* Worker */}
+        <div className={`worker-character ${state.animation}`} style={styles.characterWrap}>
+          <span style={styles.workerEmoji}>{state.emoji}</span>
+          {state.accessory && <span style={styles.accessory}>{state.accessory}</span>}
+        </div>
 
-      {/* Subtle desk */}
-      <div className="worker-desk" />
+        {/* Desk surface */}
+        <div style={styles.desk}>
+          {/* Monitor on desk */}
+          <div style={styles.monitor}>
+            <span style={styles.monitorContent}>{state.monitorContent}</span>
+          </div>
+          {/* Coffee cup always on desk */}
+          <span style={styles.coffee}>&#9749;</span>
+        </div>
+      </div>
 
       {/* Confetti for celebration states */}
       {(state.mood === 'excited' || isComplete) && (
@@ -223,6 +242,97 @@ const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, i
       )}
     </div>
   );
+};
+
+const styles: Record<string, React.CSSProperties> = {
+  container: {
+    position: 'relative',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 6,
+    padding: '8px 0',
+  },
+  speechBubble: {
+    background: '#FFEB3B',
+    color: '#1A1A1E',
+    fontFamily: "'Nunito', 'Segoe UI', sans-serif",
+    fontSize: 13,
+    fontWeight: 600,
+    padding: '6px 12px',
+    borderRadius: 6,
+    transform: 'rotate(1deg)',
+    boxShadow: '2px 3px 8px rgba(0,0,0,0.35)',
+    maxWidth: 220,
+    textAlign: 'center' as const,
+    lineHeight: 1.35,
+    animation: 'fade-in-speech 0.4s ease',
+  },
+  speechText: {
+    color: '#1A1A1E',
+  },
+  sceneWrap: {
+    position: 'relative' as const,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    alignItems: 'center',
+    marginTop: 2,
+  },
+  characterWrap: {
+    position: 'relative' as const,
+    zIndex: 2,
+    marginBottom: -10,
+  },
+  workerEmoji: {
+    fontSize: 48,
+    display: 'block',
+    lineHeight: 1,
+  },
+  accessory: {
+    position: 'absolute' as const,
+    fontSize: 18,
+    top: -2,
+    right: -14,
+  },
+  desk: {
+    position: 'relative' as const,
+    width: 160,
+    height: 28,
+    background: '#333338',
+    borderRadius: 4,
+    zIndex: 3,
+    display: 'flex',
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+  },
+  monitor: {
+    position: 'absolute' as const,
+    top: -22,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: 40,
+    height: 20,
+    background: '#23232a',
+    borderRadius: 3,
+    border: '1.5px solid #444',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    boxShadow: '0 0 12px rgba(79,195,247,0.35), 0 0 4px rgba(79,195,247,0.2)',
+    zIndex: 4,
+  },
+  monitorContent: {
+    fontSize: 11,
+    lineHeight: 1,
+  },
+  coffee: {
+    position: 'absolute' as const,
+    right: 12,
+    top: -14,
+    fontSize: 16,
+    zIndex: 5,
+  },
 };
 
 export default WorkerAvatar;

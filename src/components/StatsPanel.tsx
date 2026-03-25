@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Stats Panel ("Golden Hour Office")
-// Clean white card with 2-column stat grid
+// Work Clicker — Stats Panel ("Late Night at the Office")
+// Terminal monitor style — dark card with green tint
 // ============================================================
 
 import React from 'react';
@@ -42,161 +42,205 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
   const progressPct = (progress * 100).toFixed(1);
 
   return (
-    <div style={styles.container} className="warm-card">
-      <div style={styles.title}>Stats</div>
+    <div style={styles.container}>
+      <div style={styles.inner}>
+        <div style={styles.titleBar}>
+          <span style={styles.titleDots}>
+            <span style={styles.dotRed} />
+            <span style={styles.dotYellow} />
+            <span style={styles.dotGreen} />
+          </span>
+          <span style={styles.title}>SYSTEM STATUS</span>
+          <span style={styles.titleRight}>v2.4.1</span>
+        </div>
 
-      {/* Stats grid */}
-      <div style={styles.grid}>
-        <StatItem icon="\uD83D\uDCB0" label="Total WP" value={formatNumber(wp)} large />
-        <StatItem icon="\u26A1" label="WP/sec" value={wps.toFixed(1)} />
-        <StatItem icon="\uD83D\uDDB1\uFE0F" label="WP/click" value={wpPerClick.toFixed(1)} />
-        <StatItem icon="\u2705" label="Shifts Done" value={String(shiftsCompleted)} />
-        <StatItem
-          icon="\u23F0"
-          label="Overtime"
-          value={`${overtimeMinutes.toFixed(0)}m`}
-          valueColor={overtimeMinutes > 0 ? '#C45A3C' : undefined}
-        />
+        {/* Stats grid */}
+        <div style={styles.grid}>
+          <StatItem label="TOTAL_WP" value={formatNumber(wp)} highlight />
+          <StatItem label="WP/SEC" value={wps.toFixed(1)} />
+          <StatItem label="WP/CLICK" value={wpPerClick.toFixed(1)} />
+          <StatItem label="SHIFTS" value={String(shiftsCompleted)} />
+          <StatItem
+            label="OVERTIME"
+            value={`${overtimeMinutes.toFixed(0)}m`}
+            danger={overtimeMinutes > 0}
+          />
+          {isOnShift && (
+            <StatItem label="PROGRESS" value={`${progressPct}%`} />
+          )}
+        </div>
+
+        {/* Shift progress bar */}
         {isOnShift && (
-          <StatItem icon="\uD83D\uDCC8" label="Shift Progress" value={`${progressPct}%`} />
+          <div style={styles.progressTrack}>
+            <div
+              style={{
+                ...styles.progressBar,
+                width: `${progress * 100}%`,
+                background: progress > 0.9 ? '#66BB6A' : progress > 0.7 ? '#FFA726' : '#E8D44D',
+                boxShadow: `0 0 4px ${progress > 0.9 ? '#66BB6A' : '#E8D44D'}40`,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Active event — yellow pill */}
+        {activeEventName && (
+          <div style={styles.eventBlock}>
+            <span style={styles.eventPill}>{activeEventName}</span>
+          </div>
         )}
       </div>
-
-      {/* Shift progress bar */}
-      {isOnShift && (
-        <div style={styles.progressTrack}>
-          <div
-            style={{
-              ...styles.progressBar,
-              width: `${progress * 100}%`,
-              background: progress > 0.9 ? '#4A8B5C' : progress > 0.7 ? '#E8B30C' : '#E8900C',
-            }}
-          />
-        </div>
-      )}
-
-      {/* Active event */}
-      {activeEventName && (
-        <div style={styles.eventBlock}>
-          <span style={styles.eventName}>{activeEventName}</span>
-        </div>
-      )}
     </div>
   );
 };
 
 interface StatItemProps {
-  icon: string;
   label: string;
   value: string;
-  large?: boolean;
-  valueColor?: string;
+  highlight?: boolean;
+  danger?: boolean;
 }
 
-const StatItem: React.FC<StatItemProps> = ({ icon, label, value, large, valueColor }) => (
+const StatItem: React.FC<StatItemProps> = ({ label, value, highlight, danger }) => (
   <div style={styles.statCell}>
-    <span style={styles.statIcon}>{icon}</span>
-    <div style={styles.statInfo}>
-      <span style={styles.statLabel}>{label}</span>
-      <span
-        className="tabular-nums"
-        style={{
-          ...(large ? styles.statBig : styles.statValue),
-          ...(valueColor ? { color: valueColor } : {}),
-        }}
-      >
-        {value}
-      </span>
-    </div>
+    <span style={styles.statLabel}>{label}:</span>
+    <span
+      className="tabular-nums"
+      style={{
+        ...styles.statValue,
+        ...(highlight ? styles.statHighlight : {}),
+        ...(danger ? styles.statDanger : {}),
+      }}
+    >
+      {value}
+    </span>
   </div>
 );
 
 const styles: Record<string, React.CSSProperties> = {
   container: {
+    padding: 0,
+    background: '#1E2420',
+    borderRadius: 8,
+    borderTop: '2px solid #66BB6A',
+    color: '#E8E6E1',
+    display: 'flex',
+    flexDirection: 'column',
+    position: 'relative',
+  },
+  inner: {
     padding: '14px 16px',
-    color: '#2D2A26',
     display: 'flex',
     flexDirection: 'column',
     gap: 10,
+    position: 'relative',
+    zIndex: 2,
+  },
+  titleBar: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    paddingBottom: 8,
+    borderBottom: '1px solid rgba(102,187,106,0.15)',
+  },
+  titleDots: {
+    display: 'flex',
+    gap: 4,
+  },
+  dotRed: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    background: '#EF5350',
+  },
+  dotYellow: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    background: '#E8D44D',
+  },
+  dotGreen: {
+    width: 8,
+    height: 8,
+    borderRadius: '50%',
+    background: '#66BB6A',
   },
   title: {
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: 700,
-    color: '#2D2A26',
-    fontFamily: "'Playfair Display', Georgia, serif",
-    paddingBottom: 8,
-    borderBottom: '1px solid #E8E2D8',
+    color: '#66BB6A',
+    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    letterSpacing: 2,
+    flex: 1,
+  },
+  titleRight: {
+    fontSize: 10,
+    color: 'rgba(102,187,106,0.4)',
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   grid: {
     display: 'grid',
     gridTemplateColumns: '1fr 1fr',
-    gap: 8,
+    gap: 4,
   },
   statCell: {
     display: 'flex',
     alignItems: 'center',
-    gap: 8,
-    padding: '8px 10px',
-    borderRadius: 8,
-    background: '#FDFAF5',
-  },
-  statIcon: {
-    fontSize: 18,
-    lineHeight: 1,
-    flexShrink: 0,
-  },
-  statInfo: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 1,
-    minWidth: 0,
+    gap: 6,
+    padding: '4px 8px',
+    borderRadius: 2,
+    fontFamily: "'IBM Plex Mono', monospace",
   },
   statLabel: {
     fontSize: 10,
-    color: '#B5AFA6',
-    letterSpacing: 0.5,
-    textTransform: 'uppercase',
+    color: '#9E9B94',
     fontWeight: 600,
-  },
-  statBig: {
-    fontSize: 20,
-    fontWeight: 700,
-    color: '#E8900C',
-    lineHeight: 1,
-    fontFamily: "'Source Sans 3', sans-serif",
+    whiteSpace: 'nowrap',
   },
   statValue: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: 600,
-    color: '#2D2A26',
+    color: '#E8E6E1',
     lineHeight: 1.2,
-    fontFamily: "'Source Sans 3', sans-serif",
+    fontFamily: "'IBM Plex Mono', monospace",
+  },
+  statHighlight: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: '#E8D44D',
+    textShadow: '0 0 6px rgba(232,212,77,0.3)',
+  },
+  statDanger: {
+    color: '#EF5350',
+    textShadow: '0 0 4px rgba(239,83,80,0.3)',
   },
   progressTrack: {
-    height: 5,
-    background: '#F5F0E8',
-    borderRadius: 3,
+    height: 4,
+    background: 'rgba(102,187,106,0.1)',
+    borderRadius: 2,
     overflow: 'hidden',
   },
   progressBar: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 2,
     transition: 'width 1s linear',
   },
   eventBlock: {
-    display: 'inline-flex',
+    display: 'flex',
     alignItems: 'center',
     gap: 6,
-    padding: '4px 12px',
-    borderRadius: 20,
-    background: '#FFF3E0',
-    border: '1px solid rgba(232, 144, 12, 0.2)',
-    alignSelf: 'flex-start',
+    padding: '4px 8px',
   },
-  eventName: {
-    fontSize: 12,
-    fontWeight: 600,
-    color: '#E8900C',
+  eventPill: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: '#1A1A1E',
+    background: '#E8D44D',
+    padding: '3px 10px',
+    borderRadius: 12,
+    fontFamily: "'IBM Plex Mono', monospace",
+    letterSpacing: 0.5,
   },
 };
 
