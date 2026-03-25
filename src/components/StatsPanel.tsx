@@ -1,6 +1,6 @@
 // ============================================================
 // Work Clicker — Stats Panel ("Late Night at the Office")
-// Compact horizontal strip — clean dark style
+// Vertical card layout for left column
 // ============================================================
 
 import React from 'react';
@@ -41,23 +41,41 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
   const progress = isOnShift && shiftDuration > 0 ? Math.min(1, Math.max(0, elapsed / shiftDuration)) : 0;
   const progressPct = (progress * 100).toFixed(1);
 
+  const stats: { label: string; value: string; highlight?: boolean; danger?: boolean }[] = [
+    { label: 'TOTAL WP', value: formatNumber(wp), highlight: true },
+    { label: 'WP/SEC', value: wps.toFixed(1) },
+    { label: 'WP/CLICK', value: wpPerClick.toFixed(1) },
+    { label: 'SHIFTS', value: String(shiftsCompleted) },
+    { label: 'OVERTIME', value: `${overtimeMinutes.toFixed(0)}m`, danger: overtimeMinutes > 0 },
+  ];
+
+  if (isOnShift) {
+    stats.push({ label: 'PROGRESS', value: `${progressPct}%` });
+  }
+
   return (
     <div style={styles.container}>
-      <div style={styles.statsRow}>
-        <StatBlock label="TOTAL WP" value={formatNumber(wp)} highlight />
-        <StatBlock label="WP/SEC" value={wps.toFixed(1)} />
-        <StatBlock label="WP/CLICK" value={wpPerClick.toFixed(1)} />
-        <StatBlock label="SHIFTS" value={String(shiftsCompleted)} />
-        <StatBlock
-          label="OVERTIME"
-          value={`${overtimeMinutes.toFixed(0)}m`}
-          danger={overtimeMinutes > 0}
-        />
-        {isOnShift && (
-          <StatBlock label="PROGRESS" value={`${progressPct}%`} />
-        )}
+      <div style={styles.title}>STATS</div>
+
+      <div style={styles.statsList}>
+        {stats.map((s) => (
+          <div key={s.label} style={styles.statRow}>
+            <span style={styles.statLabel}>{s.label}</span>
+            <span
+              className="tabular-nums"
+              style={{
+                ...styles.statValue,
+                ...(s.highlight ? styles.statHighlight : {}),
+                ...(s.danger ? styles.statDanger : {}),
+              }}
+            >
+              {s.value}
+            </span>
+          </div>
+        ))}
+
         {activeEventName && (
-          <div style={styles.statBlock}>
+          <div style={styles.statRow}>
             <span style={styles.statLabel}>EVENT</span>
             <span style={styles.eventPill}>{activeEventName}</span>
           </div>
@@ -81,54 +99,40 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
   );
 };
 
-interface StatBlockProps {
-  label: string;
-  value: string;
-  highlight?: boolean;
-  danger?: boolean;
-}
-
-const StatBlock: React.FC<StatBlockProps> = ({ label, value, highlight, danger }) => (
-  <div style={styles.statBlock}>
-    <span style={styles.statLabel}>{label}</span>
-    <span
-      className="tabular-nums"
-      style={{
-        ...styles.statValue,
-        ...(highlight ? styles.statHighlight : {}),
-        ...(danger ? styles.statDanger : {}),
-      }}
-    >
-      {value}
-    </span>
-  </div>
-);
-
 const styles: Record<string, React.CSSProperties> = {
   container: {
-    background: '#222226',
+    background: '#2A2A2F',
     borderRadius: 8,
-    padding: '8px 16px',
+    padding: '12px 14px',
     display: 'flex',
     flexDirection: 'column',
-    gap: 6,
+    gap: 8,
     width: '100%',
     boxSizing: 'border-box',
   },
-  statsRow: {
-    display: 'flex',
-    flexWrap: 'wrap',
-    gap: 16,
-    alignItems: 'center',
+  title: {
+    fontSize: 11,
+    fontWeight: 700,
+    color: '#E8D44D',
+    fontFamily: "'IBM Plex Mono', monospace",
+    letterSpacing: 2,
+    textTransform: 'uppercase' as const,
+    borderBottom: '1px solid #3A3A3F',
+    paddingBottom: 6,
   },
-  statBlock: {
+  statsList: {
     display: 'flex',
     flexDirection: 'column',
-    alignItems: 'flex-start',
-    gap: 2,
+    gap: 6,
+  },
+  statRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '2px 0',
   },
   statLabel: {
-    fontSize: 9,
+    fontSize: 10,
     color: '#6B6860',
     fontWeight: 600,
     fontFamily: "'IBM Plex Mono', monospace",
@@ -168,6 +172,7 @@ const styles: Record<string, React.CSSProperties> = {
     background: 'rgba(255,255,255,0.06)',
     borderRadius: 2,
     overflow: 'hidden',
+    marginTop: 4,
   },
   progressBar: {
     height: '100%',

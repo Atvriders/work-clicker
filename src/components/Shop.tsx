@@ -17,6 +17,10 @@ interface ShopProps {
   onBuyUpgrade: (upgradeId: string) => void;
   upgrades: UpgradeDef[];
   achievements: string[];
+  prestigeLevel: number;
+  prestigeMultiplier: number;
+  prestigeCost: number;
+  onPrestige: () => void;
 }
 
 interface UpgradeDef {
@@ -30,7 +34,7 @@ interface UpgradeDef {
   tier: number;
 }
 
-type ShopTab = 'STATIONS' | 'UPGRADES' | 'TROPHIES';
+type ShopTab = 'STATIONS' | 'UPGRADES' | 'TROPHIES' | 'PRESTIGE';
 
 function formatNumber(n: number): string {
   if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1) + 'B';
@@ -53,8 +57,13 @@ const Shop: React.FC<ShopProps> = ({
   onBuyUpgrade,
   upgrades,
   achievements,
+  prestigeLevel,
+  prestigeMultiplier,
+  prestigeCost,
+  onPrestige,
 }) => {
   const [tab, setTab] = useState<ShopTab>('STATIONS');
+  const [showPrestigeConfirm, setShowPrestigeConfirm] = useState(false);
 
   const unlockedStations = STATIONS.filter((st) => totalWp >= st.unlockAt);
   const availableUpgrades = upgrades
@@ -67,16 +76,16 @@ const Shop: React.FC<ShopProps> = ({
 
       {/* Tab Toggle — pill style */}
       <div style={styles.tabRow}>
-        {(['STATIONS', 'UPGRADES', 'TROPHIES'] as ShopTab[]).map((t) => (
+        {(['STATIONS', 'UPGRADES', 'TROPHIES', 'PRESTIGE'] as ShopTab[]).map((t) => (
           <button
             key={t}
             style={{
               ...styles.tab,
-              ...(tab === t ? styles.tabActive : {}),
+              ...(tab === t ? (t === 'PRESTIGE' ? styles.tabActivePrestige : styles.tabActive) : {}),
             }}
             onClick={() => setTab(t)}
           >
-            {t === 'STATIONS' ? '\uD83C\uDFE2' : t === 'UPGRADES' ? '\u2B06\uFE0F' : '\uD83C\uDFC6'}{' '}
+            {t === 'STATIONS' ? '\uD83C\uDFE2' : t === 'UPGRADES' ? '\u2B06\uFE0F' : t === 'TROPHIES' ? '\uD83C\uDFC6' : '\u2B50'}{' '}
             {t}
           </button>
         ))}
@@ -84,7 +93,105 @@ const Shop: React.FC<ShopProps> = ({
 
       {/* List */}
       <div style={styles.list}>
-        {tab === 'TROPHIES' ? (
+        {tab === 'PRESTIGE' ? (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '8px 0' }}>
+            {/* Current Level */}
+            <div style={{ textAlign: 'center', padding: '16px 0' }}>
+              <div style={{ fontSize: 36, marginBottom: 4 }}>{'\u2B50'}</div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: '#F5A623', fontFamily: "'IBM Plex Mono', monospace" }}>
+                PRESTIGE {prestigeLevel}
+              </div>
+              <div style={{ fontSize: 14, color: '#E8D44D', fontWeight: 600, fontFamily: "'IBM Plex Mono', monospace", marginTop: 4 }}>
+                {prestigeMultiplier.toFixed(2)}x all production
+              </div>
+            </div>
+
+            {/* Next Prestige Info */}
+            <div style={{ ...styles.card, borderLeft: '3px solid #F5A623', background: '#2A2A2F' }}>
+              <div style={{ fontSize: 12, color: '#9E9B94', fontWeight: 600, fontFamily: "'IBM Plex Mono', monospace", marginBottom: 6 }}>
+                NEXT PRESTIGE
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                <span style={{ fontSize: 13, color: '#E8E6E1', fontWeight: 600 }}>
+                  Level {prestigeLevel + 1}
+                </span>
+                <span style={{ fontSize: 13, color: '#66BB6A', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>
+                  {(1 + (prestigeLevel + 1) * 0.25).toFixed(2)}x multiplier
+                </span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ ...styles.priceTag }}>
+                  {formatNumber(prestigeCost)} WP
+                </span>
+                <span style={{ fontSize: 11, color: wp >= prestigeCost ? '#66BB6A' : '#EF5350', fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600 }}>
+                  {wp >= prestigeCost ? 'READY' : `Need ${formatNumber(prestigeCost - wp)} more`}
+                </span>
+              </div>
+            </div>
+
+            {/* Prestige Button */}
+            {!showPrestigeConfirm ? (
+              <button
+                style={{
+                  ...styles.prestigeBtn,
+                  ...(wp < prestigeCost ? styles.prestigeBtnDisabled : {}),
+                }}
+                disabled={wp < prestigeCost}
+                onClick={() => setShowPrestigeConfirm(true)}
+              >
+                {'\u2B50'} PRESTIGE TO LEVEL {prestigeLevel + 1}
+              </button>
+            ) : (
+              <div style={{ ...styles.card, border: '2px solid #EF5350', background: '#2A1A1A' }}>
+                <div style={{ fontSize: 13, color: '#EF5350', fontWeight: 700, marginBottom: 8, textAlign: 'center', fontFamily: "'IBM Plex Mono', monospace" }}>
+                  ARE YOU SURE?
+                </div>
+                <div style={{ fontSize: 11, color: '#9E9B94', marginBottom: 10, lineHeight: 1.5, textAlign: 'center' }}>
+                  This will reset your stations, upgrades, and current WP.
+                  You will keep your prestige level, lifetime WP, achievements, and shifts.
+                </div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                  <button
+                    style={{ ...styles.prestigeBtn, flex: 1, fontSize: 11, padding: '8px 0' }}
+                    onClick={() => { onPrestige(); setShowPrestigeConfirm(false); }}
+                  >
+                    CONFIRM PRESTIGE
+                  </button>
+                  <button
+                    style={{ ...styles.buyBtn, flex: 1, fontSize: 11, padding: '8px 0', background: '#3A3A3F', color: '#9E9B94' }}
+                    onClick={() => setShowPrestigeConfirm(false)}
+                  >
+                    CANCEL
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* What you keep / lose */}
+            <div style={{ ...styles.card, background: '#222226' }}>
+              <div style={{ fontSize: 11, color: '#66BB6A', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", marginBottom: 6 }}>
+                {'\u2705'} YOU KEEP:
+              </div>
+              <div style={{ fontSize: 11, color: '#9E9B94', lineHeight: 1.6, paddingLeft: 8 }}>
+                Prestige level + multiplier<br/>
+                Total WP (lifetime)<br/>
+                Achievements / Trophies<br/>
+                Shifts completed<br/>
+                Callsign / Username
+              </div>
+            </div>
+            <div style={{ ...styles.card, background: '#222226' }}>
+              <div style={{ fontSize: 11, color: '#EF5350', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", marginBottom: 6 }}>
+                {'\u274C'} YOU LOSE:
+              </div>
+              <div style={{ fontSize: 11, color: '#9E9B94', lineHeight: 1.6, paddingLeft: 8 }}>
+                Current WP (set to 0)<br/>
+                All stations (reset)<br/>
+                All upgrades (reset)
+              </div>
+            </div>
+          </div>
+        ) : tab === 'TROPHIES' ? (
           <Achievements unlockedIds={achievements} />
         ) : tab === 'STATIONS' ? (
           unlockedStations.length === 0 ? (
@@ -251,6 +358,10 @@ const styles: Record<string, React.CSSProperties> = {
     background: '#E8D44D',
     color: '#1A1A1E',
   },
+  tabActivePrestige: {
+    background: '#F5A623',
+    color: '#1A1A1E',
+  },
   list: {
     flex: 1,
     overflowY: 'auto' as const,
@@ -365,6 +476,26 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#EF5350',
     fontWeight: 600,
     fontFamily: "'IBM Plex Mono', monospace",
+  },
+  prestigeBtn: {
+    background: 'linear-gradient(135deg, #F5A623, #E8D44D)',
+    border: 'none',
+    color: '#1A1A1E',
+    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: 13,
+    padding: '12px 20px',
+    borderRadius: 6,
+    cursor: 'pointer',
+    fontWeight: 800,
+    letterSpacing: 1,
+    textAlign: 'center' as const,
+    transition: 'all 0.2s ease',
+  },
+  prestigeBtnDisabled: {
+    background: '#2A2A2F',
+    color: '#6B6860',
+    border: '1px solid #3A3A3F',
+    cursor: 'not-allowed',
   },
   emptyMsg: {
     color: '#6B6860',

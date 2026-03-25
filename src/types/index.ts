@@ -111,4 +111,6 @@ export interface GameState {
   callsign: string;
   discountActive: number;
   startTime: number;
+  prestigeLevel: number;
+  prestigeMultiplier: number;
 }

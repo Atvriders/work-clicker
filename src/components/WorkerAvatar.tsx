@@ -187,35 +187,67 @@ const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, i
   const [now, setNow] = useState(Date.now());
   const [messageKey, setMessageKey] = useState(0);
   const [speechOpacity, setSpeechOpacity] = useState(1);
+  const [displayedText, setDisplayedText] = useState('');
+  const [fullMessage, setFullMessage] = useState('');
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const interval = setInterval(() => setNow(Date.now()), 500);
     return () => clearInterval(interval);
   }, []);
 
-  // Rotate speech bubbles every 5 seconds with fade in/out
+  const state = getWorkerState(shiftStart, clockOutTime, isOnShift, now);
+
+  // Set initial message on mount
   useEffect(() => {
-    // Initial fade in
-    setSpeechOpacity(1);
-
-    const interval = setInterval(() => {
-      // Start fade out at 4s (700ms fade out duration)
-      setSpeechOpacity(0);
-      fadeTimerRef.current = setTimeout(() => {
-        // After fade out completes, change message and fade in
-        setMessageKey((k) => k + 1);
-        setSpeechOpacity(1);
-      }, 700);
-    }, 5000);
-
-    return () => {
-      clearInterval(interval);
-      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
-    };
+    setFullMessage(state.message);
+    setDisplayedText('');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const state = getWorkerState(shiftStart, clockOutTime, isOnShift, now);
+  // Typewriter effect: when fullMessage changes, type it out char by char
+  useEffect(() => {
+    if (!fullMessage) return;
+
+    // Clear any existing timers
+    if (typeTimerRef.current) clearTimeout(typeTimerRef.current);
+    if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+    if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+
+    setDisplayedText('');
+    setSpeechOpacity(1);
+    let charIndex = 0;
+
+    const typeNextChar = () => {
+      charIndex++;
+      setDisplayedText(fullMessage.slice(0, charIndex));
+
+      if (charIndex < fullMessage.length) {
+        typeTimerRef.current = setTimeout(typeNextChar, 50);
+      } else {
+        // Fully typed — hold for 4 seconds, then fade out over 0.5s, then next message
+        holdTimerRef.current = setTimeout(() => {
+          setSpeechOpacity(0);
+          fadeTimerRef.current = setTimeout(() => {
+            // Pick next message based on current state
+            const newState = getWorkerState(shiftStart, clockOutTime, isOnShift, Date.now());
+            setFullMessage(newState.message);
+            setMessageKey((k) => k + 1);
+          }, 500);
+        }, 4000);
+      }
+    };
+
+    typeTimerRef.current = setTimeout(typeNextChar, 50);
+
+    return () => {
+      if (typeTimerRef.current) clearTimeout(typeTimerRef.current);
+      if (holdTimerRef.current) clearTimeout(holdTimerRef.current);
+      if (fadeTimerRef.current) clearTimeout(fadeTimerRef.current);
+    };
+  }, [fullMessage, messageKey, shiftStart, clockOutTime, isOnShift]);
 
   // Celebration check
   const remaining = clockOutTime - now;
@@ -229,11 +261,11 @@ const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, i
         style={{
           ...styles.speechBubble,
           opacity: speechOpacity,
-          transition: speechOpacity === 1 ? 'opacity 0.3s ease-in' : 'opacity 0.7s ease-out',
+          transition: speechOpacity === 1 ? 'opacity 0.3s ease-in' : 'opacity 0.5s ease-out',
         }}
         className={`worker-speech-bubble ${state.mood}`}
       >
-        <span style={styles.speechText}>{state.message}</span>
+        <span style={styles.speechText}>{displayedText}<span style={styles.cursor}>|</span></span>
       </div>
 
       {/* Character sitting behind desk */}
@@ -289,11 +321,18 @@ const styles: Record<string, React.CSSProperties> = {
     transform: 'rotate(1deg)',
     boxShadow: '2px 3px 8px rgba(0,0,0,0.35)',
     maxWidth: 220,
+    minHeight: 20,
     textAlign: 'center' as const,
     lineHeight: 1.35,
   },
   speechText: {
     color: '#1A1A1E',
+  },
+  cursor: {
+    color: '#1A1A1E',
+    opacity: 0.6,
+    fontWeight: 400,
+    animation: 'blink-cursor 1s step-end infinite',
   },
   sceneWrap: {
     position: 'relative' as const,

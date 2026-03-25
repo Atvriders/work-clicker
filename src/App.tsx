@@ -19,7 +19,7 @@ import Login from './components/Login';
 import Leaderboard from './components/Leaderboard';
 import Chat from './components/Chat';
 
-const MOBILE_BREAKPOINT = 768;
+const MOBILE_BREAKPOINT = 900;
 const USERNAME_KEY = 'work-clicker-username';
 
 function formatNumber(n: number): string {
@@ -46,7 +46,6 @@ function useIsMobile() {
 }
 
 type MobileTab = 'work' | 'stats' | 'shop' | 'log';
-type BottomTab = 'log' | 'shop';
 
 const TABS: { key: MobileTab; icon: string; label: string }[] = [
   { key: 'work', icon: '\uD83D\uDCBC', label: 'Work' },
@@ -109,6 +108,9 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
   const wpPerSecond = useGameStore((s) => s.wpPerSecond);
   const clickMultiplier = useGameStore((s) => s.clickMultiplier);
 
+  const prestigeLevel = useGameStore((s) => s.prestigeLevel);
+  const prestigeMultiplier = useGameStore((s) => s.prestigeMultiplier);
+
   const storeClick = useGameStore((s) => s.click);
   const storeBuyStation = useGameStore((s) => s.buyStation);
   const storeBuyUpgrade = useGameStore((s) => s.buyUpgrade);
@@ -116,12 +118,13 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
   const storeSetClockOutTime = useGameStore((s) => s.setClockOutTime);
   const storeAddLogEntry = useGameStore((s) => s.addLogEntry);
   const storeClearEventLog = useGameStore((s) => s.clearEventLog);
+  const storePrestige = useGameStore((s) => s.prestige);
+  const storeGetPrestigeCost = useGameStore((s) => s.getPrestigeCost);
 
   useGameLoop();
 
   const isMobile = useIsMobile();
   const [activeTab, setActiveTab] = useState<MobileTab>('work');
-  const [bottomTab, setBottomTab] = useState<BottomTab>('log');
   const [showWelcome, setShowWelcome] = useState(!!loginMessage);
 
   const effectiveWpPerClick = (() => {
@@ -233,6 +236,8 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
                 ownedStations={stations} purchasedUpgrades={upgrades}
                 onBuyStation={handleBuyStation} onBuyUpgrade={handleBuyUpgrade}
                 upgrades={UPGRADES} achievements={achievements}
+                prestigeLevel={prestigeLevel} prestigeMultiplier={prestigeMultiplier}
+                prestigeCost={storeGetPrestigeCost()} onPrestige={storePrestige}
               />
             </section>
           )}
@@ -265,7 +270,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     );
   }
 
-  // Desktop layout — single centered column
+  // Desktop layout — 3-column
   return (
     <div style={styles.wrapper}>
       {showWelcome && loginMessage && (
@@ -292,10 +297,23 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
         </div>
       </header>
 
-      {/* Single centered column */}
+      {/* 3-column desktop layout */}
       <main style={styles.main}>
+        {/* LEFT COLUMN: Stats + StationList */}
+        <div style={styles.leftCol}>
+          <StatsPanel
+            wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
+            shiftStart={shiftStart} clockOutTime={clockOutTime}
+            shiftsCompleted={shiftsCompleted} overtimeMinutes={overtimeMinutes}
+            activeEventName={activeEventName} isOnShift={isOnShift}
+          />
+          <div style={styles.stationListWrap}>
+            <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
+          </div>
+        </div>
+
+        {/* CENTER COLUMN: Timer, Worker, Work Button, Events, Log */}
         <div style={styles.centerCol}>
-          {/* 1. ClockOutTimer — full width card */}
           <div style={styles.timerWrap}>
             <ClockOutTimer
               shiftStart={shiftStart}
@@ -306,63 +324,28 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
             />
           </div>
 
-          {/* 2. WorkerAvatar + WorkButton side by side */}
           <div className="desk-card" style={styles.workerWorkRow}>
             <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
             <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
           </div>
 
-          {/* 3. StatsPanel — compact horizontal strip */}
-          <StatsPanel
-            wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
-            shiftStart={shiftStart} clockOutTime={clockOutTime}
-            shiftsCompleted={shiftsCompleted} overtimeMinutes={overtimeMinutes}
-            activeEventName={activeEventName} isOnShift={isOnShift}
-          />
-
-          {/* 4. EventPopup — inline when active */}
           <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
 
-          {/* 5. Tab buttons: LOG / SHOP */}
-          <div style={styles.bottomTabRow}>
-            <button
-              style={{
-                ...styles.bottomTabBtn,
-                ...(bottomTab === 'log' ? styles.bottomTabActive : {}),
-              }}
-              onClick={() => setBottomTab('log')}
-            >
-              {'\uD83D\uDCCB'} LOG
-            </button>
-            <button
-              style={{
-                ...styles.bottomTabBtn,
-                ...(bottomTab === 'shop' ? styles.bottomTabActive : {}),
-              }}
-              onClick={() => setBottomTab('shop')}
-            >
-              {'\uD83D\uDED2'} SHOP
-            </button>
+          <div style={styles.logArea}>
+            <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
           </div>
+        </div>
 
-          {/* 6. Tab content area — takes remaining height */}
-          <div style={styles.bottomPanel}>
-            {bottomTab === 'log' ? (
-              <div style={styles.logArea}>
-                <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
-              </div>
-            ) : (
-              <div style={styles.shopArea}>
-                <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
-                <Shop
-                  wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
-                  ownedStations={stations} purchasedUpgrades={upgrades}
-                  onBuyStation={handleBuyStation} onBuyUpgrade={handleBuyUpgrade}
-                  upgrades={UPGRADES} achievements={achievements}
-                />
-              </div>
-            )}
-          </div>
+        {/* RIGHT COLUMN: Shop */}
+        <div style={styles.rightCol}>
+          <Shop
+            wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
+            ownedStations={stations} purchasedUpgrades={upgrades}
+            onBuyStation={handleBuyStation} onBuyUpgrade={handleBuyUpgrade}
+            upgrades={UPGRADES} achievements={achievements}
+            prestigeLevel={prestigeLevel} prestigeMultiplier={prestigeMultiplier}
+            prestigeCost={storeGetPrestigeCost()} onPrestige={storePrestige}
+          />
         </div>
       </main>
 
@@ -488,24 +471,51 @@ const styles: Record<string, React.CSSProperties> = {
     color: '#EF5350',
   },
 
-  // Single centered column layout
+  // 3-column desktop layout
   main: {
     flex: 1,
     overflow: 'hidden',
     display: 'flex',
-    justifyContent: 'center',
-    padding: '0 12px',
+    flexDirection: 'row',
+    gap: 12,
+    padding: '8px 12px',
     position: 'relative',
     zIndex: 1,
+    minHeight: 0,
   },
+
+  // Left column
+  leftCol: {
+    width: 280,
+    flexShrink: 0,
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 8,
+    overflow: 'auto',
+    minHeight: 0,
+  },
+  stationListWrap: {
+    flex: 1,
+    overflow: 'auto',
+    minHeight: 0,
+  },
+
+  // Center column
   centerCol: {
-    width: '100%',
-    maxWidth: 700,
+    flex: 1,
     display: 'flex',
     flexDirection: 'column',
     gap: 8,
     overflow: 'hidden',
-    padding: '8px 0',
+    minHeight: 0,
+  },
+
+  // Right column
+  rightCol: {
+    width: 320,
+    flexShrink: 0,
+    overflow: 'auto',
+    minHeight: 0,
   },
 
   // Timer wrapper
@@ -524,53 +534,12 @@ const styles: Record<string, React.CSSProperties> = {
     padding: '8px 16px',
   },
 
-  // Bottom tab row: LOG / SHOP toggle
-  bottomTabRow: {
-    display: 'flex',
-    gap: 4,
-    flexShrink: 0,
-  },
-  bottomTabBtn: {
-    flex: 1,
-    padding: '8px 0',
-    textAlign: 'center' as const,
-    fontSize: 12,
-    letterSpacing: 1,
-    cursor: 'pointer',
-    border: 'none',
-    background: '#2A2A2F',
-    color: '#6B6860',
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontWeight: 700,
-    transition: 'all 0.2s ease',
-    borderRadius: '6px 6px 0 0',
-  },
-  bottomTabActive: {
-    background: '#1E1E22',
-    color: '#E8D44D',
-  },
-
-  // Bottom panel that fills remaining space
-  bottomPanel: {
-    flex: 1,
-    overflow: 'hidden',
-    display: 'flex',
-    flexDirection: 'column',
-    minHeight: 0,
-  },
+  // Log area in center column
   logArea: {
     flex: 1,
     display: 'flex',
     flexDirection: 'column',
     overflow: 'hidden',
-    minHeight: 0,
-  },
-  shopArea: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
-    overflow: 'auto',
     minHeight: 0,
   },
 

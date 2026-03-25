@@ -55,6 +55,8 @@ const initialState: GameState = {
   callsign: '',
   discountActive: 0,
   startTime: Date.now(),
+  prestigeLevel: 0,
+  prestigeMultiplier: 1,
 };
 
 // ---- Store actions interface ----
@@ -72,6 +74,8 @@ interface GameActions {
   addLogEntry: (message: string, type: EventLogType) => void;
   clearEventLog: () => void;
   recalcWps: () => void;
+  getPrestigeCost: () => number;
+  prestige: () => void;
   save: () => void;
   load: () => void;
   reset: () => void;
@@ -153,7 +157,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (!s.isOnShift) return {}; // Can't work if not on shift
 
       const eventMods = getEventModifiers(s.activeEvent);
-      const gained = s.wpPerClick * s.clickMultiplier * eventMods.clickMult;
+      const gained = s.wpPerClick * s.clickMultiplier * eventMods.clickMult * s.prestigeMultiplier;
       const task = WORK_TASKS[Math.floor(Math.random() * WORK_TASKS.length)];
 
       const newLog = [
@@ -225,7 +229,7 @@ export const useGameStore = create<GameStore>((set, get) => ({
       if (s.isOnShift) {
         const eventMods = getEventModifiers(activeEvent);
         if (!eventMods.noPassive && s.wpPerSecond > 0) {
-          const gained = s.wpPerSecond * deltaSec * eventMods.wpsMult;
+          const gained = s.wpPerSecond * deltaSec * eventMods.wpsMult * s.prestigeMultiplier;
           patch.wp = (patch.wp ?? s.wp) + gained;
           patch.totalWp = (patch.totalWp ?? s.totalWp) + gained;
         }
@@ -398,8 +402,9 @@ export const useGameStore = create<GameStore>((set, get) => ({
     // Apply immediate effects
     const patch: Partial<GameState> = {};
     if (event.effect.type === 'bonus_wp') {
-      patch.wp = s.wp + event.effect.value;
-      patch.totalWp = s.totalWp + event.effect.value;
+      const bonus = event.effect.value * s.prestigeMultiplier;
+      patch.wp = s.wp + bonus;
+      patch.totalWp = s.totalWp + bonus;
     }
 
     set({
@@ -469,6 +474,43 @@ export const useGameStore = create<GameStore>((set, get) => ({
     });
   },
 
+  // --- Prestige ---
+  getPrestigeCost: () => {
+    const s = get();
+    return Math.floor(100 * Math.pow(2, s.prestigeLevel));
+  },
+
+  prestige: () => {
+    const s = get();
+    const cost = Math.floor(100 * Math.pow(2, s.prestigeLevel));
+    if (s.wp < cost) return;
+
+    const newLevel = s.prestigeLevel + 1;
+    const newMultiplier = 1 + newLevel * 0.25;
+
+    set({
+      wp: 0,
+      wpPerClick: 1,
+      wpPerSecond: 0,
+      clickMultiplier: 1,
+      stations: {},
+      upgrades: [],
+      activeEvent: null,
+      coffeeLevel: 0,
+      breakTimeLeft: 0,
+      discountActive: 0,
+      prestigeLevel: newLevel,
+      prestigeMultiplier: newMultiplier,
+      eventLog: [
+        makeLogEntry(
+          `PRESTIGE! Level ${newLevel} — ${newMultiplier.toFixed(2)}x multiplier`,
+          'milestone',
+        ),
+        ...s.eventLog,
+      ].slice(0, 200),
+    });
+  },
+
   // --- Save / Load / Reset ---
   save: () => {
     const s = get();
@@ -495,6 +537,8 @@ export const useGameStore = create<GameStore>((set, get) => ({
       callsign: username || '',
       discountActive: s.discountActive,
       startTime: s.startTime,
+      prestigeLevel: s.prestigeLevel,
+      prestigeMultiplier: s.prestigeMultiplier,
     };
     try {
       localStorage.setItem(SAVE_KEY, JSON.stringify(saveData));
@@ -565,6 +609,6 @@ export const useGameStore = create<GameStore>((set, get) => ({
 
   reset: () => {
     localStorage.removeItem(SAVE_KEY);
-    set({ ...initialState, startTime: Date.now(), clockOutTime: getDefaultClockOut() });
+    set({ ...initialState, startTime: Date.now(), clockOutTime: getDefaultClockOut(), prestigeLevel: 0, prestigeMultiplier: 1 });
   },
 }));
