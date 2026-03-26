@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Login Screen ("Late Night Office")
-// Clock-in terminal with dark theme
+// Work Clicker — Login Screen ("Corporate Dystopia Brutalism")
+// Bleak clock-in terminal from the void
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -11,10 +11,22 @@ interface LoginProps {
 
 const USERNAME_KEY = 'work-clicker-username';
 
+const BLINK_KEYFRAMES = `
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.2; }
+}
+@keyframes heartbeat-line {
+  0% { background-position: -300px 0; }
+  100% { background-position: 300px 0; }
+}
+`;
+
 const Login: React.FC<LoginProps> = ({ onLogin }) => {
   const [username, setUsername] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
+  const [focused, setFocused] = useState(false);
 
   const doLogin = useCallback(async (name: string) => {
     setLoading(true);
@@ -57,43 +69,54 @@ const Login: React.FC<LoginProps> = ({ onLogin }) => {
     doLogin(trimmed);
   };
 
+  const s = styles;
+
   if (loading) {
     return (
-      <div style={styles.wrapper}>
-        <div style={styles.container}>
-          <div style={styles.loadingText}>CONNECTING...</div>
+      <div style={s.wrapper}>
+        <style>{BLINK_KEYFRAMES}</style>
+        <div style={s.card}>
+          <div style={s.heartbeatLine} />
+          <div style={s.cardInner}>
+            <div style={s.loadingText}>AUTHENTICATING...</div>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={styles.wrapper}>
-      <div style={styles.container}>
-        <h1 style={styles.title}>WORK CLICKER</h1>
-        <div style={styles.subtitle}>Clock in to start your shift</div>
+    <div style={s.wrapper}>
+      <style>{BLINK_KEYFRAMES}</style>
+      <div style={s.card}>
+        <div style={s.heartbeatLine} />
+        <div style={s.cardInner}>
+          <h1 style={s.title}>WORK CLICKER</h1>
+          <div style={s.subtitle}>Clock in. Grind. Clock out.</div>
 
-        <form onSubmit={handleSubmit} style={styles.form}>
-          <label style={styles.label}>YOUR NAME</label>
-          <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter your name"
-            style={styles.input}
-            autoFocus
-            maxLength={20}
-          />
+          <form onSubmit={handleSubmit} style={s.form}>
+            <input
+              type="text"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onBlur={() => setFocused(false)}
+              placeholder="Enter employee ID..."
+              style={{
+                ...s.input,
+                borderColor: focused ? '#D4A017' : '#333',
+                boxShadow: focused ? '0 0 0 2px rgba(212,160,23,0.25)' : 'none',
+              }}
+              autoFocus
+              maxLength={20}
+            />
 
-          {error && <div style={styles.error}>{error}</div>}
+            {error && <div style={s.error}>{error}</div>}
 
-          <button type="submit" style={styles.button}>
-            CLOCK IN
-          </button>
-        </form>
-
-        <div style={styles.hint}>
-          Your name is your identity. No password needed.
+            <button type="submit" style={s.button}>
+              PUNCH IN
+            </button>
+          </form>
         </div>
       </div>
     </div>
@@ -108,61 +131,70 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     height: '100vh',
     width: '100vw',
-    background: '#1A1A1E',
+    background: '#0a0a0a',
+    margin: 0,
+    padding: 0,
   },
-  container: {
+  card: {
+    maxWidth: 360,
+    width: '90%',
+    background: '#111',
+    border: '1px solid #222',
+    borderRadius: 0,
+    boxShadow: '0 0 60px rgba(0,0,0,0.8), 0 0 1px rgba(212,160,23,0.3)',
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  heartbeatLine: {
+    height: 3,
+    width: '100%',
+    background: 'linear-gradient(90deg, transparent 0%, #D4A017 40%, #E8D44D 50%, #D4A017 60%, transparent 100%)',
+    backgroundSize: '300px 3px',
+    backgroundRepeat: 'no-repeat',
+    animation: 'heartbeat-line 2s ease-in-out infinite',
+  },
+  cardInner: {
+    padding: '48px 36px 40px',
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    padding: '48px 40px',
-    maxWidth: '420px',
-    width: '90%',
-    background: '#2A2A2F',
-    borderRadius: 16,
-    border: '1px solid #3A3A3F',
-    boxShadow: '0 8px 32px rgba(0,0,0,0.4)',
   },
   title: {
     margin: '0 0 8px 0',
-    fontSize: '28px',
+    fontSize: 28,
     fontWeight: 700,
-    letterSpacing: 4,
-    color: '#E8D44D',
+    letterSpacing: '0.2em',
+    color: '#D4A017',
     textAlign: 'center',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    textTransform: 'uppercase',
   },
   subtitle: {
-    fontSize: '15px',
-    color: '#9E9B94',
-    marginBottom: '36px',
+    fontSize: 13,
+    color: '#555',
+    marginBottom: 36,
     fontWeight: 400,
-    letterSpacing: 0.5,
-    fontFamily: "'Nunito', 'Source Sans 3', sans-serif",
+    fontStyle: 'italic',
+    letterSpacing: '0.05em',
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
   },
   form: {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '14px',
+    gap: 14,
     width: '100%',
-  },
-  label: {
-    fontSize: '11px',
-    letterSpacing: 2,
-    color: '#9E9B94',
-    fontWeight: 600,
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
   },
   input: {
     width: '100%',
-    padding: '14px 18px',
-    background: '#1A1A1E',
-    border: '1px solid #E8D44D',
-    borderRadius: '10px',
-    color: '#E8D44D',
-    fontSize: '18px',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-    letterSpacing: 0.5,
+    padding: '14px 16px',
+    background: '#0a0a0a',
+    border: '1px solid #333',
+    borderRadius: 0,
+    color: '#ccc',
+    fontSize: 14,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    letterSpacing: '0.05em',
     textAlign: 'center',
     outline: 'none',
     boxSizing: 'border-box',
@@ -170,38 +202,34 @@ const styles: Record<string, React.CSSProperties> = {
   },
   error: {
     color: '#EF5350',
-    fontSize: '13px',
-    fontWeight: 500,
+    fontSize: 12,
+    fontWeight: 600,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    letterSpacing: '0.05em',
   },
   button: {
-    padding: '14px 48px',
-    background: '#E8D44D',
+    width: '100%',
+    padding: '14px 0',
+    background: '#D4A017',
     border: 'none',
-    borderRadius: '28px',
-    color: '#1A1A1E',
-    fontSize: '15px',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    borderRadius: 0,
+    color: '#0a0a0a',
+    fontSize: 14,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
     fontWeight: 700,
-    letterSpacing: 3,
+    letterSpacing: '0.15em',
     textTransform: 'uppercase',
     cursor: 'pointer',
-    marginTop: '8px',
-    transition: 'all 0.2s ease',
-    boxShadow: '0 4px 16px rgba(232, 212, 77, 0.25)',
-  },
-  hint: {
-    marginTop: '28px',
-    fontSize: '12px',
-    color: '#6B6860',
-    letterSpacing: 0.3,
-    textAlign: 'center',
+    marginTop: 8,
+    transition: 'background 0.15s ease',
   },
   loadingText: {
-    fontSize: '16px',
-    color: '#E8D44D',
-    letterSpacing: 3,
-    fontWeight: 600,
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    fontSize: 15,
+    color: '#D4A017',
+    letterSpacing: '0.15em',
+    fontWeight: 700,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    animation: 'blink 1.2s ease-in-out infinite',
   },
 };
 

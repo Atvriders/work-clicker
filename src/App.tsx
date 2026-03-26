@@ -1,5 +1,6 @@
 // ============================================================
-// Work Clicker — Main App Layout ("Late Night at the Office")
+// Work Clicker — Main App Layout ("Corporate Dystopia Brutalism")
+// Bloomberg Terminal meets dystopian cubicle farm
 // ============================================================
 
 import React, { useCallback, useState, useEffect, useMemo } from 'react';
@@ -21,6 +22,7 @@ import Chat from './components/Chat';
 
 const MOBILE_BREAKPOINT = 900;
 const USERNAME_KEY = 'work-clicker-username';
+const TOPBAR_HEIGHT = 56;
 
 function formatNumber(n: number): string {
   if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1) + 'B';
@@ -53,6 +55,18 @@ const TABS: { key: MobileTab; icon: string; label: string }[] = [
   { key: 'shop', icon: '\uD83D\uDED2', label: 'Shop' },
   { key: 'log', icon: '\uD83D\uDCDC', label: 'Log' },
 ];
+
+// ── Brutalist panel wrapper ─────────────────────────────────
+const Panel: React.FC<{
+  title?: string;
+  children: React.ReactNode;
+  style?: React.CSSProperties;
+}> = ({ title, children, style }) => (
+  <div style={{ ...sty.panel, ...style }}>
+    {title && <div style={sty.panelHeader}>{title}</div>}
+    <div style={{ padding: 0 }}>{children}</div>
+  </div>
+);
 
 const App: React.FC = () => {
   const [loggedIn, setLoggedIn] = useState<string | null>(() => localStorage.getItem(USERNAME_KEY));
@@ -175,62 +189,71 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     ? activeEvent.event.name
     : null;
 
-  // Mobile layout
+  // Shift progress percentage (0-100)
+  const shiftProgress = useMemo(() => {
+    if (!isOnShift || !shiftStart || !clockOutTime) return 0;
+    const total = clockOutTime - shiftStart;
+    if (total <= 0) return 0;
+    const elapsed = Date.now() - shiftStart;
+    return Math.min(100, Math.max(0, Math.round((elapsed / total) * 100)));
+  }, [isOnShift, shiftStart, clockOutTime]);
+
+  // ── MOBILE LAYOUT ─────────────────────────────────────────
   if (isMobile) {
     return (
-      <div style={styles.wrapper}>
+      <div style={sty.wrapper}>
         {showWelcome && loginMessage && (
-          <div style={styles.welcomeBanner}>{loginMessage}</div>
+          <div style={sty.welcomeBanner}>{loginMessage}</div>
         )}
 
-        {/* Top: Timer always visible */}
-        <div style={{ padding: '4px 8px', flexShrink: 0 }}>
-          <ClockOutTimer
-            shiftStart={shiftStart}
-            clockOutTime={clockOutTime}
-            isOnShift={isOnShift}
-            onClockOutTimeChange={handleClockOutTimeChange}
-            onStartShift={handleStartShift}
-          />
-        </div>
+        {/* Heartbeat line */}
+        <div style={sty.heartbeatLine} />
 
-        {/* Header row */}
-        <header style={styles.topBarMobile}>
-          <div style={styles.statsBlockMobile}>
-            <span style={styles.statItem}>
-              WP: <strong style={styles.statValueYellow} className="tabular-nums">{formatNumber(wp)}</strong>
-            </span>
-            <span style={styles.statItem}>
-              WP/s: <strong style={styles.statValueYellow} className="tabular-nums">{wpPerSecond.toFixed(1)}</strong>
-            </span>
+        {/* Compact mobile top bar: WP + WP/s */}
+        <header style={sty.topBarMobile}>
+          <div style={sty.mobileWpBlock}>
+            <span style={sty.mobileWpValue} className="tabular-nums">{formatNumber(wp)}</span>
+            <span style={sty.mobileWpUnit}>WP</span>
           </div>
-          <div style={styles.actionBlockMobile}>
-            <button style={styles.headerBtn} onClick={() => setShowLeaderboard(true)}>LB</button>
-            <button style={{ ...styles.headerBtn, ...styles.logoutBtn }} onClick={onLogout}>OUT</button>
+          <div style={sty.mobileRateBlock}>
+            <span style={sty.mobileRate} className="tabular-nums">{wpPerSecond.toFixed(1)}/s</span>
+          </div>
+          <div style={sty.mobileActions}>
+            <button style={sty.iconBtn} onClick={() => setShowLeaderboard(true)} title="Leaderboard">LB</button>
+            <button style={{ ...sty.iconBtn, color: '#EF5350', borderColor: 'rgba(239,83,80,0.4)' }} onClick={onLogout} title="Log Out">X</button>
           </div>
         </header>
 
         {/* Tab Content */}
-        <div className="mobile-content" style={styles.mobileContent}>
+        <div className="mobile-content" style={sty.mobileContent}>
           {activeTab === 'work' && (
-            <section style={styles.mobileSection}>
+            <section style={sty.mobileSection}>
+              <ClockOutTimer
+                shiftStart={shiftStart}
+                clockOutTime={clockOutTime}
+                isOnShift={isOnShift}
+                onClockOutTimeChange={handleClockOutTimeChange}
+                onStartShift={handleStartShift}
+              />
               <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
-              <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
+              <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} isOnShift={isOnShift} clockOutTime={clockOutTime} />
             </section>
           )}
           {activeTab === 'stats' && (
-            <section style={styles.mobileSection}>
+            <section style={sty.mobileSection}>
               <StatsPanel
                 wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
                 shiftStart={shiftStart} clockOutTime={clockOutTime}
                 shiftsCompleted={shiftsCompleted} overtimeMinutes={overtimeMinutes}
-                activeEventName={activeEventName} isOnShift={isOnShift}
+                activeEventName={activeEventName} activeEvent={activeEvent}
+                isOnShift={isOnShift}
+                prestigeLevel={prestigeLevel} prestigeMultiplier={prestigeMultiplier}
               />
               <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
             </section>
           )}
           {activeTab === 'shop' && (
-            <section style={styles.mobileSection}>
+            <section style={sty.mobileSection}>
               <Shop
                 wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
                 ownedStations={stations} purchasedUpgrades={upgrades}
@@ -242,26 +265,30 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
             </section>
           )}
           {activeTab === 'log' && (
-            <section style={styles.mobileSection}>
+            <section style={sty.mobileSection}>
               <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
               <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
             </section>
           )}
         </div>
 
-        {/* Bottom Tab Bar */}
-        <nav className="mobile-tab-bar">
+        {/* Bottom Tab Bar — pill buttons */}
+        <nav style={sty.mobileTabBar}>
           {TABS.map((tab) => (
             <button
               key={tab.key}
-              className={`mobile-tab${activeTab === tab.key ? ' active' : ''}`}
+              style={{
+                ...sty.mobileTabBtn,
+                ...(activeTab === tab.key ? sty.mobileTabBtnActive : {}),
+              }}
               onClick={() => setActiveTab(tab.key)}
             >
-              <span className="mobile-tab-icon">{tab.icon}</span>
-              <span className="mobile-tab-label">{tab.label}</span>
+              <span style={{ fontSize: 16, lineHeight: '1' }}>{tab.icon}</span>
+              <span style={sty.mobileTabLabel}>{tab.label}</span>
             </button>
           ))}
         </nav>
+
         {showLeaderboard && (
           <Leaderboard currentUsername={username} onClose={() => setShowLeaderboard(false)} />
         )}
@@ -270,51 +297,65 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
     );
   }
 
-  // Desktop layout — 3-column
+  // ── DESKTOP LAYOUT ────────────────────────────────────────
   return (
-    <div style={styles.wrapper}>
+    <div style={sty.wrapper}>
       {showWelcome && loginMessage && (
-        <div style={styles.welcomeBanner}>{loginMessage}</div>
+        <div style={sty.welcomeBanner}>{loginMessage}</div>
       )}
 
-      {/* Top Bar: sticky header */}
-      <header style={styles.topBar}>
-        <div style={styles.titleBlock}>
-          <h1 style={styles.title}>WORK CLICKER</h1>
-          <span style={styles.titleFlicker}>_</span>
-        </div>
-        <div style={styles.statsBlock}>
-          <span style={styles.wpDisplay} className="tabular-nums">
-            {formatNumber(wp)} <span style={styles.wpLabel}>WP</span>
-          </span>
-        </div>
-        <div style={styles.actionBlock}>
-          <span style={styles.usernameLabel}>{username}</span>
-          <button style={styles.headerBtn} onClick={() => setShowLeaderboard(true)}>
-            LEADERBOARD
-          </button>
-          <button style={{ ...styles.headerBtn, ...styles.logoutBtn }} onClick={onLogout}>LOG OUT</button>
-        </div>
-      </header>
+      {/* Heartbeat line — 2px amber/green gradient */}
+      <div style={sty.heartbeatLine} />
 
-      {/* 3-column desktop layout */}
-      <main style={styles.main}>
-        {/* LEFT COLUMN: Stats + StationList */}
-        <div style={styles.leftCol}>
-          <StatsPanel
-            wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
-            shiftStart={shiftStart} clockOutTime={clockOutTime}
-            shiftsCompleted={shiftsCompleted} overtimeMinutes={overtimeMinutes}
-            activeEventName={activeEventName} isOnShift={isOnShift}
-          />
-          <div style={styles.stationListWrap}>
-            <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
+      {/* ── TOP BAR (fixed, z-100) ───────────────────────── */}
+      <header style={sty.topBar}>
+        {/* Left sector: brand + prestige badge */}
+        <div style={sty.topBarLeft}>
+          <span style={sty.brandMark}>{'\u258C'}</span>
+          <h1 style={sty.brandTitle}>WORK CLICKER</h1>
+          {prestigeLevel > 0 && (
+            <span style={sty.prestigeBadge}>P{prestigeLevel}</span>
+          )}
+        </div>
+
+        {/* Center sector: WP counter + thin shift progress bar */}
+        <div style={sty.topBarCenter}>
+          <div style={sty.wpRow}>
+            <span style={sty.wpBlocks}>{'\u2588\u2588'}</span>
+            <span style={sty.wpValue} className="tabular-nums">{formatNumber(wp)}</span>
+            <span style={sty.wpUnit}>WP</span>
+          </div>
+          {/* Shift progress bar */}
+          <div style={sty.shiftTrack}>
+            <div style={{ ...sty.shiftFill, width: `${shiftProgress}%` }} />
           </div>
         </div>
 
-        {/* CENTER COLUMN: Timer, Worker, Work Button, Events, Log */}
-        <div style={styles.centerCol}>
-          <div style={styles.timerWrap}>
+        {/* Right sector: rate + user icon + logout */}
+        <div style={sty.topBarRight}>
+          <div style={sty.rateChip}>
+            <span style={{ fontSize: 12 }}>{'\u26A1'}</span>
+            <span style={sty.rateVal} className="tabular-nums">{wpPerSecond.toFixed(1)}/s</span>
+          </div>
+          <button style={sty.iconBtn} onClick={() => setShowLeaderboard(true)} title="Leaderboard">
+            {'\uD83D\uDC64'}
+          </button>
+          <button
+            style={{ ...sty.iconBtn, color: '#EF5350', borderColor: 'rgba(239,83,80,0.3)' }}
+            onClick={onLogout}
+            title="Log Out"
+          >
+            LOG OUT
+          </button>
+        </div>
+      </header>
+
+      {/* ── 3-COLUMN MAIN AREA ───────────────────────────── */}
+      <main style={sty.main}>
+
+        {/* LEFT COLUMN (300px) — Timer, Stats, Stations */}
+        <div style={sty.leftCol}>
+          <Panel title="SHIFT TIMER">
             <ClockOutTimer
               shiftStart={shiftStart}
               clockOutTime={clockOutTime}
@@ -322,37 +363,56 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
               onClockOutTimeChange={handleClockOutTimeChange}
               onStartShift={handleStartShift}
             />
-          </div>
+          </Panel>
 
-          <div className="desk-card" style={styles.workerWorkRow}>
-            <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
-            <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} />
-          </div>
+          <Panel title="METRICS" style={{ flexShrink: 0 }}>
+            <StatsPanel
+              wp={wp} wps={wpPerSecond} wpPerClick={effectiveWpPerClick}
+              shiftStart={shiftStart} clockOutTime={clockOutTime}
+              shiftsCompleted={shiftsCompleted} overtimeMinutes={overtimeMinutes}
+              activeEventName={activeEventName} activeEvent={activeEvent}
+              isOnShift={isOnShift}
+              prestigeLevel={prestigeLevel} prestigeMultiplier={prestigeMultiplier}
+            />
+          </Panel>
+
+          <Panel title="STATIONS" style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+            <StationList ownedStations={stations} wpPerSecond={wpPerSecond} />
+          </Panel>
+        </div>
+
+        {/* CENTER COLUMN (flex-1) — Work Zone, Event, Work Log */}
+        <div style={sty.centerCol}>
+          <Panel title="WORK ZONE" style={{ flexShrink: 0 }}>
+            <div style={sty.workZoneInner}>
+              <WorkerAvatar shiftStart={shiftStart} clockOutTime={clockOutTime} isOnShift={isOnShift} />
+              <WorkButton wpPerClick={effectiveWpPerClick} onWork={handleWork} isOnShift={isOnShift} clockOutTime={clockOutTime} />
+            </div>
+          </Panel>
 
           <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
 
-          <div style={styles.logArea}>
-            <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
-          </div>
+          <Panel title="WORK LOG" style={{ flex: 1, overflow: 'hidden', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+              <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
+            </div>
+          </Panel>
         </div>
 
-        {/* RIGHT COLUMN: Shop */}
-        <div style={styles.rightCol}>
-          <Shop
-            wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
-            ownedStations={stations} purchasedUpgrades={upgrades}
-            onBuyStation={handleBuyStation} onBuyUpgrade={handleBuyUpgrade}
-            upgrades={UPGRADES} achievements={achievements}
-            prestigeLevel={prestigeLevel} prestigeMultiplier={prestigeMultiplier}
-            prestigeCost={storeGetPrestigeCost()} onPrestige={storePrestige}
-          />
+        {/* RIGHT COLUMN (340px) — Shop / Requisitions */}
+        <div style={sty.rightCol}>
+          <Panel title="REQUISITIONS" style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
+            <Shop
+              wp={wp} totalWp={totalWp} wpPerSecond={wpPerSecond}
+              ownedStations={stations} purchasedUpgrades={upgrades}
+              onBuyStation={handleBuyStation} onBuyUpgrade={handleBuyUpgrade}
+              upgrades={UPGRADES} achievements={achievements}
+              prestigeLevel={prestigeLevel} prestigeMultiplier={prestigeMultiplier}
+              prestigeCost={storeGetPrestigeCost()} onPrestige={storePrestige}
+            />
+          </Panel>
         </div>
       </main>
-
-      {/* Footer */}
-      <footer style={styles.footer}>
-        Built with Claude Code &middot; It's 2am. Go home.
-      </footer>
 
       {/* Leaderboard Modal */}
       {showLeaderboard && (
@@ -365,7 +425,19 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
   );
 };
 
-const styles: Record<string, React.CSSProperties> = {
+// ════════════════════════════════════════════════════════════════
+// STYLE CONSTANTS — Corporate Dystopia Brutalism
+// ════════════════════════════════════════════════════════════════
+const MONO = "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace";
+const AMBER = '#E8D44D';
+const TERM_GREEN = '#66BB6A';
+const BG_PRI = '#0D0D0F';
+const BG_SEC = '#141418';
+const BG_PANEL = '#18181D';
+const BORDER = '#2A2A30';
+
+const sty: Record<string, React.CSSProperties> = {
+  // ── Shell ──────────────────────────────────────────────────
   wrapper: {
     position: 'relative',
     display: 'flex',
@@ -373,134 +445,229 @@ const styles: Record<string, React.CSSProperties> = {
     height: '100vh',
     width: '100vw',
     overflow: 'hidden',
-    background: '#1A1A1E',
+    background: BG_PRI,
   },
 
-  // Welcome banner
+  heartbeatLine: {
+    height: 2,
+    flexShrink: 0,
+    background: `linear-gradient(90deg, ${AMBER} 0%, ${TERM_GREEN} 50%, ${AMBER} 100%)`,
+    opacity: 0.7,
+  },
+
   welcomeBanner: {
     position: 'fixed',
-    top: '56px',
+    top: TOPBAR_HEIGHT + 14,
     left: '50%',
     transform: 'translateX(-50%)',
-    background: '#2A2A2F',
-    border: '1px solid #E8D44D',
-    color: '#E8D44D',
+    background: BG_PANEL,
+    border: `1px solid ${AMBER}`,
+    color: AMBER,
     padding: '10px 28px',
-    fontSize: '14px',
-    fontFamily: "'IBM Plex Mono', monospace",
+    fontSize: '13px',
+    fontFamily: MONO,
     fontWeight: 600,
     letterSpacing: 0.5,
     zIndex: 6000,
-    boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
+    boxShadow: `0 4px 24px rgba(0,0,0,0.6), 0 0 12px rgba(232,212,77,0.08)`,
     whiteSpace: 'nowrap',
-    borderRadius: 4,
+    borderRadius: 0,
   },
 
-  // Username
-  usernameLabel: {
-    color: '#9E9B94',
-    fontSize: '13px',
+  // ── Panel (shared brutalist card) ──────────────────────────
+  panel: {
+    background: BG_PANEL,
+    border: `1px solid ${BORDER}`,
+    borderRadius: 0,
+  },
+  panelHeader: {
+    fontSize: 11,
+    fontFamily: MONO,
     fontWeight: 600,
-    fontFamily: "'IBM Plex Mono', monospace",
+    letterSpacing: '0.1em',
+    textTransform: 'uppercase' as const,
+    color: '#6B6860',
+    padding: '6px 10px',
+    borderBottom: `1px solid ${BORDER}`,
+    background: 'rgba(255,255,255,0.015)',
+    userSelect: 'none' as const,
   },
 
-  // Desktop top bar
+  // ════════════════════════════════════════════════════════════
+  // DESKTOP TOP BAR — fixed, z-100
+  // ════════════════════════════════════════════════════════════
   topBar: {
-    position: 'sticky',
-    top: 0,
+    position: 'fixed',
+    top: 2,
+    left: 0,
+    right: 0,
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    padding: '0 20px',
-    height: 52,
-    background: '#222226',
-    borderBottom: '1px solid #3A3A3F',
-    zIndex: 10,
+    height: TOPBAR_HEIGHT,
+    padding: '0 16px',
+    background: BG_SEC,
+    borderBottom: `1px solid ${BORDER}`,
+    zIndex: 100,
     flexShrink: 0,
-  },
-  titleBlock: { display: 'flex', alignItems: 'center', gap: '4px' },
-  title: {
-    margin: 0,
-    fontSize: '20px',
-    fontWeight: 700,
-    letterSpacing: 3,
-    color: '#E8D44D',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-    animation: 'flicker 4s ease-in-out infinite',
-  },
-  titleFlicker: {
-    color: '#E8D44D',
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontSize: '20px',
-    fontWeight: 700,
-    animation: 'blink-cursor 1s step-end infinite',
-  },
-  statsBlock: { display: 'flex', gap: '20px', alignItems: 'center' },
-  wpDisplay: {
-    fontSize: '28px',
-    fontWeight: 700,
-    color: '#E8D44D',
-    fontFamily: "'IBM Plex Mono', monospace",
-    lineHeight: 1,
-  },
-  wpLabel: {
-    fontSize: '14px',
-    fontWeight: 600,
-    color: '#6B6860',
-    letterSpacing: 1,
-  },
-  statItem: { fontSize: '13px', color: '#9E9B94', fontWeight: 500, fontFamily: "'IBM Plex Mono', monospace" },
-  statValueYellow: { color: '#E8D44D', fontSize: '14px', fontWeight: 700 },
-  actionBlock: { display: 'flex', gap: '10px', alignItems: 'center' },
-  headerBtn: {
-    padding: '6px 16px',
-    background: 'transparent',
-    border: '1px solid #3A3A3F',
-    color: '#9E9B94',
-    fontSize: '10px',
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontWeight: 600,
-    letterSpacing: 1,
-    textTransform: 'uppercase' as const,
-    cursor: 'pointer',
-    borderRadius: 4,
-    transition: 'all 0.15s ease',
-  },
-  logoutBtn: {
-    borderColor: 'rgba(239, 83, 80, 0.4)',
-    color: '#EF5350',
+    gap: 12,
   },
 
-  // 3-column desktop layout
+  // Left: brand
+  topBarLeft: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 0,
+  },
+  brandMark: {
+    color: AMBER,
+    fontSize: 22,
+    lineHeight: '1',
+    fontFamily: MONO,
+  },
+  brandTitle: {
+    margin: 0,
+    fontSize: 15,
+    fontWeight: 700,
+    letterSpacing: '0.15em',
+    color: AMBER,
+    fontFamily: MONO,
+    textTransform: 'uppercase' as const,
+    lineHeight: '1',
+  },
+  prestigeBadge: {
+    display: 'inline-block',
+    background: AMBER,
+    color: BG_PRI,
+    fontSize: 10,
+    fontWeight: 700,
+    fontFamily: MONO,
+    padding: '2px 6px',
+    borderRadius: 0,
+    letterSpacing: '0.05em',
+    lineHeight: '1.2',
+    marginLeft: 4,
+  },
+
+  // Center: WP counter + progress
+  topBarCenter: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: 3,
+    flex: '0 1 auto',
+    minWidth: 180,
+  },
+  wpRow: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+  },
+  wpBlocks: {
+    color: AMBER,
+    fontSize: 12,
+    fontFamily: MONO,
+    opacity: 0.5,
+    lineHeight: '1',
+  },
+  wpValue: {
+    fontSize: 20,
+    fontWeight: 700,
+    fontFamily: MONO,
+    color: AMBER,
+    lineHeight: '1',
+    textShadow: '0 0 10px rgba(232,212,77,0.25)',
+    fontVariantNumeric: 'tabular-nums',
+  },
+  wpUnit: {
+    fontSize: 11,
+    fontWeight: 600,
+    fontFamily: MONO,
+    color: '#6B6860',
+    letterSpacing: '0.1em',
+    lineHeight: '1',
+  },
+  shiftTrack: {
+    width: '100%',
+    maxWidth: 160,
+    height: 3,
+    background: '#2A2A30',
+    borderRadius: 0,
+    overflow: 'hidden',
+  },
+  shiftFill: {
+    height: '100%',
+    background: `linear-gradient(90deg, ${AMBER}, ${TERM_GREEN})`,
+    transition: 'width 1s linear',
+  },
+
+  // Right: rate + buttons
+  topBarRight: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    flexShrink: 0,
+  },
+  rateChip: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+  },
+  rateVal: {
+    fontSize: 14,
+    fontWeight: 700,
+    fontFamily: MONO,
+    color: TERM_GREEN,
+    fontVariantNumeric: 'tabular-nums',
+    lineHeight: '1',
+  },
+  iconBtn: {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '5px 10px',
+    background: 'transparent',
+    border: `1px solid ${BORDER}`,
+    color: '#9E9B94',
+    fontSize: 10,
+    fontFamily: MONO,
+    fontWeight: 600,
+    letterSpacing: '0.08em',
+    textTransform: 'uppercase' as const,
+    cursor: 'pointer',
+    borderRadius: 0,
+    transition: 'all 0.12s ease',
+    lineHeight: '1',
+  },
+
+  // ════════════════════════════════════════════════════════════
+  // 3-COLUMN MAIN
+  // ════════════════════════════════════════════════════════════
   main: {
     flex: 1,
     overflow: 'hidden',
     display: 'flex',
     flexDirection: 'row',
     gap: 12,
-    padding: '8px 12px',
+    padding: 12,
+    marginTop: TOPBAR_HEIGHT + 2,
+    height: `calc(100vh - ${TOPBAR_HEIGHT + 2}px)`,
     position: 'relative',
     zIndex: 1,
     minHeight: 0,
   },
 
-  // Left column
   leftCol: {
-    width: 280,
+    width: 300,
     flexShrink: 0,
     display: 'flex',
     flexDirection: 'column',
     gap: 8,
-    overflow: 'auto',
-    minHeight: 0,
-  },
-  stationListWrap: {
-    flex: 1,
-    overflow: 'auto',
+    overflowY: 'auto',
     minHeight: 0,
   },
 
-  // Center column
   centerCol: {
     flex: 1,
     display: 'flex',
@@ -510,85 +677,78 @@ const styles: Record<string, React.CSSProperties> = {
     minHeight: 0,
   },
 
-  // Right column
   rightCol: {
-    width: 320,
+    width: 340,
     flexShrink: 0,
-    overflow: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    overflowY: 'auto',
     minHeight: 0,
   },
 
-  // Timer wrapper
-  timerWrap: {
-    flexShrink: 0,
-  },
-
-  // Worker + Work button side-by-side row
-  workerWorkRow: {
+  workZoneInner: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 24,
-    flexShrink: 0,
     padding: '8px 16px',
   },
 
-  // Log area in center column
-  logArea: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    overflow: 'hidden',
-    minHeight: 0,
-  },
-
-  // Footer
-  footer: {
-    position: 'relative',
-    padding: '4px 0',
-    textAlign: 'center' as const,
-    fontSize: '11px',
-    color: '#6B6860',
-    fontWeight: 400,
-    letterSpacing: 0.3,
-    flexShrink: 0,
-    fontFamily: "'IBM Plex Mono', monospace",
-    zIndex: 1,
-  },
-
-  // Mobile top bar
+  // ════════════════════════════════════════════════════════════
+  // MOBILE
+  // ════════════════════════════════════════════════════════════
   topBarMobile: {
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'center',
-    padding: '4px 10px',
-    height: 40,
-    background: '#222226',
-    borderBottom: '1px solid #3A3A3F',
+    justifyContent: 'space-between',
+    padding: '0 10px',
+    height: 44,
+    background: BG_SEC,
+    borderBottom: `1px solid ${BORDER}`,
     zIndex: 10,
     flexShrink: 0,
   },
-  statsBlockMobile: {
+  mobileWpBlock: {
     display: 'flex',
-    justifyContent: 'center',
-    gap: '16px',
+    alignItems: 'baseline',
+    gap: 4,
   },
-  actionBlockMobile: {
-    position: 'absolute',
-    right: '8px',
-    top: '50%',
-    transform: 'translateY(-50%)',
+  mobileWpValue: {
+    fontSize: 18,
+    fontWeight: 700,
+    fontFamily: MONO,
+    color: AMBER,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  mobileWpUnit: {
+    fontSize: 10,
+    fontWeight: 600,
+    fontFamily: MONO,
+    color: '#6B6860',
+    letterSpacing: '0.1em',
+  },
+  mobileRateBlock: {
     display: 'flex',
-    gap: '4px',
+    alignItems: 'center',
+  },
+  mobileRate: {
+    fontSize: 13,
+    fontWeight: 700,
+    fontFamily: MONO,
+    color: TERM_GREEN,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  mobileActions: {
+    display: 'flex',
+    gap: 4,
   },
 
-  // Mobile content
   mobileContent: {
     flex: 1,
     overflowY: 'auto',
-    paddingBottom: '60px',
+    paddingBottom: 68,
     position: 'relative',
     zIndex: 1,
   },
@@ -596,9 +756,57 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: '10px',
+    gap: 10,
     padding: '10px 8px',
     width: '100%',
+  },
+
+  // Bottom tab bar — pill buttons
+  mobileTabBar: {
+    position: 'fixed',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    height: 58,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    background: BG_SEC,
+    borderTop: `1px solid ${BORDER}`,
+    zIndex: 1000,
+    padding: '0 12px',
+    paddingBottom: 'env(safe-area-inset-bottom, 0px)',
+  },
+  mobileTabBtn: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 2,
+    flex: 1,
+    height: 40,
+    background: 'rgba(255,255,255,0.03)',
+    border: `1px solid ${BORDER}`,
+    borderRadius: 20,
+    color: '#6B6860',
+    fontFamily: MONO,
+    fontSize: 10,
+    cursor: 'pointer',
+    padding: '4px 0',
+    transition: 'all 0.15s ease',
+  },
+  mobileTabBtnActive: {
+    background: 'rgba(232,212,77,0.1)',
+    borderColor: AMBER,
+    color: AMBER,
+  },
+  mobileTabLabel: {
+    fontSize: 8,
+    textTransform: 'uppercase' as const,
+    letterSpacing: '0.08em',
+    fontWeight: 600,
+    fontFamily: MONO,
   },
 };
 

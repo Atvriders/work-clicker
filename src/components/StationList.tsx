@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Station List ("Late Night at the Office")
-// Dark rows with colored left borders, yellow badges, WPS bars
+// Work Clicker — Station List ("Corporate Dystopia Brutalism")
+// Bleak concrete UI with amber accents and terminal green WPS
 // ============================================================
 
 import React from 'react';
@@ -11,55 +11,164 @@ interface StationListProps {
   wpPerSecond: number;
 }
 
-const BORDER_COLORS = ['#E8D44D', '#F48FB1', '#81D4FA', '#A5D6A7'];
-
 const StationList: React.FC<StationListProps> = ({ ownedStations, wpPerSecond }) => {
   const owned = STATIONS
     .filter((st) => (ownedStations[st.id] ?? 0) > 0)
     .sort((a, b) => a.tier - b.tier);
 
+  const containerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+    flexShrink: 0,
+    background: 'var(--bg-secondary, #1a1a1e)',
+    border: '1px solid var(--border, #2a2a2f)',
+    borderRadius: 0,
+  };
+
+  const headerStyle: React.CSSProperties = {
+    fontSize: 11,
+    fontWeight: 700,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    color: 'var(--text-secondary, #9E9B94)',
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+    padding: '10px 14px',
+    borderBottom: '1px solid var(--border, #2a2a2f)',
+    margin: 0,
+    userSelect: 'none',
+  };
+
+  const scrollAreaStyle: React.CSSProperties = {
+    overflowY: 'auto',
+    padding: '8px',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: 6,
+  };
+
+  const emptyStyle: React.CSSProperties = {
+    color: 'var(--text-secondary, #9E9B94)',
+    fontSize: 12,
+    textAlign: 'center',
+    padding: '24px 16px',
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+    opacity: 0.6,
+  };
+
   return (
-    <div style={styles.container}>
-      <div style={styles.titleRow}>
-        <span style={styles.title}>YOUR STATIONS</span>
-        <span style={styles.titleLabel}>{owned.length} active</span>
-      </div>
+    <div style={containerStyle}>
+      <div style={headerStyle}>YOUR STATIONS</div>
 
       {owned.length === 0 ? (
-        <div style={styles.emptyMsg}>No stations yet -- buy some from the supply closet</div>
+        <div style={emptyStyle}>No stations yet — buy one from the Shop</div>
       ) : (
-        <div style={styles.stationGrid}>
-          {owned.map((st, i) => {
+        <div style={scrollAreaStyle}>
+          {owned.map((st) => {
             const count = ownedStations[st.id] ?? 0;
             const totalWps = +(st.baseWps * count).toFixed(1);
             const wpsContribution = wpPerSecond > 0 ? totalWps / wpPerSecond : 0;
-            const borderColor = BORDER_COLORS[i % BORDER_COLORS.length];
+
+            const cardStyle: React.CSSProperties = {
+              display: 'flex',
+              flexDirection: 'column',
+              background: 'var(--bg-primary, #232328)',
+              border: '1px solid var(--border, #2a2a2f)',
+              borderRadius: 2,
+              overflow: 'hidden',
+              cursor: 'default',
+              transition: 'border-color 0.15s ease, background 0.15s ease',
+            };
+
+            const cardInnerStyle: React.CSSProperties = {
+              display: 'flex',
+              alignItems: 'center',
+              padding: '6px 10px',
+              gap: 10,
+            };
+
+            const iconStyle: React.CSSProperties = {
+              fontSize: 20,
+              lineHeight: 1,
+              flexShrink: 0,
+              width: 24,
+              textAlign: 'center',
+            };
+
+            const centerStyle: React.CSSProperties = {
+              flex: 1,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+              minWidth: 0,
+            };
+
+            const nameStyle: React.CSSProperties = {
+              fontSize: 12,
+              fontWeight: 600,
+              color: 'var(--text-primary, #E8E6E1)',
+              fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            };
+
+            const wpsLabelStyle: React.CSSProperties = {
+              fontSize: 10,
+              fontWeight: 500,
+              color: '#39FF14',
+              fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+              letterSpacing: 0.5,
+            };
+
+            const badgeStyle: React.CSSProperties = {
+              fontSize: 10,
+              fontWeight: 700,
+              fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+              color: 'var(--accent, #E8D44D)',
+              background: 'var(--accent-dim, rgba(232, 212, 77, 0.12))',
+              borderRadius: 10,
+              padding: '1px 8px',
+              flexShrink: 0,
+              lineHeight: '16px',
+            };
+
+            const barTrackStyle: React.CSSProperties = {
+              width: '100%',
+              height: 2,
+              background: 'transparent',
+            };
+
+            const barFillStyle: React.CSSProperties = {
+              height: '100%',
+              width: `${Math.min(100, wpsContribution * 100)}%`,
+              background: 'var(--accent, #E8D44D)',
+              transition: 'width 0.3s ease',
+            };
 
             return (
               <div
                 key={st.id}
-                style={{
-                  ...styles.stationRow,
-                  borderLeft: `3px solid ${borderColor}`,
+                style={cardStyle}
+                onMouseEnter={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--accent, #E8D44D)';
+                  (e.currentTarget as HTMLDivElement).style.background = 'var(--bg-hover, #2a2a30)';
+                }}
+                onMouseLeave={(e) => {
+                  (e.currentTarget as HTMLDivElement).style.borderColor = 'var(--border, #2a2a2f)';
+                  (e.currentTarget as HTMLDivElement).style.background = 'var(--bg-primary, #232328)';
                 }}
               >
-                <span style={styles.stationIcon}>{st.icon}</span>
-                <div style={styles.stationInfo}>
-                  <div style={styles.stationNameRow}>
-                    <span style={styles.stationName}>{st.name}</span>
-                    <span style={styles.countBadge}>x{count}</span>
+                <div style={cardInnerStyle}>
+                  <span style={iconStyle}>{st.icon}</span>
+                  <div style={centerStyle}>
+                    <span style={nameStyle}>{st.name}</span>
+                    <span style={wpsLabelStyle}>{totalWps} w/s</span>
                   </div>
-                  <div style={styles.wpsRow}>
-                    <span style={styles.wpsLabel}>{totalWps} w/s</span>
-                    <div style={styles.wpsTrack}>
-                      <div
-                        style={{
-                          ...styles.wpsBar,
-                          width: `${Math.min(100, wpsContribution * 100)}%`,
-                        }}
-                      />
-                    </div>
-                  </div>
+                  <span style={badgeStyle}>&times;{count}</span>
+                </div>
+                <div style={barTrackStyle}>
+                  <div style={barFillStyle} />
                 </div>
               </div>
             );
@@ -68,115 +177,6 @@ const StationList: React.FC<StationListProps> = ({ ownedStations, wpPerSecond })
       )}
     </div>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    padding: '12px 14px',
-    color: '#E8E6E1',
-    overflow: 'auto',
-    flexShrink: 0,
-    background: '#2A2A2F',
-    borderRadius: 8,
-  },
-  titleRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderBottom: '1px solid #3A3A3F',
-    paddingBottom: 8,
-    marginBottom: 10,
-  },
-  title: {
-    fontSize: 13,
-    fontWeight: 700,
-    color: '#E8D44D',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-    letterSpacing: 1.5,
-  },
-  titleLabel: {
-    fontSize: 11,
-    color: '#9E9B94',
-    fontWeight: 500,
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  emptyMsg: {
-    color: '#9E9B94',
-    fontSize: 12,
-    textAlign: 'center',
-    padding: '12px 0',
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontStyle: 'italic',
-  },
-  stationGrid: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-  },
-  stationRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 10,
-    padding: '8px 10px',
-    background: '#232328',
-    borderRadius: 4,
-  },
-  stationIcon: {
-    fontSize: 20,
-    lineHeight: 1,
-    flexShrink: 0,
-  },
-  stationInfo: {
-    flex: 1,
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 3,
-  },
-  stationNameRow: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  stationName: {
-    fontSize: 12,
-    fontWeight: 600,
-    color: '#E8E6E1',
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  countBadge: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: '#1A1A1E',
-    background: '#E8D44D',
-    padding: '1px 7px',
-    borderRadius: 10,
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  wpsRow: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-  },
-  wpsLabel: {
-    fontSize: 10,
-    color: '#9E9B94',
-    fontWeight: 600,
-    fontFamily: "'IBM Plex Mono', monospace",
-    whiteSpace: 'nowrap',
-  },
-  wpsTrack: {
-    flex: 1,
-    height: 4,
-    background: '#3A3A3F',
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  wpsBar: {
-    height: '100%',
-    background: '#E8D44D',
-    borderRadius: 2,
-    transition: 'width 0.3s ease',
-  },
 };
 
 export default StationList;

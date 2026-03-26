@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Leaderboard ("Late Night Office")
-// Office whiteboard modal with dark theme
+// Work Clicker — Leaderboard ("Corporate Dystopia Brutalism")
+// Surveillance-grade performance rankings
 // ============================================================
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -25,6 +25,12 @@ function formatNum(n: number): string {
   if (n >= 1_000) return (n / 1_000).toFixed(1) + 'K';
   return Math.floor(n).toString();
 }
+
+const RANK_COLORS: Record<number, string> = {
+  1: '#FFD700',
+  2: '#C0C0C0',
+  3: '#CD7F32',
+};
 
 const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) => {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
@@ -51,66 +57,84 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
 
   const onlineCount = entries.filter((e) => e.is_online === 1).length;
 
+  const s = styles;
+
   return (
-    <div style={styles.overlay} onClick={onClose}>
-      <div style={styles.panel} onClick={(e) => e.stopPropagation()}>
-        <div style={styles.header}>
-          <h2 style={styles.title}>LEADERBOARD</h2>
-          <button style={styles.closeBtn} onClick={onClose}>
-            &times;
+    <div style={s.overlay} onClick={onClose}>
+      <div style={s.panel} onClick={(e) => e.stopPropagation()}>
+        <div style={s.amberBorder} />
+        <div style={s.header}>
+          <h2 style={s.title}>LEADERBOARD</h2>
+          <button style={s.closeBtn} onClick={onClose}>
+            &#10005;
           </button>
         </div>
-        <div style={styles.subtitleRow}>
-          <span style={styles.subtitle}>TOP WORKERS WORLDWIDE</span>
-          <span style={styles.onlineCount}>
-            <span style={styles.onlineDotSmall} />
+        <div style={s.subtitleRow}>
+          <span style={s.subtitle}>EMPLOYEE PERFORMANCE INDEX</span>
+          <span style={s.onlineCount}>
+            <span style={s.onlineDotSmall} />
             {onlineCount} online
           </span>
         </div>
 
         {loading ? (
-          <div style={styles.loading}>LOADING...</div>
+          <div style={s.loading}>LOADING...</div>
         ) : entries.length === 0 ? (
-          <div style={styles.empty}>No workers on the board yet. Be the first!</div>
+          <div style={s.empty}>No workers on the board yet. Be the first!</div>
         ) : (
-          <div style={styles.tableWrap}>
-            <table style={styles.table}>
+          <div style={s.tableWrap}>
+            <table style={s.table}>
               <thead>
-                <tr style={styles.headerRow}>
-                  <th style={styles.th}>#</th>
-                  <th style={{ ...styles.th, textAlign: 'left' }}>NAME</th>
-                  <th style={styles.th}>BEST WP</th>
-                  <th style={styles.th}>SHIFTS</th>
-                  <th style={styles.th}>WP/s</th>
+                <tr>
+                  <th style={s.th}>#</th>
+                  <th style={{ ...s.th, textAlign: 'left' }}>NAME</th>
+                  <th style={s.th}>BEST WP</th>
+                  <th style={s.th}>SHIFTS</th>
+                  <th style={s.th}>WP/s</th>
                 </tr>
               </thead>
               <tbody>
                 {entries.map((entry, i) => {
                   const isMe = entry.username === currentUsername;
                   const online = entry.is_online === 1;
+                  const rank = i + 1;
+                  const rankColor = RANK_COLORS[rank] || '#555';
+
+                  const rowStyle: React.CSSProperties = {
+                    background: isMe ? 'rgba(212,160,23,0.12)' : (i % 2 === 0 ? '#141414' : '#111'),
+                    transition: 'background 0.1s ease',
+                  };
+
                   return (
                     <tr
                       key={entry.username}
-                      style={isMe ? styles.rowHighlight : styles.row}
+                      style={rowStyle}
+                      onMouseEnter={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = 'rgba(212,160,23,0.08)';
+                      }}
+                      onMouseLeave={(e) => {
+                        (e.currentTarget as HTMLElement).style.background = isMe
+                          ? 'rgba(212,160,23,0.12)'
+                          : (i % 2 === 0 ? '#141414' : '#111');
+                      }}
                     >
-                      <td style={styles.td}>{i + 1}</td>
+                      <td style={{ ...s.td, color: rankColor, fontWeight: 700 }}>
+                        {rank}
+                      </td>
                       <td style={{
-                        ...styles.td,
+                        ...s.td,
                         textAlign: 'left',
                         fontWeight: isMe ? 700 : 400,
-                        color: isMe ? '#E8D44D' : '#D0CDC6',
+                        color: isMe ? '#D4A017' : '#bbb',
                       }}>
-                        <span style={styles.callsignCell}>
-                          <span
-                            style={online ? styles.onlineDot : styles.offlineDot}
-                            title={online ? 'Online' : 'Offline'}
-                          />
+                        <span style={s.nameCell}>
+                          {online && <span style={s.onlineDot} />}
                           {entry.username}
                         </span>
                       </td>
-                      <td style={styles.td}>{formatNum(entry.best_shift_wp)}</td>
-                      <td style={styles.td}>{entry.total_shifts}</td>
-                      <td style={styles.td}>{entry.wps.toFixed(1)}</td>
+                      <td style={s.td}>{formatNum(entry.best_shift_wp)}</td>
+                      <td style={s.td}>{entry.total_shifts}</td>
+                      <td style={s.td}>{entry.wps.toFixed(1)}</td>
                     </tr>
                   );
                 })}
@@ -119,7 +143,7 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
           </div>
         )}
 
-        <div style={styles.footer}>Refreshes every 30 seconds</div>
+        <div style={s.footer}>Auto-refreshes every 30s</div>
       </div>
     </div>
   );
@@ -128,159 +152,161 @@ const Leaderboard: React.FC<LeaderboardProps> = ({ currentUsername, onClose }) =
 const styles: Record<string, React.CSSProperties> = {
   overlay: {
     position: 'fixed',
-    top: 0, left: 0, width: '100%', height: '100%',
-    background: 'rgba(0,0,0,0.7)',
-    backdropFilter: 'blur(4px)',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'rgba(0,0,0,0.8)',
+    backdropFilter: 'blur(6px)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 5000,
   },
   panel: {
-    padding: '28px',
-    maxWidth: '700px',
+    maxWidth: 680,
     width: '95%',
     maxHeight: '80vh',
     display: 'flex',
     flexDirection: 'column',
-    background: '#2A2A2F',
-    borderRadius: 12,
-    border: '1px solid #3A3A3F',
-    boxShadow: '0 16px 48px rgba(0,0,0,0.5)',
+    background: '#111',
+    border: '1px solid #222',
+    borderRadius: 0,
+    boxShadow: '0 0 80px rgba(0,0,0,0.7)',
+    overflow: 'hidden',
+  },
+  amberBorder: {
+    height: 3,
+    width: '100%',
+    background: '#D4A017',
+    flexShrink: 0,
   },
   header: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
+    padding: '20px 24px 0',
   },
   title: {
     margin: 0,
-    fontSize: '22px',
+    fontSize: 20,
     fontWeight: 700,
-    color: '#E8D44D',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-    letterSpacing: 2,
+    color: '#D4A017',
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    letterSpacing: '0.15em',
+    textTransform: 'uppercase',
   },
   closeBtn: {
     background: 'transparent',
-    border: '1px solid #3A3A3F',
-    color: '#9E9B94',
-    fontSize: '20px',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    border: '1px solid #333',
+    color: '#666',
+    fontSize: 16,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
     cursor: 'pointer',
-    padding: '2px 12px',
-    borderRadius: 20,
+    padding: '4px 10px',
+    borderRadius: 0,
     fontWeight: 400,
-    lineHeight: 1.2,
+    lineHeight: 1,
+    transition: 'color 0.15s ease',
   },
   subtitleRow: {
     display: 'flex',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: '16px',
-    marginTop: '8px',
+    padding: '8px 24px 16px',
   },
   subtitle: {
-    fontSize: '10px',
-    letterSpacing: 2,
-    color: '#9E9B94',
+    fontSize: 9,
+    letterSpacing: '0.15em',
+    color: '#555',
     fontWeight: 600,
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
   },
   onlineCount: {
-    fontSize: '11px',
-    letterSpacing: 0.5,
-    color: '#66BB6A',
+    fontSize: 10,
+    letterSpacing: '0.05em',
+    color: '#4CAF50',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: 6,
     fontWeight: 600,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
   },
   onlineDotSmall: {
     display: 'inline-block',
-    width: '7px',
-    height: '7px',
+    width: 6,
+    height: 6,
     borderRadius: '50%',
-    background: '#66BB6A',
+    background: '#4CAF50',
   },
   loading: {
-    color: '#E8D44D',
+    color: '#D4A017',
     textAlign: 'center',
-    padding: '32px',
-    letterSpacing: 2,
-    fontWeight: 600,
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    padding: 40,
+    letterSpacing: '0.15em',
+    fontWeight: 700,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    fontSize: 13,
   },
   empty: {
-    color: '#9E9B94',
+    color: '#555',
     textAlign: 'center',
-    padding: '32px',
-    fontSize: '13px',
+    padding: 40,
+    fontSize: 12,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
   },
   tableWrap: {
     overflowY: 'auto',
     flex: 1,
+    padding: '0 24px',
   },
   table: {
     width: '100%',
     borderCollapse: 'collapse',
-    fontSize: '13px',
-  },
-  headerRow: {
-    background: '#333338',
+    fontSize: 12,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
   },
   th: {
     padding: '10px 8px',
     textAlign: 'right',
-    color: '#9E9B94',
-    borderBottom: '1px solid #3A3A3F',
-    fontSize: '10px',
-    letterSpacing: 0.5,
+    color: '#555',
+    borderBottom: '1px solid #222',
+    fontSize: 9,
+    letterSpacing: '0.1em',
     fontWeight: 700,
     whiteSpace: 'nowrap',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    textTransform: 'uppercase',
   },
   td: {
-    padding: '8px',
+    padding: '9px 8px',
     textAlign: 'right',
-    color: '#D0CDC6',
-    borderBottom: '1px solid #3A3A3F',
+    color: '#888',
+    borderBottom: '1px solid #1a1a1a',
     whiteSpace: 'nowrap',
     fontVariantNumeric: 'tabular-nums',
   },
-  row: {
-    background: 'transparent',
-  },
-  rowHighlight: {
-    background: 'rgba(232,212,77,0.1)',
-  },
-  callsignCell: {
+  nameCell: {
     display: 'inline-flex',
     alignItems: 'center',
-    gap: '6px',
+    gap: 6,
   },
   onlineDot: {
     display: 'inline-block',
-    width: '7px',
-    height: '7px',
+    width: 6,
+    height: 6,
     borderRadius: '50%',
-    background: '#66BB6A',
-    flexShrink: 0,
-  },
-  offlineDot: {
-    display: 'inline-block',
-    width: '7px',
-    height: '7px',
-    borderRadius: '50%',
-    background: '#6B6860',
+    background: '#4CAF50',
     flexShrink: 0,
   },
   footer: {
-    marginTop: '14px',
-    fontSize: '11px',
-    color: '#6B6860',
-    letterSpacing: 0.5,
+    padding: '12px 24px',
+    fontSize: 10,
+    color: '#333',
+    letterSpacing: '0.1em',
     textAlign: 'center',
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    borderTop: '1px solid #1a1a1a',
   },
 };
 

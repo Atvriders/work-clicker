@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Event Log ("Late Night at the Office")
-// Clipboard / work log — dark theme with ruled lines
+// Work Clicker — Event Log ("Corporate Dystopia Brutalism")
+// Clean dark panel activity log with colored status dots
 // ============================================================
 
 import React, { useEffect, useRef } from 'react';
@@ -55,9 +55,14 @@ function formatTimestamp(ts: number): string {
 
 function getDotColor(type: EventLogEntry['type']): string {
   switch (type) {
-    case 'achievement': return '#66BB6A';
-    case 'warning': return '#EF5350';
-    default: return '#E8D44D';
+    case 'milestone':
+      return '#F59E0B';
+    case 'achievement':
+      return '#00FF66';
+    case 'warning':
+      return '#FF2E2E';
+    default:
+      return 'var(--text-muted, #4A4A50)';
   }
 }
 
@@ -84,138 +89,147 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
 
   const visible = eventLog.slice(-30);
 
-  return (
-    <div style={styles.container} className="desk-card">
-      <div style={styles.titleRow}>
-        <span style={styles.title}>WORK LOG ✏️</span>
-        <span style={styles.headerRight}>
-          <span style={styles.entryCount}>{eventLog.length} entries</span>
-          {onClearLog && (
-            <button style={styles.clrButton} onClick={onClearLog} title="Clear log">
-              🗑️
-            </button>
-          )}
-        </span>
-      </div>
-      <div style={styles.logArea} ref={scrollRef}>
-        {visible.map((entry: EventLogEntry, i: number) => {
-          const isEven = i % 2 === 0;
-          return (
-            <div
-              key={entry.id}
-              style={{
-                ...styles.entry,
-                background: isEven ? '#2A2A2F' : '#262629',
-              }}
-            >
-              <span
-                style={{
-                  ...styles.dot,
-                  background: getDotColor(entry.type),
-                }}
-              />
-              <span style={styles.timestamp} className="tabular-nums">
-                {formatTimestamp(entry.timestamp)}
-              </span>
-              <span style={styles.message}>{entry.message}</span>
-            </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
+  const containerStyle: React.CSSProperties = {
     padding: '12px 14px',
-    color: '#E8E6E1',
+    color: 'var(--text-primary, #E8E6E1)',
     display: 'flex',
     flexDirection: 'column',
     height: '100%',
     boxSizing: 'border-box',
     overflow: 'hidden',
     minHeight: 0,
-    background: '#1E1E22',
-    borderRadius: 10,
-  },
-  titleRow: {
+    background: 'var(--bg-card, #1E1E22)',
+    borderRadius: 2,
+  };
+
+  const headerStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottom: '1px solid #3A3A3F',
+    borderBottom: '1px solid var(--border, #2A2A2F)',
     paddingBottom: 8,
-    marginBottom: 6,
+    marginBottom: 4,
     flexShrink: 0,
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: 700,
-    color: '#E8E6E1',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-    letterSpacing: 1.5,
-  },
-  headerRight: {
+  };
+
+  const titleStyle: React.CSSProperties = {
+    fontSize: 11,
+    fontWeight: 600,
+    color: 'var(--text-secondary, #9E9B94)',
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+    letterSpacing: 2,
+    textTransform: 'uppercase',
+  };
+
+  const headerRightStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
-    gap: 10,
-  },
-  entryCount: {
-    fontSize: 11,
-    color: '#6B6860',
+    gap: 8,
+  };
+
+  const entryCountStyle: React.CSSProperties = {
+    fontSize: 10,
+    color: 'var(--text-muted, #4A4A50)',
     fontWeight: 500,
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  clrButton: {
-    fontSize: 16,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+  };
+
+  const clearBtnStyle: React.CSSProperties = {
+    fontSize: 13,
     padding: '2px 4px',
     background: 'none',
     border: 'none',
     cursor: 'pointer',
     lineHeight: 1,
-    borderRadius: 4,
-    transition: 'background 0.15s ease',
-  },
-  logArea: {
+    borderRadius: 2,
+    color: 'var(--text-muted, #4A4A50)',
+    transition: 'color 0.15s ease',
+  };
+
+  const logAreaStyle: React.CSSProperties = {
     flex: 1,
     overflowY: 'auto',
     display: 'flex',
     flexDirection: 'column',
     gap: 0,
     minHeight: 0,
-    backgroundImage:
-      'repeating-linear-gradient(to bottom, transparent, transparent 23px, #3A3A3F 23px, #3A3A3F 24px)',
-  },
-  entry: {
+  };
+
+  const getEntryStyle = (i: number, total: number): React.CSSProperties => ({
     display: 'flex',
     alignItems: 'flex-start',
     gap: 0,
-    fontSize: 13,
-    lineHeight: 1.5,
-    padding: '3px 6px',
-    borderRadius: 4,
-  },
-  dot: {
-    width: 7,
-    height: 7,
+    fontSize: 11,
+    lineHeight: 1.6,
+    padding: '5px 4px',
+    borderBottom: i < total - 1 ? '1px solid var(--border, #2A2A2F)' : 'none',
+    animation: 'eventLogSlideUp 0.25s ease-out',
+  });
+
+  const dotStyle = (type: EventLogEntry['type']): React.CSSProperties => ({
+    width: 4,
+    height: 4,
     borderRadius: '50%',
     flexShrink: 0,
-    marginTop: 6,
+    marginTop: 7,
     marginRight: 8,
-  },
-  timestamp: {
-    color: '#6B6860',
+    background: getDotColor(type),
+  });
+
+  const timestampStyle: React.CSSProperties = {
+    color: 'var(--text-muted, #4A4A50)',
     fontSize: 10,
     marginRight: 8,
     flexShrink: 0,
     fontWeight: 500,
-    lineHeight: 1.9,
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  message: {
-    color: '#9E9B94',
-    lineHeight: 1.5,
-  },
+    lineHeight: 1.8,
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+    fontVariantNumeric: 'tabular-nums',
+  };
+
+  const messageStyle: React.CSSProperties = {
+    color: 'var(--text-secondary, #9E9B94)',
+    fontSize: 11,
+    lineHeight: 1.6,
+  };
+
+  return (
+    <div style={containerStyle}>
+      <div style={headerStyle}>
+        <span style={titleStyle}>ACTIVITY LOG</span>
+        <span style={headerRightStyle}>
+          <span style={entryCountStyle}>{eventLog.length}</span>
+          {onClearLog && (
+            <button
+              style={clearBtnStyle}
+              onClick={onClearLog}
+              title="Clear log"
+              onMouseEnter={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color = '#F59E0B';
+              }}
+              onMouseLeave={(e) => {
+                (e.currentTarget as HTMLButtonElement).style.color =
+                  'var(--text-muted, #4A4A50)';
+              }}
+            >
+              🗑
+            </button>
+          )}
+        </span>
+      </div>
+      <div style={logAreaStyle} ref={scrollRef}>
+        {visible.map((entry: EventLogEntry, i: number) => (
+          <div key={entry.id} style={getEntryStyle(i, visible.length)}>
+            <span style={dotStyle(entry.type)} />
+            <span style={timestampStyle}>
+              {formatTimestamp(entry.timestamp)}
+            </span>
+            <span style={messageStyle}>{entry.message}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default EventLog;

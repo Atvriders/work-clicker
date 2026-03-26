@@ -1,9 +1,9 @@
 // ============================================================
-// Work Clicker — Shop ("Late Night at the Office")
-// Office supply closet — dark theme
+// Work Clicker — Shop ("Corporate Dystopia Brutalism")
+// Concrete walls, amber warning lights, oppressive efficiency
 // ============================================================
 
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { STATIONS } from '../data/stations';
 import Achievements from './Achievements';
 
@@ -36,6 +36,27 @@ interface UpgradeDef {
 
 type ShopTab = 'STATIONS' | 'UPGRADES' | 'TROPHIES' | 'PRESTIGE';
 
+/* ── Palette ─────────────────────────────────────────────── */
+const C = {
+  bg:          '#121214',
+  bgCard:      '#1A1A1E',
+  bgCardHover: '#222226',
+  border:      '#2A2A2F',
+  borderLight: '#3A3A3F',
+  amber:       '#D4A017',
+  amberBright: '#F5B800',
+  amberDim:    'rgba(212,160,23,0.12)',
+  amberGlow:   'rgba(212,160,23,0.25)',
+  danger:      '#C62828',
+  dangerDim:   '#EF5350',
+  green:       '#4CAF50',
+  textPrimary: '#D0CDC6',
+  textMuted:   '#6B6860',
+  textDim:     '#4A4840',
+  mono:        "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+  sans:        "'Inter', 'Nunito', system-ui, sans-serif",
+} as const;
+
 function formatNumber(n: number): string {
   if (n >= 1_000_000_000) return (n / 1_000_000_000).toFixed(1) + 'B';
   if (n >= 1_000_000) return (n / 1_000_000).toFixed(1) + 'M';
@@ -46,6 +67,76 @@ function formatNumber(n: number): string {
 function getStationCost(station: typeof STATIONS[0], owned: number): number {
   return Math.floor(station.baseCost * Math.pow(station.costMultiplier, owned));
 }
+
+/* ── Styles ──────────────────────────────────────────────── */
+
+const s = {
+  container: {
+    padding: '14px',
+    color: C.textPrimary,
+    display: 'flex',
+    flexDirection: 'column',
+    height: '100%',
+    boxSizing: 'border-box',
+    overflow: 'hidden',
+    background: C.bg,
+    borderRadius: 0,
+    borderRight: `1px solid ${C.border}`,
+  } as React.CSSProperties,
+
+  tabRow: {
+    display: 'flex',
+    gap: 0,
+    marginBottom: 0,
+    flexShrink: 0,
+    borderBottom: `1px solid ${C.border}`,
+  } as React.CSSProperties,
+
+  tab: {
+    flex: 1,
+    padding: '10px 0 8px',
+    textAlign: 'center' as const,
+    fontSize: 11,
+    letterSpacing: '0.08em',
+    cursor: 'pointer',
+    border: 'none',
+    borderBottom: '2px solid transparent',
+    background: 'transparent',
+    color: C.textMuted,
+    fontFamily: C.mono,
+    fontWeight: 600,
+    textTransform: 'uppercase' as const,
+    transition: 'color 0.15s, border-color 0.15s',
+  } as React.CSSProperties,
+
+  tabActive: {
+    color: C.amber,
+    borderBottom: `2px solid ${C.amber}`,
+  } as React.CSSProperties,
+
+  list: {
+    flex: 1,
+    overflowY: 'auto' as const,
+    display: 'flex',
+    flexDirection: 'column' as const,
+    gap: 6,
+    minHeight: 0,
+    paddingTop: 10,
+    paddingBottom: 4,
+  } as React.CSSProperties,
+
+  emptyMsg: {
+    color: C.textMuted,
+    fontSize: 12,
+    textAlign: 'center' as const,
+    padding: '32px 0',
+    fontFamily: C.mono,
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase' as const,
+  } as React.CSSProperties,
+};
+
+/* ── Component ───────────────────────────────────────────── */
 
 const Shop: React.FC<ShopProps> = ({
   wp,
@@ -64,446 +155,571 @@ const Shop: React.FC<ShopProps> = ({
 }) => {
   const [tab, setTab] = useState<ShopTab>('STATIONS');
   const [showPrestigeConfirm, setShowPrestigeConfirm] = useState(false);
+  const [flashId, setFlashId] = useState<string | null>(null);
 
   const unlockedStations = STATIONS.filter((st) => totalWp >= st.unlockAt);
-  const availableUpgrades = upgrades
-    .filter((up) => !purchasedUpgrades.includes(up.id))
-    .sort((a, b) => a.cost - b.cost);
+  const availableUpgrades = upgrades.sort((a, b) => a.cost - b.cost);
 
-  return (
-    <div style={styles.container} className="desk-card">
-      <div style={styles.title}>SUPPLY CLOSET</div>
+  const flash = useCallback((id: string) => {
+    setFlashId(id);
+    setTimeout(() => setFlashId(null), 150);
+  }, []);
 
-      {/* Tab Toggle — pill style */}
-      <div style={styles.tabRow}>
-        {(['STATIONS', 'UPGRADES', 'TROPHIES', 'PRESTIGE'] as ShopTab[]).map((t) => (
-          <button
-            key={t}
-            style={{
-              ...styles.tab,
-              ...(tab === t ? (t === 'PRESTIGE' ? styles.tabActivePrestige : styles.tabActive) : {}),
-            }}
-            onClick={() => setTab(t)}
-          >
-            {t === 'STATIONS' ? '\uD83C\uDFE2' : t === 'UPGRADES' ? '\u2B06\uFE0F' : t === 'TROPHIES' ? '\uD83C\uDFC6' : '\u2B50'}{' '}
-            {t}
-          </button>
-        ))}
+  /* ── Render Tabs ──── */
+  const renderTabs = () => (
+    <div style={s.tabRow}>
+      {(['STATIONS', 'UPGRADES', 'TROPHIES', 'PRESTIGE'] as ShopTab[]).map((t) => (
+        <button
+          key={t}
+          style={{
+            ...s.tab,
+            ...(tab === t ? s.tabActive : {}),
+          }}
+          onClick={() => setTab(t)}
+        >
+          {t}
+        </button>
+      ))}
+    </div>
+  );
+
+  /* ── Station Card ──── */
+  const renderStation = (st: typeof STATIONS[0]) => {
+    const owned = ownedStations[st.id] ?? 0;
+    const cost = getStationCost(st, owned);
+    const canAfford = wp >= cost;
+    const totalWps = owned > 0 ? +(st.baseWps * owned).toFixed(1) : 0;
+    const pct = wpPerSecond > 0 && totalWps > 0 ? ((totalWps / wpPerSecond) * 100) : 0;
+    const isFlashing = flashId === st.id;
+
+    const cardStyle: React.CSSProperties = {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: '10px 12px',
+      background: isFlashing ? 'rgba(212,160,23,0.15)' : C.bgCard,
+      borderLeft: canAfford ? `3px solid ${C.amber}` : '3px solid transparent',
+      borderTop: `1px solid ${C.border}`,
+      borderRight: `1px solid ${C.border}`,
+      borderBottom: `1px solid ${C.border}`,
+      cursor: canAfford ? 'pointer' : 'default',
+      transition: 'background 0.12s, border-color 0.12s',
+      opacity: canAfford ? 1 : 0.55,
+      position: 'relative',
+    };
+
+    return (
+      <div
+        key={st.id}
+        style={cardStyle}
+        onClick={() => {
+          if (canAfford) {
+            flash(st.id);
+            onBuyStation(st.id);
+          }
+        }}
+        onMouseEnter={(e) => {
+          if (canAfford) (e.currentTarget as HTMLElement).style.background = C.bgCardHover;
+          if (canAfford) (e.currentTarget as HTMLElement).style.borderLeftColor = C.amberBright;
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.background = C.bgCard;
+          if (canAfford) (e.currentTarget as HTMLElement).style.borderLeftColor = C.amber;
+        }}
+      >
+        {/* Icon */}
+        <div style={{ fontSize: 28, lineHeight: 1, flexShrink: 0, width: 28, textAlign: 'center' as const }}>
+          {st.icon}
+        </div>
+
+        {/* Name + Description */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: C.textPrimary,
+            fontFamily: C.sans,
+            marginBottom: 2,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}>
+            {st.name}
+          </div>
+          <div style={{
+            fontSize: 11,
+            color: C.textMuted,
+            lineHeight: 1.3,
+            whiteSpace: 'nowrap',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+          }}>
+            +{st.baseWps} w/s per unit
+          </div>
+          {/* WPS contribution bar */}
+          {owned > 0 && pct > 0 && (
+            <div style={{ marginTop: 4, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <div style={{
+                height: 3,
+                flex: 1,
+                background: C.border,
+                borderRadius: 0,
+                overflow: 'hidden',
+              }}>
+                <div style={{
+                  height: '100%',
+                  width: `${Math.min(pct, 100)}%`,
+                  background: C.amber,
+                  transition: 'width 0.3s',
+                }} />
+              </div>
+              <span style={{
+                fontSize: 9,
+                color: C.textMuted,
+                fontFamily: C.mono,
+                flexShrink: 0,
+              }}>
+                {pct.toFixed(0)}%
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Cost + Count (right) */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, gap: 4 }}>
+          <span style={{
+            fontSize: 12,
+            fontWeight: 700,
+            fontFamily: C.mono,
+            color: canAfford ? C.amber : C.dangerDim,
+          }}>
+            {formatNumber(cost)} WP
+          </span>
+          {owned > 0 && (
+            <span style={{
+              fontSize: 10,
+              fontWeight: 700,
+              fontFamily: C.mono,
+              color: C.bg,
+              background: C.amber,
+              padding: '1px 6px',
+              borderRadius: 2,
+              lineHeight: 1.4,
+            }}>
+              x{owned}
+            </span>
+          )}
+        </div>
       </div>
+    );
+  };
 
-      {/* List */}
-      <div style={styles.list}>
-        {tab === 'PRESTIGE' ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '8px 0' }}>
-            {/* Current Level */}
-            <div style={{ textAlign: 'center', padding: '16px 0' }}>
-              <div style={{ fontSize: 36, marginBottom: 4 }}>{'\u2B50'}</div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: '#F5A623', fontFamily: "'IBM Plex Mono', monospace" }}>
-                PRESTIGE {prestigeLevel}
-              </div>
-              <div style={{ fontSize: 14, color: '#E8D44D', fontWeight: 600, fontFamily: "'IBM Plex Mono', monospace", marginTop: 4 }}>
-                {prestigeMultiplier.toFixed(2)}x all production
-              </div>
+  /* ── Upgrade Card ──── */
+  const renderUpgrade = (up: UpgradeDef) => {
+    const isPurchased = purchasedUpgrades.includes(up.id);
+    const prereqMet = !up.requires || purchasedUpgrades.includes(up.requires);
+    const canAfford = wp >= up.cost && prereqMet && !isPurchased;
+    const requiresName = up.requires
+      ? upgrades.find((u) => u.id === up.requires)?.name ?? up.requires
+      : '';
+    const isFlashing = flashId === up.id;
+
+    const cardStyle: React.CSSProperties = {
+      display: 'flex',
+      alignItems: 'center',
+      gap: 10,
+      padding: '10px 12px',
+      background: isFlashing ? 'rgba(212,160,23,0.15)' : C.bgCard,
+      borderLeft: isPurchased
+        ? `3px solid ${C.green}`
+        : canAfford
+          ? `3px solid ${C.amber}`
+          : '3px solid transparent',
+      borderTop: `1px solid ${!prereqMet ? C.danger : C.border}`,
+      borderRight: `1px solid ${!prereqMet ? C.danger : C.border}`,
+      borderBottom: `1px solid ${!prereqMet ? C.danger : C.border}`,
+      cursor: canAfford ? 'pointer' : 'default',
+      transition: 'background 0.12s, border-color 0.12s',
+      opacity: isPurchased ? 0.5 : !prereqMet ? 0.35 : canAfford ? 1 : 0.55,
+      position: 'relative',
+      overflow: 'hidden',
+    };
+
+    return (
+      <div
+        key={up.id}
+        style={cardStyle}
+        onClick={() => {
+          if (canAfford) {
+            flash(up.id);
+            onBuyUpgrade(up.id);
+          }
+        }}
+        onMouseEnter={(e) => {
+          if (canAfford) (e.currentTarget as HTMLElement).style.background = C.bgCardHover;
+          if (canAfford) (e.currentTarget as HTMLElement).style.borderLeftColor = C.amberBright;
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLElement).style.background = C.bgCard;
+          if (canAfford) (e.currentTarget as HTMLElement).style.borderLeftColor = C.amber;
+        }}
+      >
+        {/* PURCHASED stamp */}
+        {isPurchased && (
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%) rotate(-12deg)',
+            fontSize: 14,
+            fontWeight: 900,
+            fontFamily: C.mono,
+            color: C.green,
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase' as const,
+            border: `2px solid ${C.green}`,
+            padding: '2px 12px',
+            pointerEvents: 'none',
+            opacity: 0.7,
+            whiteSpace: 'nowrap',
+          }}>
+            PURCHASED
+          </div>
+        )}
+
+        {/* Icon */}
+        <div style={{ fontSize: 28, lineHeight: 1, flexShrink: 0, width: 28, textAlign: 'center' as const }}>
+          {prereqMet ? up.icon : '\uD83D\uDD12'}
+        </div>
+
+        {/* Name + Description */}
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: C.textPrimary,
+            fontFamily: C.sans,
+            marginBottom: 2,
+          }}>
+            {up.name}
+          </div>
+          <div style={{
+            fontSize: 11,
+            color: C.textMuted,
+            lineHeight: 1.3,
+            marginBottom: 2,
+          }}>
+            {up.description}
+          </div>
+          {!prereqMet && (
+            <div style={{
+              fontSize: 10,
+              color: C.dangerDim,
+              fontFamily: C.mono,
+              fontWeight: 600,
+              marginTop: 2,
+            }}>
+              {'\uD83D\uDD12'} Requires: {requiresName}
             </div>
+          )}
+        </div>
 
-            {/* Next Prestige Info */}
-            <div style={{ ...styles.card, borderLeft: '3px solid #F5A623', background: '#2A2A2F' }}>
-              <div style={{ fontSize: 12, color: '#9E9B94', fontWeight: 600, fontFamily: "'IBM Plex Mono', monospace", marginBottom: 6 }}>
-                NEXT PRESTIGE
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
-                <span style={{ fontSize: 13, color: '#E8E6E1', fontWeight: 600 }}>
-                  Level {prestigeLevel + 1}
-                </span>
-                <span style={{ fontSize: 13, color: '#66BB6A', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace" }}>
-                  {(1 + (prestigeLevel + 1) * 0.25).toFixed(2)}x multiplier
-                </span>
-              </div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ ...styles.priceTag }}>
-                  {formatNumber(prestigeCost)} WP
-                </span>
-                <span style={{ fontSize: 11, color: wp >= prestigeCost ? '#66BB6A' : '#EF5350', fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600 }}>
-                  {wp >= prestigeCost ? 'READY' : `Need ${formatNumber(prestigeCost - wp)} more`}
-                </span>
-              </div>
+        {/* Cost (right) */}
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flexShrink: 0, gap: 4 }}>
+          {!isPurchased && (
+            <span style={{
+              fontSize: 12,
+              fontWeight: 700,
+              fontFamily: C.mono,
+              color: canAfford ? C.amber : C.dangerDim,
+            }}>
+              {formatNumber(up.cost)} WP
+            </span>
+          )}
+        </div>
+      </div>
+    );
+  };
+
+  /* ── Prestige Panel ──── */
+  const renderPrestige = () => {
+    const canPrestige = wp >= prestigeCost;
+
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 14,
+        padding: '16px 8px',
+        alignItems: 'center',
+      }}>
+        {/* Current Level */}
+        <div style={{
+          textAlign: 'center',
+          padding: '20px 0 12px',
+          width: '100%',
+        }}>
+          <div style={{
+            fontSize: 11,
+            fontFamily: C.mono,
+            color: C.textMuted,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase' as const,
+            marginBottom: 8,
+          }}>
+            PRESTIGE CLEARANCE
+          </div>
+          <div style={{
+            fontSize: 36,
+            fontWeight: 900,
+            color: C.amber,
+            fontFamily: C.mono,
+            lineHeight: 1,
+          }}>
+            LEVEL {prestigeLevel}
+          </div>
+          <div style={{
+            fontSize: 14,
+            color: C.amberBright,
+            fontWeight: 700,
+            fontFamily: C.mono,
+            marginTop: 6,
+          }}>
+            {prestigeMultiplier.toFixed(2)}x ALL PRODUCTION
+          </div>
+        </div>
+
+        {/* Divider */}
+        <div style={{ width: '100%', height: 1, background: C.border }} />
+
+        {/* Cost Display */}
+        <div style={{
+          textAlign: 'center',
+          padding: '8px 0',
+        }}>
+          <div style={{
+            fontSize: 10,
+            fontFamily: C.mono,
+            color: C.textMuted,
+            letterSpacing: '0.1em',
+            marginBottom: 6,
+          }}>
+            NEXT LEVEL REQUIRES
+          </div>
+          <div style={{
+            fontSize: 20,
+            fontWeight: 800,
+            fontFamily: C.mono,
+            color: canPrestige ? C.amber : C.dangerDim,
+          }}>
+            {formatNumber(prestigeCost)} WP
+          </div>
+          {!canPrestige && (
+            <div style={{
+              fontSize: 11,
+              fontFamily: C.mono,
+              color: C.textMuted,
+              marginTop: 4,
+            }}>
+              ({formatNumber(prestigeCost - wp)} more needed)
             </div>
+          )}
+          <div style={{
+            fontSize: 11,
+            fontFamily: C.mono,
+            color: C.green,
+            marginTop: 6,
+          }}>
+            Next: {(1 + (prestigeLevel + 1) * 0.25).toFixed(2)}x multiplier
+          </div>
+        </div>
 
-            {/* Prestige Button */}
-            {!showPrestigeConfirm ? (
+        {/* ASCEND Button or Confirm */}
+        {!showPrestigeConfirm ? (
+          <button
+            style={{
+              width: '100%',
+              padding: '14px 0',
+              fontSize: 15,
+              fontWeight: 900,
+              fontFamily: C.mono,
+              letterSpacing: '0.15em',
+              textTransform: 'uppercase' as const,
+              border: 'none',
+              cursor: canPrestige ? 'pointer' : 'not-allowed',
+              transition: 'all 0.15s',
+              ...(canPrestige ? {
+                background: C.amber,
+                color: C.bg,
+              } : {
+                background: C.border,
+                color: C.textDim,
+              }),
+            }}
+            disabled={!canPrestige}
+            onClick={() => setShowPrestigeConfirm(true)}
+          >
+            ASCEND
+          </button>
+        ) : (
+          <div style={{
+            width: '100%',
+            border: `2px solid ${C.danger}`,
+            background: '#1A1214',
+            padding: 16,
+          }}>
+            <div style={{
+              fontSize: 13,
+              color: C.dangerDim,
+              fontWeight: 800,
+              fontFamily: C.mono,
+              textAlign: 'center',
+              letterSpacing: '0.1em',
+              marginBottom: 10,
+            }}>
+              CONFIRM ASCENSION?
+            </div>
+            <div style={{
+              fontSize: 11,
+              color: C.textMuted,
+              textAlign: 'center',
+              lineHeight: 1.6,
+              marginBottom: 14,
+            }}>
+              This action is irreversible. All stations, upgrades, and current WP will be reset.
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
               <button
                 style={{
-                  ...styles.prestigeBtn,
-                  ...(wp < prestigeCost ? styles.prestigeBtnDisabled : {}),
+                  flex: 1,
+                  padding: '10px 0',
+                  fontSize: 11,
+                  fontWeight: 800,
+                  fontFamily: C.mono,
+                  letterSpacing: '0.1em',
+                  border: 'none',
+                  cursor: 'pointer',
+                  background: C.amber,
+                  color: C.bg,
                 }}
-                disabled={wp < prestigeCost}
-                onClick={() => setShowPrestigeConfirm(true)}
+                onClick={() => { onPrestige(); setShowPrestigeConfirm(false); }}
               >
-                {'\u2B50'} PRESTIGE TO LEVEL {prestigeLevel + 1}
+                CONFIRM
               </button>
-            ) : (
-              <div style={{ ...styles.card, border: '2px solid #EF5350', background: '#2A1A1A' }}>
-                <div style={{ fontSize: 13, color: '#EF5350', fontWeight: 700, marginBottom: 8, textAlign: 'center', fontFamily: "'IBM Plex Mono', monospace" }}>
-                  ARE YOU SURE?
-                </div>
-                <div style={{ fontSize: 11, color: '#9E9B94', marginBottom: 10, lineHeight: 1.5, textAlign: 'center' }}>
-                  This will reset your stations, upgrades, and current WP.
-                  You will keep your prestige level, lifetime WP, achievements, and shifts.
-                </div>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                  <button
-                    style={{ ...styles.prestigeBtn, flex: 1, fontSize: 11, padding: '8px 0' }}
-                    onClick={() => { onPrestige(); setShowPrestigeConfirm(false); }}
-                  >
-                    CONFIRM PRESTIGE
-                  </button>
-                  <button
-                    style={{ ...styles.buyBtn, flex: 1, fontSize: 11, padding: '8px 0', background: '#3A3A3F', color: '#9E9B94' }}
-                    onClick={() => setShowPrestigeConfirm(false)}
-                  >
-                    CANCEL
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* What you keep / lose */}
-            <div style={{ ...styles.card, background: '#222226' }}>
-              <div style={{ fontSize: 11, color: '#66BB6A', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", marginBottom: 6 }}>
-                {'\u2705'} YOU KEEP:
-              </div>
-              <div style={{ fontSize: 11, color: '#9E9B94', lineHeight: 1.6, paddingLeft: 8 }}>
-                Prestige level + multiplier<br/>
-                Total WP (lifetime)<br/>
-                Achievements / Trophies<br/>
-                Shifts completed<br/>
-                Callsign / Username
-              </div>
-            </div>
-            <div style={{ ...styles.card, background: '#222226' }}>
-              <div style={{ fontSize: 11, color: '#EF5350', fontWeight: 700, fontFamily: "'IBM Plex Mono', monospace", marginBottom: 6 }}>
-                {'\u274C'} YOU LOSE:
-              </div>
-              <div style={{ fontSize: 11, color: '#9E9B94', lineHeight: 1.6, paddingLeft: 8 }}>
-                Current WP (set to 0)<br/>
-                All stations (reset)<br/>
-                All upgrades (reset)
-              </div>
+              <button
+                style={{
+                  flex: 1,
+                  padding: '10px 0',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  fontFamily: C.mono,
+                  letterSpacing: '0.1em',
+                  border: `1px solid ${C.borderLight}`,
+                  cursor: 'pointer',
+                  background: 'transparent',
+                  color: C.textMuted,
+                }}
+                onClick={() => setShowPrestigeConfirm(false)}
+              >
+                CANCEL
+              </button>
             </div>
           </div>
+        )}
+
+        {/* Divider */}
+        <div style={{ width: '100%', height: 1, background: C.border }} />
+
+        {/* YOU KEEP */}
+        <div style={{
+          width: '100%',
+          background: C.bgCard,
+          border: `1px solid ${C.border}`,
+          padding: '12px 14px',
+        }}>
+          <div style={{
+            fontSize: 10,
+            fontWeight: 800,
+            fontFamily: C.mono,
+            color: C.green,
+            letterSpacing: '0.1em',
+            marginBottom: 8,
+          }}>
+            YOU KEEP:
+          </div>
+          <div style={{
+            fontSize: 11,
+            color: C.textMuted,
+            lineHeight: 1.8,
+            paddingLeft: 8,
+            fontFamily: C.mono,
+          }}>
+            Prestige level + multiplier<br/>
+            Total WP (lifetime)<br/>
+            Achievements / Trophies<br/>
+            Shifts completed
+          </div>
+        </div>
+
+        {/* YOU LOSE */}
+        <div style={{
+          width: '100%',
+          background: C.bgCard,
+          border: `1px solid ${C.danger}`,
+          padding: '12px 14px',
+        }}>
+          <div style={{
+            fontSize: 10,
+            fontWeight: 800,
+            fontFamily: C.mono,
+            color: C.dangerDim,
+            letterSpacing: '0.1em',
+            marginBottom: 8,
+          }}>
+            YOU LOSE:
+          </div>
+          <div style={{
+            fontSize: 11,
+            color: C.textMuted,
+            lineHeight: 1.8,
+            paddingLeft: 8,
+            fontFamily: C.mono,
+          }}>
+            Current WP (set to 0)<br/>
+            All stations (reset)<br/>
+            All upgrades (reset)
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  /* ── Main Render ──── */
+  return (
+    <div style={s.container}>
+      {renderTabs()}
+
+      <div style={s.list}>
+        {tab === 'STATIONS' ? (
+          unlockedStations.length === 0 ? (
+            <div style={s.emptyMsg}>NO STATIONS UNLOCKED</div>
+          ) : (
+            unlockedStations.map(renderStation)
+          )
+        ) : tab === 'UPGRADES' ? (
+          availableUpgrades.length === 0 ? (
+            <div style={s.emptyMsg}>NO UPGRADES AVAILABLE</div>
+          ) : (
+            availableUpgrades.map(renderUpgrade)
+          )
         ) : tab === 'TROPHIES' ? (
           <Achievements unlockedIds={achievements} />
-        ) : tab === 'STATIONS' ? (
-          unlockedStations.length === 0 ? (
-            <div style={styles.emptyMsg}>No stations unlocked yet</div>
-          ) : (
-            unlockedStations.map((st) => {
-              const owned = ownedStations[st.id] ?? 0;
-              const cost = getStationCost(st, owned);
-              const canAfford = wp >= cost;
-              const totalWps = owned > 0 ? +(st.baseWps * owned).toFixed(1) : 0;
-              const pct = wpPerSecond > 0 && totalWps > 0 ? ((totalWps / wpPerSecond) * 100).toFixed(0) : null;
-
-              return (
-                <div
-                  key={st.id}
-                  className={`shop-item-card${canAfford ? '' : ' disabled'}`}
-                  style={{
-                    ...styles.card,
-                    ...(canAfford ? styles.cardAffordable : styles.cardDisabled),
-                  }}
-                  onClick={() => canAfford && onBuyStation(st.id)}
-                >
-                  <div style={styles.cardHeader}>
-                    <span style={styles.cardIcon}>{st.icon}</span>
-                    <span style={styles.cardName}>{st.name}</span>
-                    {owned > 0 && (
-                      <span style={styles.cardCount}>x{owned}</span>
-                    )}
-                    {pct && (
-                      <span style={styles.cardPct}>{pct}%</span>
-                    )}
-                  </div>
-                  <div style={styles.cardFlavor}>{st.flavor}</div>
-                  <div style={styles.cardFooter}>
-                    <span style={styles.priceTag} className="tabular-nums">
-                      {formatNumber(cost)} WP
-                    </span>
-                    <span style={styles.cardEffect}>
-                      +{st.baseWps} w/s
-                    </span>
-                    <button
-                      style={{
-                        ...styles.buyBtn,
-                        ...(!canAfford ? styles.buyBtnDisabled : {}),
-                      }}
-                      disabled={!canAfford}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (canAfford) onBuyStation(st.id);
-                      }}
-                    >
-                      BUY
-                    </button>
-                  </div>
-                </div>
-              );
-            })
-          )
-        ) : availableUpgrades.length === 0 ? (
-          <div style={styles.emptyMsg}>No upgrades available</div>
         ) : (
-          availableUpgrades.map((up) => {
-            const prereqMet = !up.requires || purchasedUpgrades.includes(up.requires);
-            const canAfford = wp >= up.cost && prereqMet;
-            const requiresName = up.requires
-              ? upgrades.find((u) => u.id === up.requires)?.name ?? up.requires
-              : '';
-
-            return (
-              <div
-                key={up.id}
-                className={`shop-item-card${canAfford ? '' : ' disabled'}`}
-                style={{
-                  ...styles.card,
-                  ...(!prereqMet
-                    ? styles.cardLocked
-                    : canAfford
-                      ? styles.cardAffordable
-                      : styles.cardDisabled),
-                }}
-                onClick={() => canAfford && onBuyUpgrade(up.id)}
-              >
-                <div style={styles.cardHeader}>
-                  <span style={styles.cardIcon}>{prereqMet ? up.icon : '\uD83D\uDD12'}</span>
-                  <span style={styles.cardName}>{up.name}</span>
-                </div>
-                <div style={styles.cardFlavor}>{up.flavor}</div>
-                <div style={styles.cardDesc}>{up.description}</div>
-                <div style={styles.cardFooter}>
-                  <span style={styles.priceTag} className="tabular-nums">
-                    {formatNumber(up.cost)} WP
-                  </span>
-                  {!prereqMet ? (
-                    <span style={styles.reqLabel}>
-                      Req: {requiresName}
-                    </span>
-                  ) : (
-                    <button
-                      style={{
-                        ...styles.buyBtn,
-                        ...(!canAfford ? styles.buyBtnDisabled : {}),
-                      }}
-                      disabled={!canAfford}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (canAfford) onBuyUpgrade(up.id);
-                      }}
-                    >
-                      BUY
-                    </button>
-                  )}
-                </div>
-              </div>
-            );
-          })
+          renderPrestige()
         )}
       </div>
     </div>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    padding: '14px',
-    color: '#E8E6E1',
-    display: 'flex',
-    flexDirection: 'column',
-    height: '100%',
-    boxSizing: 'border-box',
-    overflow: 'hidden',
-    background: '#1E1E22',
-    borderRadius: 10,
-  },
-  title: {
-    fontSize: 14,
-    fontWeight: 700,
-    color: '#E8D44D',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-    paddingBottom: 10,
-    letterSpacing: 2,
-  },
-  tabRow: {
-    display: 'flex',
-    gap: 6,
-    marginBottom: 12,
-    flexShrink: 0,
-  },
-  tab: {
-    flex: 1,
-    padding: '8px 0',
-    textAlign: 'center' as const,
-    fontSize: 10,
-    letterSpacing: 0.5,
-    cursor: 'pointer',
-    border: 'none',
-    background: '#3A3A3F',
-    color: '#9E9B94',
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontWeight: 600,
-    transition: 'all 0.2s ease',
-    borderRadius: 9999,
-  },
-  tabActive: {
-    background: '#E8D44D',
-    color: '#1A1A1E',
-  },
-  tabActivePrestige: {
-    background: '#F5A623',
-    color: '#1A1A1E',
-  },
-  list: {
-    flex: 1,
-    overflowY: 'auto' as const,
-    display: 'flex',
-    flexDirection: 'column' as const,
-    gap: 8,
-    minHeight: 0,
-  },
-  card: {
-    border: '1px dotted #3A3A3F',
-    borderRadius: 6,
-    padding: '10px 12px',
-    background: '#2A2A2F',
-    transition: 'all 0.2s ease',
-    cursor: 'pointer',
-  },
-  cardAffordable: {
-    borderLeft: '3px solid #E8D44D',
-    borderLeftStyle: 'solid' as const,
-    background: '#2A2A2F',
-  },
-  cardDisabled: {
-    opacity: 0.5,
-  },
-  cardLocked: {
-    opacity: 0.35,
-    border: '1px solid #EF5350',
-  },
-  cardHeader: {
-    display: 'flex',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 4,
-  },
-  cardIcon: {
-    fontSize: 18,
-  },
-  cardName: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: 600,
-    color: '#E8E6E1',
-    fontFamily: "'Nunito', sans-serif",
-  },
-  cardCount: {
-    fontSize: 11,
-    color: '#E8D44D',
-    fontWeight: 700,
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  cardFlavor: {
-    fontSize: 11,
-    color: '#6B6860',
-    lineHeight: 1.4,
-    marginBottom: 4,
-    fontStyle: 'italic',
-  },
-  cardDesc: {
-    fontSize: 11,
-    color: '#9E9B94',
-    marginBottom: 4,
-    fontWeight: 500,
-  },
-  cardFooter: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    gap: 6,
-  },
-  priceTag: {
-    fontSize: 13,
-    color: '#E8D44D',
-    fontWeight: 700,
-    fontFamily: "'IBM Plex Mono', monospace",
-    background: 'rgba(232,212,77,0.1)',
-    padding: '2px 8px',
-    borderRadius: 3,
-    border: '1px solid rgba(232,212,77,0.2)',
-  },
-  cardEffect: {
-    fontSize: 11,
-    color: '#66BB6A',
-    fontWeight: 600,
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  cardPct: {
-    fontSize: 10,
-    color: '#6B6860',
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  buyBtn: {
-    background: '#E8D44D',
-    border: 'none',
-    color: '#1A1A1E',
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontSize: 10,
-    padding: '4px 14px',
-    borderRadius: 4,
-    cursor: 'pointer',
-    fontWeight: 700,
-    letterSpacing: 0.5,
-    transition: 'all 0.15s ease',
-  },
-  buyBtnDisabled: {
-    background: '#2A2A2F',
-    color: '#6B6860',
-    border: '1px solid #3A3A3F',
-    cursor: 'not-allowed',
-  },
-  reqLabel: {
-    fontSize: 10,
-    color: '#EF5350',
-    fontWeight: 600,
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  prestigeBtn: {
-    background: 'linear-gradient(135deg, #F5A623, #E8D44D)',
-    border: 'none',
-    color: '#1A1A1E',
-    fontFamily: "'IBM Plex Mono', monospace",
-    fontSize: 13,
-    padding: '12px 20px',
-    borderRadius: 6,
-    cursor: 'pointer',
-    fontWeight: 800,
-    letterSpacing: 1,
-    textAlign: 'center' as const,
-    transition: 'all 0.2s ease',
-  },
-  prestigeBtnDisabled: {
-    background: '#2A2A2F',
-    color: '#6B6860',
-    border: '1px solid #3A3A3F',
-    cursor: 'not-allowed',
-  },
-  emptyMsg: {
-    color: '#6B6860',
-    fontSize: 13,
-    textAlign: 'center' as const,
-    padding: '24px 0',
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
 };
 
 export default Shop;

@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Achievements ("Late Night Office")
-// Employee of the Month wall with dark theme
+// Work Clicker — Achievements ("Corporate Dystopia Brutalism")
+// Concrete slab achievement wall — amber glow on unlocked badges
 // ============================================================
 
 import React, { useState } from 'react';
@@ -18,52 +18,71 @@ const Achievements: React.FC<AchievementsProps> = ({ unlockedIds }) => {
 
   return (
     <div style={styles.container}>
+      {/* Header — right-aligned progress counter */}
       <div style={styles.header}>
-        <div style={styles.title}>EMPLOYEE OF THE MONTH</div>
-        <div style={styles.count}>
-          {unlockedCount} / {totalCount}
-        </div>
+        <span style={styles.counter}>
+          {unlockedCount} / {totalCount} UNLOCKED
+        </span>
       </div>
 
+      {/* Achievement grid */}
       <div style={styles.grid}>
         {ACHIEVEMENTS.map((ach) => {
           const isUnlocked = unlockedIds.includes(ach.id);
           const isHovered = hoveredId === ach.id;
+          const isHidden = !isUnlocked && ach.hidden;
           const showInfo = isUnlocked || !ach.hidden;
+
+          // Build card style
+          const cardStyle: React.CSSProperties = {
+            ...styles.card,
+            ...(isUnlocked ? styles.cardUnlocked : {}),
+            ...(!isUnlocked && !isHidden ? styles.cardLocked : {}),
+            ...(isHidden ? styles.cardHidden : {}),
+          };
 
           return (
             <div
               key={ach.id}
-              style={{
-                ...styles.badge,
-                ...(isUnlocked ? styles.badgeUnlocked : styles.badgeLocked),
-              }}
+              style={cardStyle}
               onMouseEnter={() => setHoveredId(ach.id)}
               onMouseLeave={() => setHoveredId(null)}
             >
+              {/* Icon or placeholder */}
               <span
                 style={
-                  isUnlocked ? styles.badgeIcon : styles.badgeIconLocked
+                  isUnlocked
+                    ? styles.icon
+                    : isHidden
+                      ? styles.iconHidden
+                      : styles.iconLocked
                 }
               >
-                {isUnlocked ? ach.icon : ach.hidden ? '?' : ach.icon}
-              </span>
-              <span
-                style={
-                  isUnlocked ? styles.badgeName : styles.badgeNameLocked
-                }
-              >
-                {showInfo ? ach.name : '???'}
+                {isUnlocked ? ach.icon : isHidden ? '???' : '?'}
               </span>
 
+              {/* Name (only shown when unlocked) */}
+              {isUnlocked && (
+                <span style={styles.name}>{ach.name}</span>
+              )}
+
+              {/* Tooltip */}
               {isHovered && (
                 <div style={styles.tooltip}>
+                  <div style={styles.tooltipArrow} />
                   <div style={styles.tooltipName}>
                     {showInfo ? ach.name : '???'}
                   </div>
                   <div style={styles.tooltipDesc}>
-                    {showInfo ? ach.description : 'Keep working to unlock!'}
+                    {showInfo
+                      ? ach.description
+                      : 'Keep working to unlock!'}
                   </div>
+                  {showInfo && ach.condition && (
+                    <div style={styles.tooltipCondition}>
+                      {formatCondition(ach.condition)}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -74,112 +93,178 @@ const Achievements: React.FC<AchievementsProps> = ({ unlockedIds }) => {
   );
 };
 
+/** Format an unlock condition for display */
+function formatCondition(condition: { type: string; value: number }): string {
+  const v = condition.value.toLocaleString();
+  switch (condition.type) {
+    case 'total_clicks':
+      return `Reach ${v} clicks`;
+    case 'total_wp':
+      return `Earn ${v} WP`;
+    case 'upgrades':
+      return `Buy ${v} upgrades`;
+    case 'wp_rate':
+      return `Reach ${v} WP/s`;
+    default:
+      return `${condition.type}: ${v}`;
+  }
+}
+
+// ────────────────────────────────────────────────────────────
+// Styles — all inline, CSS custom properties for theme tokens
+// ────────────────────────────────────────────────────────────
+
 const styles: Record<string, React.CSSProperties> = {
   container: {
     padding: 4,
   },
+
+  // Header — right-aligned counter
   header: {
     display: 'flex',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     alignItems: 'center',
-    borderBottom: '1px solid #3A3A3F',
-    paddingBottom: 8,
-    marginBottom: 12,
+    marginBottom: 10,
+    paddingBottom: 6,
+    borderBottom: '1px solid var(--border, #2A2A2F)',
   },
-  title: {
-    fontSize: 14,
-    fontWeight: 700,
-    color: '#E8D44D',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-    letterSpacing: 1,
+  counter: {
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
+    fontSize: 11,
+    fontWeight: 600,
+    color: 'var(--text-secondary, #9E9B94)',
+    letterSpacing: 1.5,
+    textTransform: 'uppercase' as const,
   },
-  count: {
-    fontSize: 12,
-    color: '#E8D44D',
-    fontWeight: 700,
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-  },
+
+  // Grid
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(85px, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))',
     gap: 8,
   },
-  badge: {
-    position: 'relative',
+
+  // Base card
+  card: {
+    position: 'relative' as const,
+    width: '100%',
+    aspectRatio: '1',
+    maxHeight: 72,
     display: 'flex',
-    flexDirection: 'column',
+    flexDirection: 'column' as const,
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 10,
-    borderRadius: 10,
-    border: '1px solid #3A3A3F',
     cursor: 'pointer',
     transition: 'all 0.2s ease',
-    minHeight: 75,
-    textAlign: 'center',
-    background: '#2A2A2F',
+    boxSizing: 'border-box' as const,
+    overflow: 'hidden',
   },
-  badgeUnlocked: {
-    background: '#2A2A2F',
-    borderColor: '#E8D44D',
-    boxShadow: '0 0 12px rgba(232, 212, 77, 0.2)',
+
+  // Unlocked variant
+  cardUnlocked: {
+    background: 'var(--bg-card, #2A2A2F)',
+    border: '1px solid var(--accent, #E8D44D)',
+    boxShadow: '0 0 8px var(--accent-dim, rgba(232, 212, 77, 0.15))',
   },
-  badgeLocked: {
-    background: '#252528',
-    borderColor: '#3A3A3F',
+
+  // Locked variant (known but not yet earned)
+  cardLocked: {
+    background: 'var(--bg-primary, #1E1E22)',
+    border: '1px solid var(--border, #2A2A2F)',
   },
-  badgeIcon: {
-    fontSize: 26,
-    marginBottom: 4,
+
+  // Hidden variant (not revealed)
+  cardHidden: {
+    background: 'var(--bg-primary, #1E1E22)',
+    border: '1px solid var(--border, #252528)',
   },
-  badgeIconLocked: {
-    fontSize: 26,
-    marginBottom: 4,
-    filter: 'grayscale(100%) brightness(0.4)',
+
+  // Icons
+  icon: {
+    fontSize: 24,
+    lineHeight: 1,
+    marginBottom: 2,
   },
-  badgeName: {
-    fontSize: 10,
+  iconLocked: {
+    fontSize: 20,
+    lineHeight: 1,
+    color: 'var(--text-muted, #6B6860)',
+    fontWeight: 700,
+    fontFamily: "'JetBrains Mono', monospace",
+  },
+  iconHidden: {
+    fontSize: 14,
+    lineHeight: 1,
+    color: 'var(--text-muted, #555250)',
+    fontWeight: 700,
+    fontFamily: "'JetBrains Mono', monospace",
+    letterSpacing: 1,
+  },
+
+  // Name label (unlocked only)
+  name: {
+    fontSize: 8,
     lineHeight: 1.2,
-    color: '#D0CDC6',
+    color: 'var(--text-secondary, #9E9B94)',
     maxWidth: '100%',
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap' as const,
+    textAlign: 'center' as const,
+    padding: '0 2px',
     fontWeight: 600,
   },
-  badgeNameLocked: {
-    fontSize: 10,
-    lineHeight: 1.2,
-    color: '#6B6860',
-  },
+
+  // Tooltip — dark panel with amber border, positioned above card
   tooltip: {
-    position: 'absolute',
-    bottom: '100%',
+    position: 'absolute' as const,
+    bottom: 'calc(100% + 10px)',
     left: '50%',
     transform: 'translateX(-50%)',
-    padding: '10px 14px',
-    fontSize: 12,
-    color: '#D0CDC6',
-    zIndex: 100,
-    pointerEvents: 'none',
-    marginBottom: 8,
+    padding: '8px 12px',
+    zIndex: 200,
+    pointerEvents: 'none' as const,
+    minWidth: 160,
     maxWidth: 220,
-    whiteSpace: 'normal',
-    background: '#1A1A1E',
-    borderRadius: 10,
-    border: '1px solid #3A3A3F',
-    boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+    whiteSpace: 'normal' as const,
+    background: '#111114',
+    border: '1px solid var(--accent, #E8D44D)',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.7)',
+  },
+  tooltipArrow: {
+    position: 'absolute' as const,
+    bottom: -6,
+    left: '50%',
+    transform: 'translateX(-50%)',
+    width: 0,
+    height: 0,
+    borderLeft: '6px solid transparent',
+    borderRight: '6px solid transparent',
+    borderTop: '6px solid var(--accent, #E8D44D)',
   },
   tooltipName: {
+    fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
     fontWeight: 700,
+    fontSize: 12,
+    color: 'var(--accent, #E8D44D)',
     marginBottom: 3,
-    color: '#E8D44D',
-    fontFamily: "'IBM Plex Mono', 'Courier New', monospace",
-    fontSize: 13,
+    lineHeight: 1.3,
   },
   tooltipDesc: {
-    color: '#9E9B94',
     fontSize: 11,
     lineHeight: 1.4,
+    color: 'var(--text-secondary, #9E9B94)',
+    marginBottom: 4,
+  },
+  tooltipCondition: {
+    fontSize: 9,
+    lineHeight: 1.3,
+    color: 'var(--text-muted, #6B6860)',
+    fontFamily: "'JetBrains Mono', monospace",
+    letterSpacing: 0.5,
+    borderTop: '1px solid #2A2A2F',
+    paddingTop: 4,
+    marginTop: 2,
   },
 };
 

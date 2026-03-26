@@ -1,9 +1,10 @@
 // ============================================================
-// Work Clicker — Stats Panel ("Late Night at the Office")
-// Vertical card layout for left column
+// Work Clicker — Stats Panel ("Corporate Dystopia Brutalism")
+// EMPLOYEE METRICS — 2-column grid, all inline styles
 // ============================================================
 
 import React from 'react';
+import { ActiveEvent } from '../types';
 
 interface StatsPanelProps {
   wp: number;
@@ -14,7 +15,10 @@ interface StatsPanelProps {
   shiftsCompleted: number;
   overtimeMinutes: number;
   activeEventName: string | null;
+  activeEvent: ActiveEvent | null;
   isOnShift: boolean;
+  prestigeLevel: number;
+  prestigeMultiplier: number;
 }
 
 function formatNumber(n: number): string {
@@ -33,152 +37,154 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
   shiftsCompleted,
   overtimeMinutes,
   activeEventName,
+  activeEvent,
   isOnShift,
+  prestigeLevel,
+  prestigeMultiplier,
 }) => {
   const now = Date.now();
   const shiftDuration = clockOutTime - shiftStart;
   const elapsed = now - shiftStart;
   const progress = isOnShift && shiftDuration > 0 ? Math.min(1, Math.max(0, elapsed / shiftDuration)) : 0;
-  const progressPct = (progress * 100).toFixed(1);
 
-  const stats: { label: string; value: string; highlight?: boolean; danger?: boolean }[] = [
-    { label: 'TOTAL WP', value: formatNumber(wp), highlight: true },
-    { label: 'WP/SEC', value: wps.toFixed(1) },
-    { label: 'WP/CLICK', value: wpPerClick.toFixed(1) },
-    { label: 'SHIFTS', value: String(shiftsCompleted) },
-    { label: 'OVERTIME', value: `${overtimeMinutes.toFixed(0)}m`, danger: overtimeMinutes > 0 },
+  const isActiveEventPositive = activeEvent && activeEvent.endTime > now
+    ? activeEvent.event.isPositive
+    : true;
+
+  const stats: {
+    label: string;
+    value: string;
+    color: string;
+  }[] = [
+    { label: 'TOTAL WP', value: formatNumber(wp), color: '#FFB800' },
+    { label: 'WP/SEC', value: wps.toFixed(1), color: '#00FF66' },
+    { label: 'WP/CLICK', value: wpPerClick.toFixed(1), color: '#E8E6E1' },
+    { label: 'SHIFTS', value: String(shiftsCompleted), color: '#E8E6E1' },
+    {
+      label: 'OVERTIME',
+      value: `${overtimeMinutes.toFixed(0)}m`,
+      color: overtimeMinutes > 0 ? '#EF5350' : '#4A4A50',
+    },
+    {
+      label: 'PRESTIGE',
+      value: prestigeLevel > 0 ? `${prestigeLevel} ×${prestigeMultiplier.toFixed(2)}` : '0',
+      color: prestigeLevel > 0 ? '#FFB800' : '#4A4A50',
+    },
   ];
 
-  if (isOnShift) {
-    stats.push({ label: 'PROGRESS', value: `${progressPct}%` });
-  }
-
   return (
-    <div style={styles.container}>
-      <div style={styles.title}>STATS</div>
+    <div
+      style={{
+        background: '#111113',
+        border: '1px solid #2A2A2F',
+        padding: '14px 16px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 10,
+        width: '100%',
+        boxSizing: 'border-box',
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          fontSize: 11,
+          fontWeight: 600,
+          color: '#6B6860',
+          fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+          letterSpacing: '0.1em',
+          textTransform: 'uppercase' as const,
+          borderBottom: '1px solid #2A2A2F',
+          paddingBottom: 8,
+        }}
+      >
+        EMPLOYEE METRICS
+      </div>
 
-      <div style={styles.statsList}>
+      {/* 2-column grid */}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '10px 16px',
+        }}
+      >
         {stats.map((s) => (
-          <div key={s.label} style={styles.statRow}>
-            <span style={styles.statLabel}>{s.label}</span>
+          <div key={s.label} style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <span
-              className="tabular-nums"
               style={{
-                ...styles.statValue,
-                ...(s.highlight ? styles.statHighlight : {}),
-                ...(s.danger ? styles.statDanger : {}),
+                fontSize: 10,
+                fontWeight: 600,
+                color: '#4A4A50',
+                fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+                letterSpacing: '0.08em',
+                textTransform: 'uppercase' as const,
+                lineHeight: 1,
+              }}
+            >
+              {s.label}
+            </span>
+            <span
+              style={{
+                fontSize: 16,
+                fontWeight: 700,
+                color: s.color,
+                fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+                fontVariantNumeric: 'tabular-nums',
+                lineHeight: 1.2,
               }}
             >
               {s.value}
             </span>
           </div>
         ))}
-
-        {activeEventName && (
-          <div style={styles.statRow}>
-            <span style={styles.statLabel}>EVENT</span>
-            <span style={styles.eventPill}>{activeEventName}</span>
-          </div>
-        )}
       </div>
 
       {/* Shift progress bar */}
       {isOnShift && (
-        <div style={styles.progressTrack}>
+        <div
+          style={{
+            height: 4,
+            background: '#1A1A1E',
+            overflow: 'hidden',
+            marginTop: 2,
+          }}
+        >
           <div
             style={{
-              ...styles.progressBar,
+              height: '100%',
               width: `${progress * 100}%`,
-              background: progress > 0.9 ? '#66BB6A' : progress > 0.7 ? '#FFA726' : '#E8D44D',
-              boxShadow: `0 0 4px ${progress > 0.9 ? '#66BB6A' : '#E8D44D'}40`,
+              background: '#FFB800',
+              transition: 'width 1s linear',
             }}
           />
         </div>
       )}
+
+      {/* Active event banner */}
+      {activeEventName && activeEvent && activeEvent.endTime > now && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            padding: '6px 10px',
+            background: '#1A1A1E',
+            border: `1px solid ${isActiveEventPositive ? '#00FF6640' : '#EF535040'}`,
+            borderLeft: `3px solid ${isActiveEventPositive ? '#00FF66' : '#EF5350'}`,
+            fontSize: 11,
+            fontWeight: 600,
+            color: isActiveEventPositive ? '#00FF66' : '#EF5350',
+            fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
+            letterSpacing: '0.04em',
+          }}
+        >
+          <span style={{ fontSize: 14 }}>{activeEvent.event.icon}</span>
+          <span>{activeEventName}</span>
+        </div>
+      )}
     </div>
   );
-};
-
-const styles: Record<string, React.CSSProperties> = {
-  container: {
-    background: '#2A2A2F',
-    borderRadius: 8,
-    padding: '12px 14px',
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 8,
-    width: '100%',
-    boxSizing: 'border-box',
-  },
-  title: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: '#E8D44D',
-    fontFamily: "'IBM Plex Mono', monospace",
-    letterSpacing: 2,
-    textTransform: 'uppercase' as const,
-    borderBottom: '1px solid #3A3A3F',
-    paddingBottom: 6,
-  },
-  statsList: {
-    display: 'flex',
-    flexDirection: 'column',
-    gap: 6,
-  },
-  statRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    padding: '2px 0',
-  },
-  statLabel: {
-    fontSize: 10,
-    color: '#6B6860',
-    fontWeight: 600,
-    fontFamily: "'IBM Plex Mono', monospace",
-    letterSpacing: 1,
-    textTransform: 'uppercase' as const,
-  },
-  statValue: {
-    fontSize: 14,
-    fontWeight: 700,
-    color: '#E8E6E1',
-    lineHeight: 1.2,
-    fontFamily: "'IBM Plex Mono', monospace",
-  },
-  statHighlight: {
-    fontSize: 16,
-    fontWeight: 700,
-    color: '#E8D44D',
-    textShadow: '0 0 6px rgba(232,212,77,0.3)',
-  },
-  statDanger: {
-    color: '#EF5350',
-    textShadow: '0 0 4px rgba(239,83,80,0.3)',
-  },
-  eventPill: {
-    fontSize: 11,
-    fontWeight: 700,
-    color: '#1A1A1E',
-    background: '#E8D44D',
-    padding: '2px 8px',
-    borderRadius: 10,
-    fontFamily: "'IBM Plex Mono', monospace",
-    letterSpacing: 0.5,
-    whiteSpace: 'nowrap',
-  },
-  progressTrack: {
-    height: 3,
-    background: 'rgba(255,255,255,0.06)',
-    borderRadius: 2,
-    overflow: 'hidden',
-    marginTop: 4,
-  },
-  progressBar: {
-    height: '100%',
-    borderRadius: 2,
-    transition: 'width 1s linear',
-  },
 };
 
 export default StatsPanel;

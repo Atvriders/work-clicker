@@ -1,6 +1,6 @@
 // ============================================================
-// Work Clicker — Worker Avatar ("Late Night at the Office")
-// Worker at desk with glowing monitor, coffee cup, sticky note speech bubbles
+// Work Clicker — Worker Avatar ("Corporate Dystopia Brutalism")
+// Centered brutalist layout: dark tones, amber accents, minimal desk
 // ============================================================
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -13,11 +13,9 @@ interface WorkerAvatarProps {
 
 interface WorkerState {
   emoji: string;
-  accessory: string;
   message: string;
-  animation: string;
+  animationClass: string;
   mood: string;
-  monitorContent: string;
 }
 
 const SLEEP_LINES = [
@@ -88,11 +86,9 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
   if (!isOnShift) {
     return {
       emoji: '\uD83D\uDE34',
-      accessory: '',
       message: pickRandom(SLEEP_LINES),
-      animation: 'worker-float',
+      animationClass: 'worker-float',
       mood: 'sleeping',
-      monitorContent: '\u23FB',
     };
   }
 
@@ -101,26 +97,22 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
   const progress = totalDuration > 0 ? elapsed / totalDuration : 0;
   const remaining = clockOutTime - now;
 
-  // Overtime
+  // Overtime (bad — >30 min)
   if (remaining < 0) {
     const overtimeMin = Math.abs(remaining) / 60000;
     if (overtimeMin > 30) {
       return {
         emoji: '\uD83D\uDE2D',
-        accessory: '\uD83D\uDCCB',
         message: pickRandom(OVERTIME_BAD_LINES),
-        animation: 'worker-shake',
+        animationClass: 'worker-shake',
         mood: 'overtime-bad',
-        monitorContent: '\uD83D\uDD25',
       };
     }
     return {
       emoji: '\uD83D\uDE2D',
-      accessory: '\u23F0',
       message: pickRandom(OVERTIME_LINES),
-      animation: 'worker-shake',
+      animationClass: 'worker-shake',
       mood: 'overtime',
-      monitorContent: '\u23F0',
     };
   }
 
@@ -128,11 +120,9 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
   if (remaining < 5 * 60 * 1000) {
     return {
       emoji: '\uD83E\uDD29',
-      accessory: '\uD83C\uDF89',
       message: pickRandom(EXCITED_LINES),
-      animation: 'worker-bounce',
+      animationClass: 'worker-bounce',
       mood: 'excited',
-      monitorContent: '\uD83C\uDF89',
     };
   }
 
@@ -140,46 +130,38 @@ function getWorkerState(shiftStart: number, clockOutTime: number, isOnShift: boo
   if (progress >= 0.75) {
     return {
       emoji: '\uD83D\uDE2C',
-      accessory: '\u23F0',
       message: pickRandom(ANXIOUS_LINES),
-      animation: 'worker-wiggle',
+      animationClass: 'worker-shake',
       mood: 'anxious',
-      monitorContent: '\uD83D\uDD52',
     };
   }
 
-  // Late shift (50-75%)
-  if (progress >= 0.5) {
+  // Late shift — stressed (60%+)
+  if (progress >= 0.6) {
     return {
       emoji: '\uD83D\uDE24',
-      accessory: '\uD83D\uDCC4',
       message: pickRandom(STRESSED_LINES),
-      animation: 'worker-shake',
+      animationClass: 'worker-shake',
       mood: 'stressed',
-      monitorContent: '\uD83D\uDCE7',
     };
   }
 
-  // Mid shift (25-50%)
+  // Mid shift (25-60%)
   if (progress >= 0.25) {
     return {
       emoji: '\uD83E\uDDD1\u200D\uD83D\uDCBB',
-      accessory: '',
       message: pickRandom(FOCUSED_LINES),
-      animation: 'worker-pulse',
+      animationClass: 'worker-pulse',
       mood: 'focused',
-      monitorContent: '\uD83D\uDCBB',
     };
   }
 
-  // Start of shift (0-25%)
+  // Start of shift (0-25%) — coffee
   return {
-    emoji: '\uD83D\uDE10',
-    accessory: '\u2615',
+    emoji: '\u2615',
     message: pickRandom(ARRIVING_LINES),
-    animation: 'worker-float',
+    animationClass: '',
     mood: 'arriving',
-    monitorContent: '\uD83D\uDCE7',
   };
 }
 
@@ -187,6 +169,7 @@ const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, i
   const [now, setNow] = useState(Date.now());
   const [messageKey, setMessageKey] = useState(0);
   const [speechOpacity, setSpeechOpacity] = useState(1);
+  const [speechSlide, setSpeechSlide] = useState(false);
   const [displayedText, setDisplayedText] = useState('');
   const [fullMessage, setFullMessage] = useState('');
   const fadeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -206,6 +189,11 @@ const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, i
     setDisplayedText('');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Trigger slide-up on new message
+  useEffect(() => {
+    setSpeechSlide(true);
+  }, [fullMessage, messageKey]);
 
   // Typewriter effect: when fullMessage changes, type it out char by char
   useEffect(() => {
@@ -230,6 +218,7 @@ const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, i
         // Fully typed — hold for 4 seconds, then fade out over 0.5s, then next message
         holdTimerRef.current = setTimeout(() => {
           setSpeechOpacity(0);
+          setSpeechSlide(false);
           fadeTimerRef.current = setTimeout(() => {
             // Pick next message based on current state
             const newState = getWorkerState(shiftStart, clockOutTime, isOnShift, Date.now());
@@ -253,48 +242,50 @@ const WorkerAvatar: React.FC<WorkerAvatarProps> = ({ shiftStart, clockOutTime, i
   const remaining = clockOutTime - now;
   const isComplete = isOnShift && remaining < 0 && remaining > -2000;
 
+  const isOvertime = state.mood === 'overtime' || state.mood === 'overtime-bad';
+
   return (
     <div style={styles.container}>
-      {/* Speech bubble — sticky note style */}
+      {/* Speech bubble — brutalist dark card with amber border */}
       <div
         key={messageKey}
         style={{
           ...styles.speechBubble,
           opacity: speechOpacity,
-          transition: speechOpacity === 1 ? 'opacity 0.3s ease-in' : 'opacity 0.5s ease-out',
+          transform: speechSlide ? 'translateY(0)' : 'translateY(6px)',
+          transition: speechOpacity === 1
+            ? 'opacity 0.3s ease-in, transform 0.3s ease-out'
+            : 'opacity 0.5s ease-out, transform 0.5s ease-out',
         }}
-        className={`worker-speech-bubble ${state.mood}`}
       >
         <span style={styles.speechText}>{displayedText}<span style={styles.cursor}>|</span></span>
       </div>
 
-      {/* Character sitting behind desk */}
-      <div style={styles.sceneWrap}>
-        {/* Worker */}
-        <div className={`worker-character ${state.animation}`} style={styles.characterWrap}>
-          <span style={styles.workerEmoji}>{state.emoji}</span>
-          {state.accessory && <span style={styles.accessory}>{state.accessory}</span>}
-        </div>
-
-        {/* Desk surface */}
-        <div style={styles.desk}>
-          {/* Monitor on desk */}
-          <div style={styles.monitor}>
-            <span style={styles.monitorContent}>{state.monitorContent}</span>
-          </div>
-          {/* Coffee cup always on desk */}
-          <span style={styles.coffee}>&#9749;</span>
-        </div>
+      {/* Worker emoji — centered, with animation class */}
+      <div
+        className={`worker-character ${state.animationClass}`}
+        style={{
+          ...styles.workerWrap,
+          ...(isOvertime ? { filter: 'saturate(0.6) brightness(0.9)', color: '#FF4444' } : {}),
+        }}
+      >
+        <span style={styles.workerEmoji}>{state.emoji}</span>
       </div>
 
-      {/* Confetti for celebration states */}
+      {/* Minimal desk — thin line with monitor and coffee */}
+      <div style={styles.deskLine}>
+        <span style={styles.deskMonitor}>{'\uD83D\uDCBB'}</span>
+        <span style={styles.deskCoffee}>{'\u2615'}</span>
+      </div>
+
+      {/* Confetti on shift completion — amber/green colored pieces */}
       {(state.mood === 'excited' || isComplete) && (
         <div className="worker-confetti">
-          <span className="confetti-piece c1">{'\uD83C\uDF8A'}</span>
-          <span className="confetti-piece c2">{'\u2728'}</span>
-          <span className="confetti-piece c3">{'\uD83C\uDF89'}</span>
-          <span className="confetti-piece c4">{'\uD83C\uDF8A'}</span>
-          <span className="confetti-piece c5">{'\u2728'}</span>
+          <span className="confetti-piece c1" style={{ color: '#FFB800' }}>{'\u25A0'}</span>
+          <span className="confetti-piece c2" style={{ color: '#4CAF50' }}>{'\u25A0'}</span>
+          <span className="confetti-piece c3" style={{ color: '#FFB800' }}>{'\u25CF'}</span>
+          <span className="confetti-piece c4" style={{ color: '#4CAF50' }}>{'\u25CF'}</span>
+          <span className="confetti-piece c5" style={{ color: '#FFB800' }}>{'\u25A0'}</span>
         </div>
       )}
     </div>
@@ -307,94 +298,66 @@ const styles: Record<string, React.CSSProperties> = {
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'center',
-    gap: 6,
-    padding: '8px 0',
+    justifyContent: 'center',
+    height: 180,
+    gap: 8,
   },
   speechBubble: {
-    background: '#FFEB3B',
-    color: '#1A1A1E',
-    fontFamily: "'Nunito', 'Segoe UI', sans-serif",
-    fontSize: 13,
-    fontWeight: 600,
-    padding: '6px 12px',
-    borderRadius: 6,
-    transform: 'rotate(1deg)',
-    boxShadow: '2px 3px 8px rgba(0,0,0,0.35)',
-    maxWidth: 220,
-    minHeight: 20,
-    textAlign: 'center' as const,
+    background: 'var(--bg-card)',
+    borderLeft: '3px solid var(--accent)',
+    padding: '6px 10px',
+    maxWidth: 200,
+    minHeight: 18,
+    textAlign: 'left' as const,
     lineHeight: 1.35,
   },
   speechText: {
-    color: '#1A1A1E',
+    fontFamily: "'DM Sans', 'Inter', sans-serif",
+    fontSize: 11,
+    color: 'var(--text-secondary)',
+    letterSpacing: '0.01em',
   },
   cursor: {
-    color: '#1A1A1E',
-    opacity: 0.6,
+    color: 'var(--accent)',
     fontWeight: 400,
     animation: 'blink-cursor 1s step-end infinite',
   },
-  sceneWrap: {
-    position: 'relative' as const,
+  workerWrap: {
     display: 'flex',
-    flexDirection: 'column' as const,
     alignItems: 'center',
-    marginTop: 2,
-  },
-  characterWrap: {
-    position: 'relative' as const,
-    zIndex: 2,
-    marginBottom: -10,
+    justifyContent: 'center',
   },
   workerEmoji: {
     fontSize: 48,
     display: 'block',
     lineHeight: 1,
+    textAlign: 'center' as const,
   },
-  accessory: {
-    position: 'absolute' as const,
-    fontSize: 18,
-    top: -2,
-    right: -14,
-  },
-  desk: {
+  deskLine: {
     position: 'relative' as const,
-    width: 160,
-    height: 28,
-    background: '#333338',
-    borderRadius: 4,
-    zIndex: 3,
+    width: 120,
+    height: 1,
+    background: 'var(--text-secondary)',
+    opacity: 0.4,
     display: 'flex',
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
     justifyContent: 'center',
-    boxShadow: '0 4px 12px rgba(0,0,0,0.4)',
+    gap: 24,
+    marginTop: 2,
   },
-  monitor: {
+  deskMonitor: {
     position: 'absolute' as const,
-    top: -22,
-    left: '50%',
-    transform: 'translateX(-50%)',
-    width: 40,
-    height: 20,
-    background: '#23232a',
-    borderRadius: 3,
-    border: '1.5px solid #444',
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    boxShadow: '0 0 12px rgba(79,195,247,0.35), 0 0 4px rgba(79,195,247,0.2)',
-    zIndex: 4,
+    top: -16,
+    left: 20,
+    fontSize: 13,
+    opacity: 0.7,
   },
-  monitorContent: {
-    fontSize: 11,
-    lineHeight: 1,
-  },
-  coffee: {
+  deskCoffee: {
     position: 'absolute' as const,
-    right: 12,
     top: -14,
-    fontSize: 16,
-    zIndex: 5,
+    right: 16,
+    fontSize: 11,
+    opacity: 0.6,
   },
 };
 

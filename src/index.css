@@ -1,29 +1,34 @@
 /* ============================================================
-   Work Clicker — "Late Night at the Office" Dark Theme
+   Work Clicker — "Corporate Dystopia Brutalism"
+   Bloomberg Terminal meets dystopian cubicle farm
    ============================================================ */
 
 /* --- Google Fonts --- */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Nunito:wght@400;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 /* --- CSS Variables --- */
 :root {
-  --bg-primary: #1A1A1E;
-  --bg-secondary: #222226;
-  --bg-card: #2A2A2F;
-  --text-primary: #E8E6E1;
-  --text-secondary: #9E9B94;
-  --text-muted: #6B6860;
-  --accent: #E8D44D;
-  --accent-hover: #D4C040;
-  --accent-dim: rgba(232,212,77,0.15);
-  --success: #66BB6A;
-  --danger: #EF5350;
-  --warning: #FFA726;
-  --border: #3A3A3F;
-  --shadow: 0 2px 8px rgba(0,0,0,0.3);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
-  --font-heading: 'IBM Plex Mono', 'Courier New', monospace;
-  --font-body: 'Nunito', -apple-system, sans-serif;
+  --bg-void: #06080C;
+  --bg-primary: #0A0E14;
+  --bg-panel: #111820;
+  --bg-card: #1A2230;
+  --bg-card-hover: #202A38;
+  --border: #1E2A38;
+  --border-bright: #2A3A50;
+  --accent: #FFB800;
+  --accent-dim: #FFB80033;
+  --accent-glow: #FFB80066;
+  --success: #00FF66;
+  --success-dim: #00FF6633;
+  --danger: #FF2E2E;
+  --danger-dim: #FF2E2E33;
+  --warning: #FF8C00;
+  --text-primary: #E8ECF2;
+  --text-secondary: #7A8899;
+  --text-muted: #3E4E60;
+  --text-accent: #FFB800;
+  --font-heading: 'JetBrains Mono', 'Courier New', monospace;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
 }
 
 /* --- Reset --- */
@@ -35,26 +40,13 @@
 body {
   margin: 0;
   padding: 0;
-  background: var(--bg-primary);
+  background: var(--bg-void);
   color: var(--text-primary);
   font-family: var(--font-body);
-  overflow-x: hidden;
+  overflow: hidden;
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-}
-
-/* Subtle grain texture overlay */
-body::after {
-  content: '';
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
-  pointer-events: none;
-  z-index: 0;
 }
 
 #root {
@@ -63,37 +55,40 @@ body::after {
   z-index: 1;
 }
 
-/* --- Scrollbars (dark track, yellow thumb) --- */
+/* --- Scrollbars --- */
 ::-webkit-scrollbar {
-  width: 7px;
-  height: 7px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--bg-secondary);
-  border-radius: 4px;
+  background: #0A0E14;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent);
-  border-radius: 4px;
-  opacity: 0.6;
+  background: #FFB80044;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-hover);
+  background: #FFB80066;
 }
 
-/* Firefox scrollbar */
 * {
   scrollbar-width: thin;
-  scrollbar-color: var(--accent) var(--bg-secondary);
+  scrollbar-color: #FFB80044 #0A0E14;
 }
 
-/* --- Selection (yellow highlight) --- */
+/* --- Selection --- */
 ::selection {
   background: var(--accent);
-  color: var(--bg-primary);
+  color: #000000;
+}
+
+/* --- All transitions default --- */
+button, a, input, .card, .panel {
+  transition: all 150ms ease;
 }
 
 /* --- Base resets --- */
@@ -107,67 +102,102 @@ input {
 }
 
 /* ============================================================
-   .desk-card — dark card, border, rounded 8px, padding 12px
+   Utility Classes
    ============================================================ */
-.desk-card {
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  font-family: 'JetBrains Mono', monospace;
+}
+
+.glow-text {
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.card {
   background: var(--bg-card);
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 12px;
-  box-shadow: var(--shadow);
+  border-radius: 4px;
+  transition: all 150ms ease;
+}
+
+.card:hover {
+  border-color: var(--border-bright);
+  background: var(--bg-card-hover);
+}
+
+/* ============================================================
+   Corporate Heartbeat Line
+   ============================================================ */
+.heartbeat-line {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), var(--success), var(--accent), transparent);
+  background-size: 200% 100%;
+  animation: heartbeat-line 4s linear infinite;
 }
 
 /* ============================================================
    Keyframe Animations
    ============================================================ */
 
-/* float-up — rise and fade for click feedback */
-@keyframes float-up {
-  0% {
-    opacity: 1;
-    transform: translateY(0) scale(1);
-  }
-  60% {
-    opacity: 0.8;
-    transform: translateY(-45px) scale(1.1);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-80px) scale(0.85);
-  }
-}
-
-/* stamp-press — scale 1 -> 0.92 -> 1 with rotation */
-@keyframes stamp-press {
-  0% { transform: scale(1) rotate(0deg); }
-  50% { transform: scale(0.92) rotate(-2deg); }
-  100% { transform: scale(1) rotate(0deg); }
-}
-
-/* sticky-wobble */
-@keyframes sticky-wobble {
-  0%, 100% { transform: rotate(-1deg); }
-  25% { transform: rotate(1deg); }
-  50% { transform: rotate(-0.5deg); }
-  75% { transform: rotate(0.5deg); }
-}
-
-/* flicker — fluorescent light flicker */
-@keyframes flicker {
-  0%, 100% { opacity: 1; }
-  3% { opacity: 0.85; }
-  6% { opacity: 1; }
-  8% { opacity: 0.9; }
-  10% { opacity: 1; }
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
-  52% { opacity: 0.88; }
-  54% { opacity: 1; }
 }
 
-/* Additional utility animations */
-@keyframes gentle-pulse {
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes float-number {
+  0% { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-40px); }
+}
+
+@keyframes stamp-press {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.92); }
+  100% { transform: scale(1); }
+}
+
+@keyframes heartbeat-line {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes confetti-fall {
+  0% { transform: translateY(-10px) rotate(0); }
+  100% { transform: translateY(100vh) rotate(720deg); }
+}
+
+@keyframes blink {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.6; }
+  50% { opacity: 0; }
+}
+
+@keyframes gentle-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+/* Legacy animation aliases for component compatibility */
+@keyframes float-up {
+  0% { opacity: 1; transform: translateY(0) scale(1); }
+  60% { opacity: 0.8; transform: translateY(-45px) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-80px) scale(0.85); }
 }
 
 @keyframes slide-in {
@@ -175,14 +205,20 @@ input {
   100% { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse-red {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+@keyframes ripple {
+  0% { transform: scale(0); opacity: 0.4; }
+  100% { transform: scale(4); opacity: 0; }
 }
 
-@keyframes blink-cursor {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0; }
+@keyframes speech-pop {
+  0% { transform: scale(0.85) rotate(-1deg); opacity: 0; }
+  50% { transform: scale(1.04) rotate(0.5deg); }
+  100% { transform: scale(1) rotate(-1deg); opacity: 1; }
+}
+
+@keyframes monitor-glow {
+  0%, 100% { box-shadow: 0 0 8px rgba(0, 255, 102, 0.15), inset 0 0 15px rgba(0, 255, 102, 0.03); }
+  50% { box-shadow: 0 0 12px rgba(0, 255, 102, 0.25), inset 0 0 20px rgba(0, 255, 102, 0.06); }
 }
 
 /* Worker avatar animations */
@@ -218,30 +254,14 @@ input {
   50% { transform: scale(1.06); }
 }
 
-@keyframes confetti-fall {
-  0% { transform: translateY(-20px) rotate(0deg); opacity: 1; }
-  100% { transform: translateY(30px) rotate(360deg); opacity: 0; }
-}
-
-@keyframes speech-pop {
-  0% { transform: scale(0.85) rotate(-1deg); opacity: 0; }
-  50% { transform: scale(1.04) rotate(0.5deg); }
-  100% { transform: scale(1) rotate(-1deg); opacity: 1; }
-}
-
-@keyframes slide-up {
-  0% { opacity: 0; transform: translateY(10px); }
-  100% { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes monitor-glow {
-  0%, 100% { box-shadow: 0 0 8px rgba(102,187,106,0.15), inset 0 0 15px rgba(102,187,106,0.03); }
-  50% { box-shadow: 0 0 12px rgba(102,187,106,0.25), inset 0 0 20px rgba(102,187,106,0.06); }
-}
-
-@keyframes ripple {
-  0% { transform: scale(0); opacity: 0.4; }
-  100% { transform: scale(4); opacity: 0; }
+/* ============================================================
+   .desk-card — dark card with brutalist border
+   ============================================================ */
+.desk-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px;
 }
 
 /* ============================================================
@@ -262,10 +282,9 @@ input {
   bottom: 0;
   width: 160px;
   height: 14px;
-  background: #3A3530;
-  border: 1px solid #4A4540;
-  border-radius: 3px 3px 0 0;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  background: var(--bg-card);
+  border: 1px solid var(--border-bright);
+  border-radius: 2px 2px 0 0;
 }
 
 .worker-desk::before {
@@ -276,11 +295,11 @@ input {
   transform: translateX(-50%);
   width: 40px;
   height: 28px;
-  background: #1A2218;
-  border: 2px solid #444;
-  border-radius: 3px 3px 0 0;
+  background: var(--bg-panel);
+  border: 2px solid var(--border-bright);
+  border-radius: 2px 2px 0 0;
   border-bottom: none;
-  box-shadow: 0 0 8px rgba(102,187,106,0.15);
+  box-shadow: 0 0 8px var(--success-dim);
 }
 
 .worker-desk::after {
@@ -292,8 +311,8 @@ input {
 }
 
 .worker-speech-bubble {
-  background: #FFEB3B;
-  color: #3E3A00;
+  background: var(--accent);
+  color: #000000;
   border: none;
   border-radius: 2px;
   padding: 6px 14px;
@@ -304,7 +323,7 @@ input {
   max-width: 240px;
   text-align: center;
   white-space: nowrap;
-  box-shadow: 2px 3px 6px rgba(0,0,0,0.3);
+  box-shadow: 2px 3px 6px rgba(0, 0, 0, 0.5);
   font-weight: 600;
   font-family: var(--font-body);
   transform: rotate(-1deg);
@@ -318,7 +337,7 @@ input {
   transform: translateX(-50%);
   width: 30px;
   height: 10px;
-  background: rgba(255,255,255,0.25);
+  background: rgba(255, 255, 255, 0.15);
   border-radius: 1px;
 }
 
@@ -330,31 +349,31 @@ input {
   transform: translateX(-50%);
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
-  border-top: 6px solid #FFEB3B;
+  border-top: 6px solid var(--accent);
 }
 
-.worker-speech-bubble.sleeping { background: #9E9B94; color: #2A2A2F; }
-.worker-speech-bubble.sleeping::after { border-top-color: #9E9B94; }
-.worker-speech-bubble.arriving { background: #FFEB3B; color: #3E3A00; }
-.worker-speech-bubble.arriving::after { border-top-color: #FFEB3B; }
-.worker-speech-bubble.focused { background: #A5D6A7; color: #1B3B1E; }
-.worker-speech-bubble.focused::after { border-top-color: #A5D6A7; }
-.worker-speech-bubble.stressed { background: #F48FB1; color: #4A0020; }
-.worker-speech-bubble.stressed::after { border-top-color: #F48FB1; }
-.worker-speech-bubble.anxious { background: #81D4FA; color: #003050; }
-.worker-speech-bubble.anxious::after { border-top-color: #81D4FA; }
-.worker-speech-bubble.excited { background: #A5D6A7; color: #1B3B1E; }
-.worker-speech-bubble.excited::after { border-top-color: #A5D6A7; }
-.worker-speech-bubble.overtime { background: #F48FB1; color: #4A0020; }
-.worker-speech-bubble.overtime::after { border-top-color: #F48FB1; }
-.worker-speech-bubble.overtime-bad { background: #EF5350; color: #fff; font-weight: 700; }
-.worker-speech-bubble.overtime-bad::after { border-top-color: #EF5350; }
+.worker-speech-bubble.sleeping { background: var(--text-secondary); color: var(--bg-primary); }
+.worker-speech-bubble.sleeping::after { border-top-color: var(--text-secondary); }
+.worker-speech-bubble.arriving { background: var(--accent); color: #000000; }
+.worker-speech-bubble.arriving::after { border-top-color: var(--accent); }
+.worker-speech-bubble.focused { background: var(--success); color: #001A0A; }
+.worker-speech-bubble.focused::after { border-top-color: var(--success); }
+.worker-speech-bubble.stressed { background: var(--danger); color: #FFFFFF; }
+.worker-speech-bubble.stressed::after { border-top-color: var(--danger); }
+.worker-speech-bubble.anxious { background: #4488AA; color: #E8ECF2; }
+.worker-speech-bubble.anxious::after { border-top-color: #4488AA; }
+.worker-speech-bubble.excited { background: var(--success); color: #001A0A; }
+.worker-speech-bubble.excited::after { border-top-color: var(--success); }
+.worker-speech-bubble.overtime { background: var(--warning); color: #000000; }
+.worker-speech-bubble.overtime::after { border-top-color: var(--warning); }
+.worker-speech-bubble.overtime-bad { background: var(--danger); color: #FFFFFF; font-weight: 700; }
+.worker-speech-bubble.overtime-bad::after { border-top-color: var(--danger); }
 
 .worker-character {
   display: flex;
   align-items: center;
   gap: 4px;
-  transition: all 0.3s ease;
+  transition: all 150ms ease;
 }
 
 .worker-character.worker-float { animation: worker-float 3s ease-in-out infinite; }
@@ -366,7 +385,7 @@ input {
 .worker-emoji {
   font-size: 48px;
   line-height: 1;
-  transition: all 0.3s ease;
+  transition: all 150ms ease;
 }
 
 .worker-accessory {
@@ -402,7 +421,7 @@ input {
 .work-btn-ripple {
   position: absolute;
   border-radius: 50%;
-  background: rgba(232, 212, 77, 0.35);
+  background: var(--accent-dim);
   animation: ripple 0.6s ease-out forwards;
   pointer-events: none;
   width: 30px;
@@ -413,14 +432,14 @@ input {
    Shop Card Hover Effect
    ============================================================ */
 .shop-item-card {
-  transition: all 0.2s ease;
+  transition: all 150ms ease;
   cursor: pointer;
 }
 
 .shop-item-card:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
   border-color: var(--accent) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--accent-dim);
 }
 
 .shop-item-card.disabled {
@@ -453,101 +472,14 @@ input {
 .log-dot.shift { background: var(--success); }
 
 /* ============================================================
-   Tabular Numbers for Stats
-   ============================================================ */
-.tabular-nums {
-  font-variant-numeric: tabular-nums;
-}
-
-/* ============================================================
-   Lined Paper Effect (for clipboard log)
-   ============================================================ */
-.lined-paper {
-  background-image: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 23px,
-    rgba(232,212,77,0.06) 23px,
-    rgba(232,212,77,0.06) 24px
-  );
-}
-
-/* ============================================================
-   Sticky Note
-   ============================================================ */
-.sticky-note {
-  position: relative;
-  border-radius: 2px;
-  padding: 12px;
-  box-shadow: 2px 3px 8px rgba(0,0,0,0.3);
-  transform: rotate(-1deg);
-}
-
-.sticky-note::before {
-  content: '';
-  position: absolute;
-  top: -6px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 40px;
-  height: 12px;
-  background: rgba(255,255,255,0.25);
-  border-radius: 1px;
-}
-
-.sticky-note.yellow { background: #FFEB3B; color: #3E3A00; }
-.sticky-note.pink   { background: #F48FB1; color: #4A0020; }
-.sticky-note.blue   { background: #81D4FA; color: #003050; }
-.sticky-note.green  { background: #A5D6A7; color: #1B3B1E; }
-
-/* ============================================================
-   Clipboard
-   ============================================================ */
-.clipboard {
-  position: relative;
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  box-shadow: var(--shadow);
-}
-
-.clipboard::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 50px;
-  height: 16px;
-  background: #6B6860;
-  border-radius: 4px 4px 0 0;
-  border: 2px solid #555;
-  border-bottom: none;
-  z-index: 1;
-}
-
-.clipboard::after {
-  content: '';
-  position: absolute;
-  top: -2px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 30px;
-  height: 6px;
-  background: #888;
-  border-radius: 0 0 3px 3px;
-  z-index: 2;
-}
-
-/* ============================================================
    Terminal Screen
    ============================================================ */
 .terminal-screen {
   position: relative;
-  background: #1A2218;
-  border: 3px solid #444;
-  border-radius: 10px;
-  box-shadow: var(--shadow), inset 0 0 30px rgba(102,187,106,0.05);
+  background: var(--bg-panel);
+  border: 2px solid var(--border-bright);
+  border-radius: 4px;
+  box-shadow: inset 0 0 30px rgba(0, 255, 102, 0.03);
   overflow: hidden;
 }
 
@@ -562,22 +494,100 @@ input {
     0deg,
     transparent,
     transparent 2px,
-    rgba(0,0,0,0.08) 2px,
-    rgba(0,0,0,0.08) 4px
+    rgba(0, 0, 0, 0.06) 2px,
+    rgba(0, 0, 0, 0.06) 4px
   );
   pointer-events: none;
   z-index: 1;
 }
 
 /* ============================================================
-   Mobile Responsive — 768px and below
+   Lined Paper Effect (for clipboard log)
    ============================================================ */
-@media (max-width: 768px) {
-  body {
+.lined-paper {
+  background-image: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 23px,
+    var(--accent-dim) 23px,
+    var(--accent-dim) 24px
+  );
+}
+
+/* ============================================================
+   Clipboard
+   ============================================================ */
+.clipboard {
+  position: relative;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+}
+
+.clipboard::before {
+  content: '';
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 16px;
+  background: var(--text-muted);
+  border-radius: 2px 2px 0 0;
+  border: 2px solid var(--border-bright);
+  border-bottom: none;
+  z-index: 1;
+}
+
+.clipboard::after {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 30px;
+  height: 6px;
+  background: var(--text-secondary);
+  border-radius: 0 0 2px 2px;
+  z-index: 2;
+}
+
+/* ============================================================
+   Sticky Note
+   ============================================================ */
+.sticky-note {
+  position: relative;
+  border-radius: 2px;
+  padding: 12px;
+  box-shadow: 2px 3px 8px rgba(0, 0, 0, 0.5);
+  transform: rotate(-1deg);
+}
+
+.sticky-note::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 40px;
+  height: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 1px;
+}
+
+.sticky-note.yellow { background: var(--accent); color: #000000; }
+.sticky-note.pink   { background: var(--danger); color: #FFFFFF; }
+.sticky-note.blue   { background: #2A3A50; color: var(--text-primary); }
+.sticky-note.green  { background: #0A3320; color: var(--success); }
+
+/* ============================================================
+   Mobile Responsive
+   ============================================================ */
+@media (max-width: 900px) {
+  html {
     font-size: 14px;
   }
 
-  /* --- Bottom tab bar (dark with yellow active) --- */
   .mobile-tab-bar {
     position: fixed;
     bottom: 0;
@@ -587,9 +597,9 @@ input {
     display: flex;
     align-items: center;
     justify-content: space-around;
-    background: var(--bg-card);
+    background: var(--bg-panel);
     border-top: 1px solid var(--border);
-    box-shadow: 0 -2px 12px rgba(0,0,0,0.3);
+    box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.5);
     z-index: 1000;
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -610,7 +620,7 @@ input {
     letter-spacing: 0.5px;
     cursor: pointer;
     padding: 4px 0;
-    transition: color 0.2s ease;
+    transition: color 150ms ease;
   }
 
   .mobile-tab.active {
@@ -630,7 +640,6 @@ input {
     font-family: var(--font-heading);
   }
 
-  /* --- Mobile content area needs bottom padding for tab bar --- */
   .mobile-content {
     flex: 1;
     overflow-y: auto;
