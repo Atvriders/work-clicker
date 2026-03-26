@@ -62,7 +62,7 @@ function getDotColor(type: EventLogEntry['type']): string {
     case 'warning':
       return '#FF2E2E';
     default:
-      return 'var(--text-muted, #4A4A50)';
+      return 'var(--text-muted, #7A8899)';
   }
 }
 
@@ -129,7 +129,7 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
 
   const entryCountStyle: React.CSSProperties = {
     fontSize: 10,
-    color: 'var(--text-muted, #4A4A50)',
+    color: 'var(--text-muted, #7A8899)',
     fontWeight: 500,
     fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
   };
@@ -142,7 +142,7 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
     cursor: 'pointer',
     lineHeight: 1,
     borderRadius: 2,
-    color: 'var(--text-muted, #4A4A50)',
+    color: 'var(--text-muted, #7A8899)',
     transition: 'color 0.15s ease',
   };
 
@@ -177,7 +177,7 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
   });
 
   const timestampStyle: React.CSSProperties = {
-    color: 'var(--text-muted, #4A4A50)',
+    color: 'var(--text-muted, #7A8899)',
     fontSize: 10,
     marginRight: 8,
     flexShrink: 0,
@@ -209,7 +209,7 @@ const EventLog: React.FC<EventLogProps> = ({ eventLog, onAddLogEntry, onClearLog
               }}
               onMouseLeave={(e) => {
                 (e.currentTarget as HTMLButtonElement).style.color =
-                  'var(--text-muted, #4A4A50)';
+                  'var(--text-muted, #7A8899)';
               }}
             >
               🗑

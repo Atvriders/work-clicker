@@ -51,8 +51,8 @@ const C = {
   dangerDim:   '#EF5350',
   green:       '#4CAF50',
   textPrimary: '#D0CDC6',
-  textMuted:   '#6B6860',
-  textDim:     '#4A4840',
+  textMuted:   '#9AA8B8',
+  textDim:     '#7A8899',
   mono:        "'JetBrains Mono', 'IBM Plex Mono', 'Courier New', monospace",
   sans:        "'Inter', 'Nunito', system-ui, sans-serif",
 } as const;

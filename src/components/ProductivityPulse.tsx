@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { STATIONS } from '../data/stations';
+import { ACHIEVEMENTS } from '../data/achievements';
 
 interface ProductivityPulseProps {
   wp: number;
@@ -10,6 +12,10 @@ interface ProductivityPulseProps {
   isOnShift: boolean;
   prestigeLevel: number;
   totalClicks: number;
+  stations: Record<string, number>;
+  upgrades: string[];
+  achievements: string[];
+  startTime: number;
 }
 
 const formatNumber = (n: number): string => {
@@ -19,43 +25,77 @@ const formatNumber = (n: number): string => {
   return n.toFixed(n % 1 === 0 ? 0 : 1);
 };
 
+const formatTime = (ms: number): string => {
+  const totalSeconds = Math.floor(ms / 1000);
+  const totalMinutes = Math.floor(totalSeconds / 60);
+  const totalHours = Math.floor(totalMinutes / 60);
+  const totalDays = Math.floor(totalHours / 24);
+
+  if (totalDays > 0) {
+    const h = totalHours % 24;
+    return `${totalDays}d ${h}h`;
+  }
+  if (totalHours > 0) {
+    const m = totalMinutes % 60;
+    return `${totalHours}h ${m}m`;
+  }
+  return `${totalMinutes}m`;
+};
+
 const headerStyle: React.CSSProperties = {
   fontSize: '10px',
   fontFamily: '"JetBrains Mono", monospace',
   textTransform: 'uppercase',
   letterSpacing: '2px',
-  color: '#3E4E60',
+  color: '#6A7A8A',
   margin: 0,
   marginBottom: '6px',
 };
 
+const monoNum: React.CSSProperties = {
+  fontFamily: '"JetBrains Mono", monospace',
+  fontVariantNumeric: 'tabular-nums',
+};
+
 const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
+  wp,
+  totalWp,
   wpPerSecond,
-  isOnShift,
+  wpPerClick,
   shiftsCompleted,
   overtimeMinutes,
+  isOnShift,
   prestigeLevel,
   totalClicks,
+  stations,
+  upgrades,
+  achievements,
+  startTime,
 }) => {
   const [sparklineData, setSparklineData] = useState<number[]>([]);
   const readingsRef = useRef<number[]>([]);
+  const [now, setNow] = useState(Date.now());
 
+  // Sparkline sampling every 2s
   useEffect(() => {
     const interval = setInterval(() => {
       const readings = readingsRef.current;
       readings.push(wpPerSecond);
-      if (readings.length > 30) {
-        readings.shift();
-      }
+      if (readings.length > 30) readings.shift();
       setSparklineData([...readings]);
     }, 2000);
-
     return () => clearInterval(interval);
   }, [wpPerSecond]);
 
-  // --- Section 1: WPS Sparkline ---
+  // Live clock tick every 1s
+  useEffect(() => {
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  // === SECTION 1: WPS SPARKLINE ===
   const svgWidth = 300;
-  const svgHeight = 50;
+  const svgHeight = 60;
   const maxVal = Math.max(...sparklineData, 1);
   const points = sparklineData.map((val, i) => {
     const x = (i / Math.max(sparklineData.length - 1, 1)) * svgWidth;
@@ -69,7 +109,7 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
       : '';
   const isIdle = wpPerSecond === 0 && sparklineData.every((v) => v === 0);
 
-  // --- Section 2: Corporate Mood Meter ---
+  // === SECTION 2: MORALE ===
   let moodScore = 0;
   if (wpPerSecond > 0) moodScore += 20;
   if (wpPerSecond > 100) moodScore += 20;
@@ -106,38 +146,63 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
     filledSegments = 5;
   }
 
-  // --- Section 3: Milestones ---
-  const milestones = [
-    {
-      icon: '⌨',
-      label: 'CLICKS',
-      value: formatNumber(totalClicks),
-      color: '#00FF66',
-    },
-    {
-      icon: '🔄',
-      label: 'SHIFTS',
-      value: formatNumber(shiftsCompleted),
-      color: '#FFB800',
-    },
-    {
-      icon: '⏰',
-      label: 'OVERTIME',
-      value: overtimeMinutes + 'm',
-      color: overtimeMinutes > 0 ? '#FF2E2E' : '#3E4E60',
-    },
-    {
-      icon: '⭐',
-      label: 'PRESTIGE',
-      value: formatNumber(prestigeLevel),
-      color: prestigeLevel > 0 ? '#FFB800' : '#3E4E60',
-    },
+  // === SECTION 3: WPS BREAKDOWN ===
+  const stationContributions = STATIONS
+    .filter((s) => (stations[s.id] || 0) > 0)
+    .map((s) => ({
+      icon: s.icon,
+      name: s.name,
+      wps: s.baseWps * (stations[s.id] || 0),
+    }))
+    .sort((a, b) => b.wps - a.wps)
+    .slice(0, 5);
+  const maxStationWps = stationContributions.length > 0 ? stationContributions[0].wps : 1;
+
+  // === SECTION 4: NEXT UNLOCK PROGRESS ===
+  const nextStation = STATIONS.find(
+    (s) => (stations[s.id] || 0) === 0 && totalWp < s.unlockAt
+  ) || STATIONS.find((s) => (stations[s.id] || 0) === 0);
+
+  const nextAchievement = ACHIEVEMENTS.find((a) => !achievements.includes(a.id));
+
+  const getAchievementProgress = (a: typeof ACHIEVEMENTS[0]): number => {
+    const { type, value } = a.condition;
+    let current = 0;
+    if (type === 'total_clicks') current = totalClicks;
+    else if (type === 'total_wp') current = totalWp;
+    else if (type === 'wps') current = wpPerSecond;
+    else if (type === 'shifts_completed') current = shiftsCompleted;
+    else if (type === 'overtime_worked') current = overtimeMinutes;
+    return Math.min(current / value, 1);
+  };
+
+  // === SECTION 5: SESSION STATS ===
+  const sessionMs = Math.max(now - startTime, 1000);
+  const sessionMinutes = sessionMs / 60000;
+  const efficiency = wpPerSecond / Math.max(totalClicks, 1);
+  const clickRate = totalClicks / Math.max(sessionMinutes, 1);
+  const wpPerShift = totalWp / Math.max(shiftsCompleted, 1);
+
+  const sessionStats = [
+    { icon: '\uD83D\uDD50', label: 'TIME', value: formatTime(sessionMs) },
+    { icon: '\uD83D\uDCC8', label: 'EFFICIENCY', value: formatNumber(efficiency) },
+    { icon: '\u26A1', label: 'CLICK RATE', value: formatNumber(clickRate) + '/m' },
+    { icon: '\uD83D\uDCCA', label: 'WP/SHIFT', value: formatNumber(wpPerShift) },
   ];
 
   return (
-    <div style={{ fontFamily: '"JetBrains Mono", monospace' }}>
+    <div
+      style={{
+        fontFamily: '"JetBrains Mono", monospace',
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '12px',
+        overflow: 'auto',
+      }}
+    >
       {/* Section 1: WPS Sparkline */}
-      <div style={{ marginBottom: '12px' }}>
+      <div style={{ flexShrink: 0 }}>
         <div
           style={{
             display: 'flex',
@@ -148,20 +213,19 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
           <p style={headerStyle}>PRODUCTIVITY INDEX</p>
           <span
             style={{
-              fontFamily: '"JetBrains Mono", monospace',
+              ...monoNum,
               fontSize: '16px',
               color: '#00FF66',
               textShadow: '0 0 6px rgba(0, 255, 102, 0.4)',
-              fontVariantNumeric: 'tabular-nums',
             }}
           >
             {isIdle ? '' : formatNumber(wpPerSecond)}
           </span>
         </div>
-        <div style={{ position: 'relative', width: '100%', height: '50px' }}>
+        <div style={{ position: 'relative', width: '100%', height: '60px' }}>
           <svg
             width="100%"
-            height="50"
+            height="60"
             viewBox={`0 0 ${svgWidth} ${svgHeight}`}
             preserveAspectRatio="none"
             style={{ display: 'block' }}
@@ -174,10 +238,7 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
             </defs>
             {sparklineData.length > 1 && !isIdle && (
               <>
-                <polygon
-                  points={areaPoints}
-                  fill="url(#sparkFill)"
-                />
+                <polygon points={areaPoints} fill="url(#sparkFill)" />
                 <polyline
                   points={polylinePoints}
                   fill="none"
@@ -192,7 +253,7 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
                 y1={svgHeight - 2}
                 x2={svgWidth}
                 y2={svgHeight - 2}
-                stroke="#3E4E60"
+                stroke="#6A7A8A"
                 strokeWidth="1"
                 strokeDasharray="4 3"
               />
@@ -206,8 +267,8 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
                 left: '50%',
                 transform: 'translate(-50%, -50%)',
                 fontSize: '11px',
-                fontFamily: '"JetBrains Mono", monospace',
-                color: '#3E4E60',
+                ...monoNum,
+                color: '#6A7A8A',
                 letterSpacing: '3px',
               }}
             >
@@ -217,16 +278,10 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
         </div>
       </div>
 
-      {/* Section 2: Corporate Mood Meter */}
-      <div style={{ marginBottom: '12px' }}>
+      {/* Section 2: Morale Status */}
+      <div style={{ flexShrink: 0 }}>
         <p style={headerStyle}>MORALE STATUS</p>
-        <div
-          style={{
-            display: 'flex',
-            gap: '3px',
-            marginBottom: '4px',
-          }}
-        >
+        <div style={{ display: 'flex', gap: '3px', marginBottom: '4px' }}>
           {Array.from({ length: 5 }).map((_, i) => (
             <div
               key={i}
@@ -240,20 +295,216 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
             />
           ))}
         </div>
-        <span
-          style={{
-            fontSize: '11px',
-            fontFamily: '"JetBrains Mono", monospace',
-            color: moodColor,
-          }}
-        >
+        <span style={{ fontSize: '11px', ...monoNum, color: moodColor }}>
           {moodLabel}
         </span>
       </div>
 
-      {/* Section 3: Shift Milestones */}
-      <div>
-        <p style={headerStyle}>MILESTONES</p>
+      {/* Section 3: WPS Breakdown */}
+      <div style={{ flexShrink: 0 }}>
+        <p style={headerStyle}>OUTPUT ANALYSIS</p>
+        {stationContributions.length === 0 ? (
+          <div
+            style={{
+              fontSize: '11px',
+              ...monoNum,
+              color: '#6A7A8A',
+              padding: '4px 0',
+            }}
+          >
+            No stations acquired
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            {stationContributions.map((s) => (
+              <div
+                key={s.name}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  height: '20px',
+                }}
+              >
+                <span style={{ fontSize: '12px', width: '16px', textAlign: 'center', flexShrink: 0 }}>
+                  {s.icon}
+                </span>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    color: '#9AA8B8',
+                    width: '72px',
+                    flexShrink: 0,
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    whiteSpace: 'nowrap',
+                  }}
+                >
+                  {s.name}
+                </span>
+                <div
+                  style={{
+                    flex: 1,
+                    height: '10px',
+                    backgroundColor: '#1A2230',
+                    borderRadius: '1px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${(s.wps / maxStationWps) * 100}%`,
+                      height: '100%',
+                      background: 'linear-gradient(90deg, #FFB800, #FFD060)',
+                      borderRadius: '1px',
+                      transition: 'width 0.3s ease',
+                    }}
+                  />
+                </div>
+                <span
+                  style={{
+                    fontSize: '10px',
+                    ...monoNum,
+                    color: '#FFB800',
+                    width: '48px',
+                    textAlign: 'right',
+                    flexShrink: 0,
+                  }}
+                >
+                  {formatNumber(s.wps)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Section 4: Next Unlock Progress */}
+      <div style={{ flexShrink: 0 }}>
+        <p style={headerStyle}>NEXT TARGETS</p>
+        {!nextStation && !nextAchievement ? (
+          <div
+            style={{
+              fontSize: '11px',
+              ...monoNum,
+              color: '#00FF66',
+              padding: '4px 0',
+            }}
+          >
+            ALL TARGETS COMPLETE ✓
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            {nextStation && (
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    marginBottom: '3px',
+                  }}
+                >
+                  <span style={{ fontSize: '12px' }}>{nextStation.icon}</span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      color: '#9AA8B8',
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {nextStation.name}
+                  </span>
+                  <span style={{ fontSize: '10px', ...monoNum, color: '#7A8899' }}>
+                    {Math.min(
+                      Math.floor((totalWp / Math.max(nextStation.unlockAt, 1)) * 100),
+                      100
+                    )}
+                    %
+                  </span>
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    height: '4px',
+                    backgroundColor: '#1A2230',
+                    borderRadius: '1px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${Math.min(
+                        (totalWp / Math.max(nextStation.unlockAt, 1)) * 100,
+                        100
+                      )}%`,
+                      height: '100%',
+                      backgroundColor: '#FFB800',
+                      borderRadius: '1px',
+                      transition: 'width 0.3s ease',
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+            {nextAchievement && (
+              <div>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    marginBottom: '3px',
+                  }}
+                >
+                  <span style={{ fontSize: '12px' }}>❓</span>
+                  <span
+                    style={{
+                      fontSize: '10px',
+                      color: '#9AA8B8',
+                      flex: 1,
+                      overflow: 'hidden',
+                      textOverflow: 'ellipsis',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {nextAchievement.name}
+                  </span>
+                  <span style={{ fontSize: '10px', ...monoNum, color: '#7A8899' }}>
+                    {Math.floor(getAchievementProgress(nextAchievement) * 100)}%
+                  </span>
+                </div>
+                <div
+                  style={{
+                    width: '100%',
+                    height: '4px',
+                    backgroundColor: '#1A2230',
+                    borderRadius: '1px',
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: `${getAchievementProgress(nextAchievement) * 100}%`,
+                      height: '100%',
+                      backgroundColor: '#FFB800',
+                      borderRadius: '1px',
+                      transition: 'width 0.3s ease',
+                    }}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Section 5: Session Stats */}
+      <div style={{ flexShrink: 0, flex: 1 }}>
+        <p style={headerStyle}>SESSION DATA</p>
         <div
           style={{
             display: 'grid',
@@ -261,13 +512,12 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
             gap: '4px',
           }}
         >
-          {milestones.map((m) => (
+          {sessionStats.map((s) => (
             <div
-              key={m.label}
+              key={s.label}
               style={{
                 backgroundColor: '#111820',
-                width: '60px',
-                height: '52px',
+                padding: '8px 6px',
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
@@ -275,28 +525,27 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
                 gap: '2px',
               }}
             >
-              <span style={{ fontSize: '14px', lineHeight: 1 }}>{m.icon}</span>
+              <span style={{ fontSize: '14px', lineHeight: 1 }}>{s.icon}</span>
               <span
                 style={{
                   fontSize: '14px',
-                  fontFamily: '"JetBrains Mono", monospace',
-                  fontVariantNumeric: 'tabular-nums',
-                  color: m.color,
+                  ...monoNum,
+                  color: '#00FF66',
                   lineHeight: 1,
                 }}
               >
-                {m.value}
+                {s.value}
               </span>
               <span
                 style={{
                   fontSize: '8px',
-                  fontFamily: '"JetBrains Mono", monospace',
+                  ...monoNum,
                   textTransform: 'uppercase',
-                  color: '#3E4E60',
+                  color: '#6A7A8A',
                   lineHeight: 1,
                 }}
               >
-                {m.label}
+                {s.label}
               </span>
             </div>
           ))}

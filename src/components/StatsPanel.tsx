@@ -63,12 +63,12 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
     {
       label: 'OVERTIME',
       value: `${overtimeMinutes.toFixed(0)}m`,
-      color: overtimeMinutes > 0 ? '#EF5350' : '#4A4A50',
+      color: overtimeMinutes > 0 ? '#EF5350' : '#7A8899',
     },
     {
       label: 'PRESTIGE',
       value: prestigeLevel > 0 ? `${prestigeLevel} ×${prestigeMultiplier.toFixed(2)}` : '0',
-      color: prestigeLevel > 0 ? '#FFB800' : '#4A4A50',
+      color: prestigeLevel > 0 ? '#FFB800' : '#7A8899',
     },
   ];
 
@@ -90,7 +90,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
         style={{
           fontSize: 11,
           fontWeight: 600,
-          color: '#6B6860',
+          color: '#6A7A8A',
           fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
           letterSpacing: '0.1em',
           textTransform: 'uppercase' as const,
@@ -115,7 +115,7 @@ const StatsPanel: React.FC<StatsPanelProps> = ({
               style={{
                 fontSize: 10,
                 fontWeight: 600,
-                color: '#4A4A50',
+                color: '#7A8899',
                 fontFamily: "'JetBrains Mono', 'IBM Plex Mono', monospace",
                 letterSpacing: '0.08em',
                 textTransform: 'uppercase' as const,

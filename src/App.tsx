@@ -123,6 +123,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
   const wpPerSecond = useGameStore((s) => s.wpPerSecond);
   const clickMultiplier = useGameStore((s) => s.clickMultiplier);
   const totalClicks = useGameStore((s) => s.totalClicks);
+  const startTime = useGameStore((s) => s.startTime);
 
   const prestigeLevel = useGameStore((s) => s.prestigeLevel);
   const prestigeMultiplier = useGameStore((s) => s.prestigeMultiplier);
@@ -279,6 +280,10 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
                 isOnShift={isOnShift}
                 prestigeLevel={prestigeLevel}
                 totalClicks={totalClicks}
+                stations={stations}
+                upgrades={upgrades}
+                achievements={achievements}
+                startTime={startTime}
               />
               <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
             </section>
@@ -416,6 +421,10 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
               isOnShift={isOnShift}
               prestigeLevel={prestigeLevel}
               totalClicks={totalClicks}
+              stations={stations}
+              upgrades={upgrades}
+              achievements={achievements}
+              startTime={startTime}
             />
           </Panel>
 
