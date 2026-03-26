@@ -16,6 +16,7 @@ import StationList from './components/StationList';
 import EventLog from './components/EventLog';
 import Shop from './components/Shop';
 import EventPopup from './components/EventPopup';
+import ProductivityPulse from './components/ProductivityPulse';
 import Login from './components/Login';
 import Leaderboard from './components/Leaderboard';
 import Chat from './components/Chat';
@@ -121,6 +122,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
   const wpPerClick = useGameStore((s) => s.wpPerClick);
   const wpPerSecond = useGameStore((s) => s.wpPerSecond);
   const clickMultiplier = useGameStore((s) => s.clickMultiplier);
+  const totalClicks = useGameStore((s) => s.totalClicks);
 
   const prestigeLevel = useGameStore((s) => s.prestigeLevel);
   const prestigeMultiplier = useGameStore((s) => s.prestigeMultiplier);
@@ -267,6 +269,17 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
           {activeTab === 'log' && (
             <section style={sty.mobileSection}>
               <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
+              <ProductivityPulse
+                wp={wp}
+                totalWp={totalWp}
+                wpPerSecond={wpPerSecond}
+                wpPerClick={effectiveWpPerClick}
+                shiftsCompleted={shiftsCompleted}
+                overtimeMinutes={overtimeMinutes}
+                isOnShift={isOnShift}
+                prestigeLevel={prestigeLevel}
+                totalClicks={totalClicks}
+              />
               <EventLog eventLog={eventLog} onAddLogEntry={storeAddLogEntry} onClearLog={storeClearEventLog} />
             </section>
           )}
@@ -391,6 +404,20 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
           </Panel>
 
           <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
+
+          <Panel title="PRODUCTIVITY PULSE" style={{ flex: 3, overflow: 'hidden', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+            <ProductivityPulse
+              wp={wp}
+              totalWp={totalWp}
+              wpPerSecond={wpPerSecond}
+              wpPerClick={effectiveWpPerClick}
+              shiftsCompleted={shiftsCompleted}
+              overtimeMinutes={overtimeMinutes}
+              isOnShift={isOnShift}
+              prestigeLevel={prestigeLevel}
+              totalClicks={totalClicks}
+            />
+          </Panel>
 
           <Panel title="WORK LOG" style={{ flex: 1, overflow: 'hidden', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
             <div style={{ flex: 1, overflow: 'auto', minHeight: 0 }}>
