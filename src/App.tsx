@@ -410,7 +410,7 @@ const GameApp: React.FC<GameAppProps> = ({ username, loginMessage, showLeaderboa
 
           <EventPopup activeEvent={activeEvent} eventDefs={EVENTS} />
 
-          <Panel title="PRODUCTIVITY PULSE" style={{ flex: 3, overflow: 'hidden', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
+          <Panel title="PRODUCTIVITY PULSE" style={{ flex: 3, overflow: 'auto', minHeight: 0, display: 'flex', flexDirection: 'column' }}>
             <ProductivityPulse
               wp={wp}
               totalWp={totalWp}

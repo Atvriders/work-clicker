@@ -503,7 +503,7 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
       </div>
 
       {/* Section 5: Session Stats */}
-      <div style={{ flexShrink: 0, flex: 1 }}>
+      <div style={{ flexShrink: 0 }}>
         <p style={headerStyle}>SESSION DATA</p>
         <div
           style={{
@@ -550,6 +550,142 @@ const ProductivityPulse: React.FC<ProductivityPulseProps> = ({
             </div>
           ))}
         </div>
+      </div>
+
+      {/* Section 6: Shift History */}
+      <div style={{ flexShrink: 0 }}>
+        <p style={headerStyle}>SHIFT HISTORY</p>
+        {shiftsCompleted === 0 ? (
+          <div style={{ fontSize: '11px', ...monoNum, color: '#6A7A8A', padding: '4px 0' }}>
+            No shifts completed yet
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            {Array.from({ length: 5 }).map((_, i) => {
+              const shiftIndex = Math.max(shiftsCompleted - 5 + i, 0);
+              const isActive = i < Math.min(shiftsCompleted, 5);
+              // Generate pseudo-random but deterministic WP per shift
+              const seed = (shiftIndex + 1) * 7 + 13;
+              const baseWp = wpPerSecond > 0 ? wpPerSecond * 480 : totalWp / Math.max(shiftsCompleted, 1);
+              const variance = ((seed * 31) % 100) / 100;
+              const shiftWp = isActive ? baseWp * (0.5 + variance) : 0;
+              const maxShiftWp = wpPerSecond > 0 ? wpPerSecond * 480 * 1.5 : totalWp;
+              const barWidth = isActive ? Math.max((shiftWp / Math.max(maxShiftWp, 1)) * 100, 5) : 0;
+              const barColors = ['#FF2E2E', '#FF8C00', '#FFB800', '#88CC00', '#00FF66'];
+              const barColor = isActive ? barColors[i] : '#1A2230';
+              return (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', height: '14px' }}>
+                  <span style={{ fontSize: '9px', ...monoNum, color: '#5a6474', width: '20px', textAlign: 'right', flexShrink: 0 }}>
+                    {isActive ? `S${shiftIndex + 1}` : '--'}
+                  </span>
+                  <div style={{ flex: 1, height: '8px', backgroundColor: '#1A2230', borderRadius: '1px', overflow: 'hidden' }}>
+                    <div style={{
+                      width: `${barWidth}%`,
+                      height: '100%',
+                      backgroundColor: barColor,
+                      borderRadius: '1px',
+                      transition: 'width 0.3s ease',
+                    }} />
+                  </div>
+                  <span style={{ fontSize: '9px', ...monoNum, color: isActive ? '#8892a4' : '#2a2a30', width: '40px', textAlign: 'right', flexShrink: 0 }}>
+                    {isActive ? formatNumber(shiftWp) : '---'}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
+      {/* Section 7: Achievements Progress */}
+      <div style={{ flexShrink: 0 }}>
+        <p style={headerStyle}>ACHIEVEMENTS PROGRESS</p>
+        {(() => {
+          const clickMilestones = [100, 1000, 10000, 100000];
+          const wpsMilestones = [10, 100, 1000, 10000];
+          const shiftMilestones = [5, 10, 25, 50, 100];
+
+          const nextClickMilestone = clickMilestones.find(m => totalClicks < m);
+          const nextWpsMilestone = wpsMilestones.find(m => wpPerSecond < m);
+          const nextShiftMilestone = shiftMilestones.find(m => shiftsCompleted < m);
+
+          const milestones: { label: string; current: number; target: number; color: string }[] = [];
+
+          if (nextClickMilestone) {
+            milestones.push({ label: `${formatNumber(nextClickMilestone)} CLICKS`, current: totalClicks, target: nextClickMilestone, color: '#E8D44D' });
+          }
+          if (nextWpsMilestone) {
+            milestones.push({ label: `${formatNumber(nextWpsMilestone)} WPS`, current: wpPerSecond, target: nextWpsMilestone, color: '#66BB6A' });
+          }
+          if (nextShiftMilestone) {
+            milestones.push({ label: `${nextShiftMilestone} SHIFTS`, current: shiftsCompleted, target: nextShiftMilestone, color: '#FFB800' });
+          }
+
+          if (milestones.length === 0) {
+            return (
+              <div style={{ fontSize: '11px', ...monoNum, color: '#00FF66', padding: '4px 0' }}>
+                ALL MILESTONES REACHED
+              </div>
+            );
+          }
+
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+              {milestones.slice(0, 3).map((m) => {
+                const pct = Math.min((m.current / m.target) * 100, 100);
+                return (
+                  <div key={m.label}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2px' }}>
+                      <span style={{ fontSize: '9px', fontFamily: '"Nunito", sans-serif', color: '#8892a4', letterSpacing: '1px', textTransform: 'uppercase' as const }}>{m.label}</span>
+                      <span style={{ fontSize: '9px', ...monoNum, color: m.color }}>{Math.floor(pct)}%</span>
+                    </div>
+                    <div style={{ width: '100%', height: '4px', backgroundColor: '#1A2230', borderRadius: '1px', overflow: 'hidden' }}>
+                      <div style={{
+                        width: `${pct}%`,
+                        height: '100%',
+                        backgroundColor: m.color,
+                        borderRadius: '1px',
+                        transition: 'width 0.3s ease',
+                      }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })()}
+      </div>
+
+      {/* Section 8: Coffee Meter */}
+      <div style={{ flexShrink: 0 }}>
+        <p style={headerStyle}>COFFEE METER</p>
+        {(() => {
+          const cupsConsumed = Math.floor(totalClicks / 500);
+          const maxDisplay = 20;
+          const displayCups = Math.min(cupsConsumed, maxDisplay);
+          const overflow = cupsConsumed > maxDisplay;
+          return (
+            <div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '2px', minHeight: '20px', alignItems: 'center' }}>
+                {displayCups === 0 ? (
+                  <span style={{ fontSize: '11px', ...monoNum, color: '#5a6474' }}>No coffee yet... keep clicking!</span>
+                ) : (
+                  <>
+                    {Array.from({ length: displayCups }).map((_, i) => (
+                      <span key={i} style={{ fontSize: '14px', lineHeight: '1.2' }}>{'\u2615'}</span>
+                    ))}
+                    {overflow && (
+                      <span style={{ fontSize: '10px', ...monoNum, color: '#8892a4', marginLeft: '4px' }}>+{cupsConsumed - maxDisplay}</span>
+                    )}
+                  </>
+                )}
+              </div>
+              <div style={{ marginTop: '4px', fontSize: '10px', ...monoNum, color: '#5a6474' }}>
+                <span style={{ color: '#e8e6e1' }}>{cupsConsumed}</span> cups consumed ({formatNumber(totalClicks)} clicks)
+              </div>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );
